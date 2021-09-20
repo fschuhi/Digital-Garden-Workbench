@@ -1,9 +1,10 @@
 tmp/
+__pycache__/
+.vscode/
 
 *.bat
 ~$*
+*.pyc
 
-Dropbox-audio-Rob Burbea
-Dropbox-audio-Rob Burbea-_Transcriptions
-Dropbox-Papers-_Markdown
-Dropbox-Papers-_Publish
+Dropbox-audio-*
+Dropbox-Papers-*
