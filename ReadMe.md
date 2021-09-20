@@ -1,7 +1,0 @@
-# History
-
-# Platforms
-
-# Usage
-
-# Recommendations
