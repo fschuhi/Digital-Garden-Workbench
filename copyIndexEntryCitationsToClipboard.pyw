@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+
+import tkinter
+from util import showMessageBox, thisFunctionName
+
+
+def copyIndexEntryCitationsToClipboard(gui = True):
+    from HAFEnvironment import HAFEnvironment, RetreatDirs
+    from consts import HAF_YAML
+    haf = HAFEnvironment(HAF_YAML)    
+    
+    import pyperclip
+    data = pyperclip.paste()
+    
+    import re
+    links = re.split('\]\]\*?\*?, ', data)
+    linkPattern = r"\[\[([^#]+)#\^(([0-9]+)-([0-9]+))\|"
+
+    citationMarkups = []
+    for link in links:
+        match = re.search(linkPattern, link)
+        if match:
+
+            transcriptName = match.group(1)
+            pageNr = int(match.group(3))
+            paragraphNr = int(match.group(4))
+
+            if not haf.talkExists(transcriptName):
+                pass
+            else:
+                sfnTranscriptMd = haf.getTranscriptFilename(transcriptName)
+
+                from TranscriptPage import TranscriptPage
+                page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
+                paragraph = page.findParagraph(pageNr, paragraphNr)
+                text = paragraph.text
+                blockId = f"{pageNr}-{paragraphNr}"
+                citationMarkup = f"> {text} _([[{transcriptName}#^{blockId}|{blockId}]])_"
+                citationMarkups.append(citationMarkup)
+
+    clipboardText = '\n' + '\n\n'.join(citationMarkups) + '\n'
+    print(clipboardText)
+    pyperclip.copy(clipboardText)
+
+    if gui:
+        showMessageBox(f"copied {len(citationMarkups)} citations to clipboard ({len(clipboardText)} chars)", thisFunctionName())
+
+
+if __name__ == "__main__":
+    copyIndexEntryCitationsToClipboard()
