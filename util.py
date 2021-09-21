@@ -27,7 +27,7 @@ TFootnotes = list[TFootnote]
 # deitalizise
 # *********************************************
 
-def deitaliziseWithReplace(text: str, term: str) -> str:
+def deitalicizeWithReplace(text: str, term: str) -> str:
     text = text.replace('_' + term + '_', term)
     text = text.replace('_' + term + ',_', term + ',')
     text = text.replace('_' + term + '._', term + '.')
@@ -36,7 +36,7 @@ def deitaliziseWithReplace(text: str, term: str) -> str:
     text = text.replace('_' + term.capitalize() + '._', term.capitalize() + '.')
     return text
 
-def deitaliziseTerm(text: str, term: str) -> str:
+def deitalicizeTerm(text: str, term: str) -> str:
     seps = '[,.:;– )’!-]*?'
     text = re.sub(f"_({term})({seps})_", "\\1\\2", text)
     capitalized = term.capitalize()
@@ -44,13 +44,15 @@ def deitaliziseTerm(text: str, term: str) -> str:
     text = re.sub(f"_({capitalized[0]})_+({capitalized[1:]})({seps})_", "\\1\\2\\3", text)
     return text
 
-def deitaliziseTerms(text: str, terms: list[str]) -> str:
+def deitalicizeTerms(text: str, terms: list[str]) -> str:
     for term in terms:
-        text = deitaliziseTerm(text, term)
+        text = deitalicizeTerm(text, term)
     return text
 
-def deitalizeTermsWithDiacritics(text: str) -> str:
-    return deitaliziseTerms(text, ['jhāna', 'jhānas', 'mudrā', 'mudrās', 'anattā', 'brahmavihāra', 'brahmavihāras', 'muditā', 'upekkhā', \
+# ((IKTVHOR)) Deitalicize with yaml
+def deitalicizeTermsWithDiacritics(text: str) -> str:
+    return deitalicizeTerms(text, ['dukkha', 'papañca', 'Satipaṭṭhāna Sutta', 'saṃsāra', 'bodhicitta', \
+        'jhāna', 'jhānas', 'mudrā', 'mudrās', 'anattā', 'brahmavihāra', 'brahmavihāras', 'muditā', 'upekkhā', \
         'mettā', 'samādhi', 'karuṇā', 'samatha', 'dharma', 'dharmas', 'pīti'] )
 
 
@@ -180,14 +182,18 @@ def thisFunctionName(stackLevel: int = 0):
 # *********************************************
 
 def canonicalizeText(text) -> str:
-    text = text.replace('\n', ' ')            
+    text = text.replace('\n', ' ')
     text = text.rstrip()
     text = re.sub("  +", " ", text )
     text = re.sub("[“”“]", '"', text)
     text = re.sub("[‘’]", '\'', text)    
-    text = re.sub("[–-]+","-", text)
+    text = re.sub("([^-])--([^-])", "\\1 - \\2", text)
+    text = re.sub("[–-]+","-", text)  # short and long dash
     text = re.sub("([^ ])- ([^ ])", "\\1-\\2", text)
-    text = re.sub("\.\.\.", "... ", text)
+    #text = re.sub(r"\.\.\.+", "... ", text)
+    text = re.sub(" \.\. ", "... ", text)
+    text = re.sub("([^.])\.\.([^. ])", "\\1... \\2", text)
+    text = re.sub("([^.])\.\. ", "\\1... ", text)
     text = re.sub("([^ ]) ,([^ ])", "\\1, \\2", text)
     text = re.sub("^[0-9]+ ", "", text)
     text = re.sub(" [0-9]+ ", "", text)

@@ -4,17 +4,17 @@ ignored:
   - calling it
   - centre around
   - centre the
-  - urban centre
   - do wonder
   - freedom from remorse
   - mixed blessing
+  - music concert
   - not - self
   - out of breath
   - so calling
+  - urban centre
   - we are calling
   - what I'm calling
   - would wonder
-
 
 Persons:
   - Abraham:
@@ -61,6 +61,8 @@ Persons:
       - /Krishnamurti, Juddi
       - Krishnamurti
   - Julian of Norwich
+  - Kaccayana:
+      - Kaccāyana
   - Ludwig van Beethoven:
       - /Beethoven, Ludwig van
       - Beethoven
@@ -80,6 +82,7 @@ Persons:
       - /Rorty, Richard
   - Rosa Parks:
       - /Parks, Rosa
+  - Rumi
   - Sariputta
   - St. Paul:
       - Paul
@@ -97,12 +100,12 @@ Persons:
       - /Whitman, Walt
   - Wilfrid Sellars:
       - /Sellars, Wilfrid
+  - William Blake:
+      - /Blake, William
 
 Buddhology:
-  - Sutra:
-      - sūtras
-  - Lotus Sutra
-  - Akṣayamati Sūtra
+  - Aksayamati Sutra:
+      - Akṣayamati Sūtra
   - Anatta:
       - anattā
       - no self
@@ -111,6 +114,7 @@ Buddhology:
       - not self
       - anattā practice
       - anatta practice
+      - first characteristic
   - Asavas
   - Attention:
       - bare attention
@@ -119,7 +123,11 @@ Buddhology:
       - Kuan Yin
       - Guanyin
       - Guan Yin
-  - Aversion
+  - Aversion:
+      - pushing away
+      - push it away
+      - averse to it
+      - wanting to get rid of
   - Avijja:
       - delusion
   - Awakening:
@@ -142,7 +150,9 @@ Buddhology:
   - Bodhisattva
   - Brahman
   - Brahmaviharas:
+      - brahmavihara
       - brahmavihāras
+      - divine abidings
   - Buddha:
       - Bhagavān
       - the blessed one
@@ -167,6 +177,9 @@ Buddhology:
       - Karuṇā
       - Karunā
       - karuna
+  - Conventional reality:
+      - relative truth
+      - the relative
   - Craving:
       - tanha
       - taṇhā
@@ -176,6 +189,8 @@ Buddhology:
       - push and pull
       - the push and the pull
       - push-pull
+      - the push, the pull
+      - pushing and pulling
   - Dakini:
       - ḍākinī
       - consort
@@ -217,6 +232,9 @@ Buddhology:
       - Dharmakāya
   - Dukkha:
       - suffering
+      - dis-ease
+      - dissatisfaction
+      - second characteristic
   - Dzogchen
   - Eight worldly conditions
   - Emptiness:
@@ -280,6 +298,7 @@ Buddhology:
       - arisings and passings away
       - arise and pass
       - rise and fall
+      - first characteristic
   - Insight:
       - insights
       - understanding
@@ -314,6 +333,7 @@ Buddhology:
       - let go of everything
       - just let go
       - illusion of non-doing
+  - Lotus Sutra
   - Love:
       - sense of connection
       - self-love
@@ -336,7 +356,9 @@ Buddhology:
       - mindfulness of the body
       - mindful ob the body
       - mindfulness-based cognitive theory
-  - Mudita
+  - Mudita:
+      - sympathetic joy
+      - spiritual joy
   - Mudra:
       - mudrā
       - mudras
@@ -402,6 +424,8 @@ Buddhology:
       - habitual holding
       - habitual holdings
       - holding back of
+  - Satipatthana Sutta:
+      - Satipaṭṭhāna Sutta
   - Seed Syllables:
       - seed syllable
   - Shingon
@@ -418,6 +442,8 @@ Buddhology:
       - five aggregates
   - Spiritual friendship:
       - kalyanamitta
+  - Sutra:
+      - sūtras
   - Sutta:
       - suttas
   - Tantra:
@@ -426,11 +452,16 @@ Buddhology:
       - Theravāda
       - Theravādan
       - Theravadan
+  - Three characteristics
   - Tibetan Buddhism:
       - Tibetan Buddhist
       - Tibetan tradition
   - Tonglen
-  - Ultimate Truth
+  - Ultimate Truth:
+      - ultimate truths
+      - the ultimate
+      - universal truths
+      - universal insights
   - Vajra
   - Vajrayana:
       - Vajrayāna
@@ -486,6 +517,8 @@ Philosophy:
       - monotheistic
   - Neuroscience:
       - biochemistry
+  - Nihilism:
+      - nihilistic
   - Old Testament:
       - Genesis
       - Abraham\'s hospitality to the angels
@@ -496,6 +529,8 @@ Philosophy:
       - phenomenological
       - phenomenological bracketing
       - phenomenologically
+  - Phenomenon:
+      - phenomena
   - Physicalism
   - Postmodernism:
       - post-modern attitude
@@ -539,17 +574,19 @@ Psychology:
   - Grief
   - Personality structure:
       - personality structures
+  - Personality types:
+      - personality differences
   - Personhood:
       - human subject
       - human being
       - personhood of a person
   - Pity
+  - Psychological maturity
   - Psychology of a Person
   - Shame
 
 Robology:
   - Acceptance
-  - Consciousness
   - Active listening:
       - receptive listening
       - modes of listening
@@ -564,6 +601,7 @@ Robology:
       - transubstantiate
   - Anger
   - Antinomy
+  - Appreciation
   - Beauty:
       - possibilities for beauty
       - beauties
@@ -615,6 +653,8 @@ Robology:
       - larger principle
       - larger structure of ideas
       - non-conceptual framework
+  - Consciousness:
+      - consciousnesses
   - Constriction:
       - constriction in the view
       - constrained
@@ -721,6 +761,9 @@ Robology:
       - body and soul
       - body movement
       - sense of balance
+      - world of our body
+      - body sensations
+  - Emotions
   - Empathy
   - Energy Body:
       - imaginal energy body
@@ -752,7 +795,7 @@ Robology:
       - fabricating
       - fabricate
       - fabricates
-      - facbricated
+      - fabricated
       - fabrications
       - nothing gets fabricated
       - no experience gets fabricated
@@ -775,11 +818,14 @@ Robology:
       - fantasy of the self
       - fantasies
       - Mythos
+      - mythological stories
       - mythos of the bodhisattva
       - mythic creature
+  - Feelings
   - Fullness of Intention:
       - one\'s fullness of intention
   - Gaia House
+  - Generosity
   - Global warming
   - Gratitude
   - Guinness Book of Records
@@ -788,6 +834,8 @@ Robology:
   - Happiness:
       - joy
       - buoyancy
+      - unhappiness
+  - Healing
   - Hermit:
       - the Hermit
   - History:
@@ -852,7 +900,9 @@ Robology:
       - mystical openings
   - Nobility:
       - ennobling quality
-  - Pain
+  - Pain:
+      - headache
+      - knee-ache
   - Passion:
       - passion
       - passions
@@ -872,6 +922,7 @@ Robology:
       - enjoyment
       - pleasant quality
       - well-being
+      - okayness
   - Poetry:
       - psychology without poetry
   - Preliminaries:
@@ -888,6 +939,8 @@ Robology:
   - Psyche
   - Reactivity:
       - reactivity to experience
+  - Reconditioning
+  - Relationships
   - Romantic love
   - Seeing That Frees
   - Sexuality
@@ -957,6 +1010,7 @@ Robology:
       - eros-psyche-logos
       - eros psyche logos
   - Spaciousness
+  - Spiritual circles
   - Spirituality
   - Steadiness:
       - steadiness of practice
@@ -964,6 +1018,11 @@ Robology:
       - steadiness of the heart
       - steadiness of the mind
       - calmness
+  - Stories:
+      - our story
+      - our journey
+      - the story we tell
+      - narrative
   - Telos:
       - one\'s telos
   - Temenos
@@ -996,6 +1055,7 @@ Robology:
       - self-importance
       - self-aggrandizement
       - self-obsession
+      - selfing
   - Tiredness
   - Unfabricated:
       - nirvana
@@ -1006,6 +1066,7 @@ Robology:
       - The Unconditioned
       - the Unfabricating
       - unbinding
+      - unborn
   - Unfathomability:
       - beyonds
       - unfathomable beyonds

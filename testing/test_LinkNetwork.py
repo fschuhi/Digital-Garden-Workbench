@@ -8,7 +8,7 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptPage import TranscriptPage
 from testing import MyTestClass
-from consts import HAF_YAML, RB_YAML, VAJRA_MUSIC
+from consts import HAF_YAML, HAF_YAML_TESTING, RB_YAML, RB_YAML_TESTING, VAJRA_MUSIC
 import unittest
 import os
 import re
@@ -22,35 +22,33 @@ class Test_LinkNetwork(MyTestClass):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.haf = HAFEnvironment(HAF_YAML)
-        cls.transcriptIndex = TranscriptIndex(RB_YAML)
+        cls.haf = HAFEnvironment(HAF_YAML_TESTING)
+        cls.transcriptIndex = TranscriptIndex(RB_YAML_TESTING)
         # cls.transcriptModel = TranscriptModel(cls.transcriptIndex)        
         return super().setUpClass()
 
 
     def test_1(self):
         network = LinkNetwork(self.haf)
-        matches = network.collectReferencedNoteMatches('Brahmavihāras')
+        matches = network.collectReferencedNoteMatches('Brahmaviharas')
+        result = []
         for note, match in matches:
-            print(note)
-            print('  ' + matchedObsidianLinkToString(match))
+            result.append(note)
+            result.append('  ' + matchedObsidianLinkToString(match))
             retainShown = note != 'Index'
-            print('  ' + matchedObsidianLinkToString(match, 'Brahmaviharas', retainShown))
-
-
-    def test_2(self):
-        network = LinkNetwork(self.haf)
-        linkingNotes = network.getBacklinksByNote('Brahmavihāras')
-        for linkingNote in linkingNotes:
-            print(linkingNote)
-            matches = network.getLinkMatchesByNote(linkingNote, 'Brahmavihāras')
-            for match in matches:
-                print('  ' + matchedObsidianLinkToString(match))
-                retainShown = linkingNote != 'index'
-                print('  ' + matchedObsidianLinkToString(match, 'Brahmaviharas', retainShown))
+            result.append('  ' + matchedObsidianLinkToString(match, 'blabla', retainShown))
+        self.assertListEqual(result, [ \
+            "Samadhi in Metta Practice", \
+            "  [[Brahmaviharas]]", \
+            "  [[blabla|Brahmaviharas]]", \
+            "0122 Samadhi in Metta Practice", \
+            "  [[Brahmaviharas|brahmavihāras]]", \
+            "  [[blabla|brahmavihāras]]", \
+            ])
 
 
     def test_3(self):
+        return
         network = LinkNetwork(self.haf)
         oldNote = 'Sīla'
         newNote = 'Sila'
@@ -66,6 +64,22 @@ class Test_LinkNetwork(MyTestClass):
                 sfn = os.path.join("tmp", os.path.basename(network.getFilenameByNote(linkingNote)))
                 #sfn = network.getFilenameByNote(linkingNote)
                 saveStringToTextFile(sfn, newText)
+
+
+    def test_IndexEntryOccurrences(self):
+        # ((OSTNQSZ))
+        network = LinkNetwork(self.haf)
+        targetNote = 'Energy Body'
+        linkingNotes = network.getBacklinksByNote(targetNote)
+
+        linkingTranscripts = [note for note in linkingNotes if network.filenameByNote[note].__contains__("Transcripts")]
+        print(linkingTranscripts)
+        return
+        for linkingNote in linkingNotes:
+            markdown = network.getMarkdownSnippetByNote(linkingNote)
+            allLinkMatches = markdown.collectLinkMatches()
+            targetLinkMatches = [match for match in allLinkMatches if match.group('note').lower() == targetNote.lower()]
+            print(linkingNote, len(targetLinkMatches))
 
 
     def test_pydot(self):

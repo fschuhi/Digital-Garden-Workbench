@@ -15,7 +15,7 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage, createTranscriptsDictionary
 from TranscriptSummaryPage import TranscriptSummaryPage, createNewSummaryPage
 from IndexEntryPage import IndexEntryPage
-from util import baseNameWithoutExt, convertMatchedObsidianLink, deitalizeTermsWithDiacritics, filterExt, loadLinesFromTextFile, loadStringFromTextFile, matchedObsidianLinkToString, saveLinesToTextFile, saveStringToTextFile
+from util import baseNameWithoutExt, canonicalizeText, convertMatchedObsidianLink, deitalicizeTermsWithDiacritics, filterExt, loadLinesFromTextFile, loadStringFromTextFile, matchedObsidianLinkToString, saveLinesToTextFile, saveStringToTextFile
 from HAFEnvironment import HAFEnvironment, determineTalkname
 
 #import sys
@@ -144,7 +144,7 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 pass
             else:
                 # we need to deitalize manually
-                transcript = deitalizeTermsWithDiacritics(transcript)                            
+                transcript = deitalicizeTermsWithDiacritics(transcript)
                 lines = transcript.splitlines()
                 page = TranscriptPage.fromPlainMarkupLines(sfnTranscriptMd, lines)
 
@@ -155,6 +155,21 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                     copyfile(sfnTranscriptMd, bak)
 
                 page.saveToObsidian(sfnTranscriptMd)
+
+
+def deitalicizeTranscript(haf: HAFEnvironment, talkName):
+    sfnTranscriptMd = haf.getTranscriptFilename(talkName)
+    transcript = loadStringFromTextFile(sfnTranscriptMd)
+    transcript = deitalicizeTermsWithDiacritics(transcript)
+    saveStringToTextFile(sfnTranscriptMd, transcript)
+
+
+def canonicalizeTranscript(haf: HAFEnvironment, talkName):
+    sfnTranscriptMd = haf.getTranscriptFilename(talkName)
+    lines = loadLinesFromTextFile(sfnTranscriptMd)
+    newLines = [(line if line.strip() == '---' else canonicalizeText(line)) for line in lines]
+    saveLinesToTextFile(sfnTranscriptMd, newLines)
+
 
 
 # *********************************************
@@ -484,16 +499,24 @@ if __name__ == "__main__":
         network = LinkNetwork(haf)
 
 
+    elif script == 'transferFilesToPublish':
+        transferFilesToPublish()
+        replaceLinksInAllSummaries()
+        replaceLinksInAllRootFilenames()
+        replaceLinksInSpecialFiles()
+        print("transferred")
+
+
+    # Kanban stuff
+
     if script == 'addMissingSummaryCards':
         assert retreatName
         sfnKanban = r"S:\Dropbox\Papers\_Markdown\Rob Burbea\Talk summaries (Kanban).md"
         addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf, retreatName)
         print('done')
 
-    elif script == 'createNewSummaries':
-        assert retreatName
-        createNewTranscriptSummariesForRetreat(haf, retreatName)
-        print('created')
+
+    # reindexing, updating
 
     elif script == 'reindexTranscripts':
         if retreatName:
@@ -516,21 +539,24 @@ if __name__ == "__main__":
                 updateSummary(haf, talkName, transcriptModel)
             print(f"updated all talk summaries")
 
+    elif script == 'unspanSummary':
+        assert talkName
+        sfn = haf.getSummaryFilename(talkName)
+        lines = loadLinesFromTextFile(sfn)
+        for index, line in enumerate(lines):
+            match = re.match(r"<span class=\"(counts|keywords)\">(?P<inside>[^<]+)</span>", line)
+            if match:
+                lines[index] = match.group('inside')
+        saveLinesToTextFile(sfn, lines)
+        print("removed <span>")
+
+
+    # index stuff
+
     elif script == 'addMissingCitations':
         assert indexEntry
         addMissingCitations(haf, indexEntry, transcriptIndex, transcriptModel)
         print(f"added citations to '{indexEntry}'")
-
-    elif script == 'transferFilesToPublish':
-        transferFilesToPublish()
-        replaceLinksInAllSummaries()
-        replaceLinksInAllRootFilenames()
-        replaceLinksInSpecialFiles()
-        print("transferred")
-
-    elif script == 'convertAllMarkdownFiles':
-        convertAllMarkdownFiles()
-        print("converted")
 
     elif script == 'updateAlphabeticalIndex':
         updateAlphabeticalIndex(haf, transcriptIndex)
@@ -552,13 +578,32 @@ if __name__ == "__main__":
         print("copied to clipboard")
 
     elif script == 'replaceNoteLink':        
-        oldNote = 'Brahmavihāras'
-        newNote = 'Brahmaviharas'
+        # needs args "old", "new"
         (found, changed, unchanged) = replaceNoteLink(haf, network, args)
         if not found:
             print('not found')
         else:
             print(f"found {found}, {changed} changed, {unchanged} unchanged")
+
+
+    # conversion helpers
+
+    elif script == 'convertAllMarkdownFiles':
+        convertAllMarkdownFiles()
+        print("converted")
+
+    elif script == "canonicalize":
+        assert talkName
+        canonicalizeTranscript(haf, talkName)
+        print("canonicalized")
+
+    elif script == "deitalicizeTranscript":
+        assert talkName
+        deitalicizeTranscript(haf, talkName)
+        print("deitalizised")
+
+
+    # creating files
 
     elif script == 'convertPlainMarkupToTranscript':
         assert talkName
@@ -570,14 +615,9 @@ if __name__ == "__main__":
         firstIndexingOfRetreatFolder(haf, retreatName)
         print("first reindexing done")
 
-    elif script == 'unspanSummary':
-        assert talkName
-        sfn = haf.getSummaryFilename(talkName)
-        lines = loadLinesFromTextFile(sfn)
-        for index, line in enumerate(lines):
-            match = re.match(r"<span class=\"(counts|keywords)\">(?P<inside>[^<]+)</span>", line)
-            if match:
-                lines[index] = match.group('inside')
-        saveLinesToTextFile(sfn, lines)
-        print("removed <span>")
+    elif script == 'createNewSummaries':
+        assert retreatName
+        createNewTranscriptSummariesForRetreat(haf, retreatName)
+        print('created')
+
 

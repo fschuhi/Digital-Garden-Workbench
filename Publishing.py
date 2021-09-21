@@ -89,16 +89,20 @@ class Publishing:
     def convertAllMarkdownFiles(self):
         filenames = filterExt(self.hafPublish.allFiles, '.md')
         for filename in filenames:
+            if filename.__contains__('2007 New Years Retreat Insight Meditation'):
+                print(filename)
             convertedLines = self.convertMarkdownFile(filename)
             saveLinesToTextFile(filename, convertedLines)
 
 
     def convertMarkdownFile(self, sfn) -> list[str]:
+        bla = sfn == r'S:/Dropbox/Papers/_Publish\2007 New Years Retreat Insight Meditation\2007 New Years Retreat Insight Meditation.md'
         newLines = []
         lines = loadLinesFromTextFile(sfn)
         inAdmonition = False
         admonitionLines = []
         for line in lines:
+            if bla: print(line)
             # ![[20200301-Rob_Burbea-GAIA-preliminaries_regarding_voice_movement_and_gesture_part_1-62452.mp3#t=13:09]]
             match = re.search(r"!\[\[(?P<date>[0-9]+)-(?P<middle>.+)-(?P<audioid>[0-9]+).mp3(#t=(?P<timestamp>[0-9:]+))?\]\]", line)
             if match:

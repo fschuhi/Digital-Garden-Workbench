@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from genericpath import exists
-from util import canonicalizeText, extractYaml, loadLinesFromTextFile, saveLinesToTextFile
+from util import canonicalizeText, deitalicizeTermsWithDiacritics, extractYaml, loadLinesFromTextFile, saveLinesToTextFile
 
 import os
 import re
@@ -67,11 +67,6 @@ class TranscriptPage:
         # IMPORTANT: passed sfnPlainMd is a sfnTranscriptMd, but contains only raw markup
         # we generate trailing blockids for the paragraphs in this method
 
-        # logging.info(f"TranscriptPage.fromPlainMarkup( {sfnPlainMd} )")
-
-        #with open(sfnPlainMd, encoding='utf8') as f:
-        #    lines = f.readlines()
-        #    f.close()        
         paragraphs = []
 
         nPageIndicators = 0
@@ -84,6 +79,7 @@ class TranscriptPage:
                 # doing the indexing as a reindexing (i.e. there are block indicators) is allowed
                 line = re.sub(r" \^[0-9]+-[0-9]+$", "", line)
                 line = canonicalizeText(line)
+                line = deitalicizeTermsWithDiacritics(line)
                 if firstLine or line == "#":
                     # line w/ a single # marks a new page
                     pageNr += 1
