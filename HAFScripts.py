@@ -45,7 +45,7 @@ def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban,
         newCard = f"[[{talkName}]] ({missing if missing else 'ok'})"
         searchFunc = lambda ln, c: re.match(r"\[\[" + talkName + r"\]\] \([0-9ok]+\)", c)
         foundCards = kb.findCards(searchFunc)
-        print(r"\[\[" + talkName + r"\]\] \([0-9ok]+\)")
+        # print(r"\[\[" + talkName + r"\]\] \([0-9ok]+\)")
         if missing:
             if foundCards:
                 for (listName, card, done) in foundCards:

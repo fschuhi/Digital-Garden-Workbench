@@ -64,7 +64,7 @@ class SummaryLineParser:
             return SummaryLineMatch.PARAGRAPH_COUNTS
 
         # <span class="counts">_[[Compassion]] (3) · [[Dukkha]] (2) · [[Contraction]] (2) · [[The Self]]_</span>
-        pattern = r"(?P<spanStart><span class=\"counts\">)_?(?P<counts>[^_<]*)_?(?P<spanEnd></span>)$"
+        pattern = r"(?P<spanStart><span class=\"counts\">)?_?(?P<counts>\[\[[^\]]+\]\] \([0-9]+\)( · \[\[[^\]]+\]\]( \([0-9]+\))?)*)_?(?P<spanEnd></span>)?$"
         match = re.match(pattern, line)
         if match:
             if self.headerText != 'Index':
@@ -86,6 +86,16 @@ class SummaryLineParser:
             self.spanStart = "<span class=\"counts\">"
             self.spanEnd = "</span>"
         return self.spanStart + inside + self.spanEnd if self.spanStart else inside
+
+
+    def canonicalIndexCounts(self, forceSpan=True):
+        inside = f"_{self.counts}_"
+        if (not self.spanStart) and forceSpan:
+            assert not self.spanEnd
+            self.spanStart = "<span class=\"counts\">"
+            self.spanEnd = "</span>"
+        return self.spanStart + inside + self.spanEnd if self.spanStart else inside
+
 
 
 # *********************************************
@@ -147,7 +157,8 @@ class TranscriptSummaryPage:
 
                 entryFunc = lambda entry : f"[[{entry}]]" if allTermCounts[entry] == 1 else f"[[{entry}]] ({allTermCounts[entry]})"
                 links = [entryFunc(tuple[0]) for tuple in tuples]
-                self.lines[index] = parser.spanStart + " · ".join(links) + parser.spanEnd
+                parser.counts = " · ".join(links)
+                self.lines[index] = parser.canonicalIndexCounts(forceSpan=True)
                 parser.reset()
 
 
