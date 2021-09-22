@@ -229,7 +229,6 @@ class MarkdownSnippet:
 
 class MarkdownSnippets:
     def __init__(self, text: str):
-        self.markdown = MarkdownSnippet(text)
         self.markdownSnippets = [MarkdownSnippet(line) for line in text.splitlines()]
 
 
@@ -237,8 +236,7 @@ class MarkdownSnippets:
         return self.markdownSnippets[key]
 
 
-    @property
-    def text(self) -> str:
+    def asText(self) -> str:
         return '\n'.join( [snippet.text for snippet in self.markdownSnippets] ) + '\n'
 
 
@@ -256,17 +254,16 @@ class MarkdownSnippets:
             match = re.search(pattern, mdl.text)
             if match:
                 return (index, match)
-        return None
+        return (None, None)
 
 
     def searchSection(self, fromPattern, toPattern, startIndex=0) -> Tuple[int, int, re.Match, re.Match]:
-        fromSearch = self.search(fromPattern, startIndex)
-        if fromSearch is not None:
-            (fromIndex, fromMatch) = fromSearch
-            toSearch = self.search(toPattern, fromIndex+1)
-            if toSearch:
-                (toIndex, toMatch) = toSearch
+        (fromIndex, fromMatch) = self.search(fromPattern, startIndex)
+        if fromIndex is not None:
+            (toIndex, toMatch) = self.search(toPattern, fromIndex+1)
+            if toIndex:
                 #print((fromIndex, toIndex, fromMatch, toMatch))
                 return (fromIndex, toIndex, fromMatch, toMatch)
+        return (None, None, None, None)
         
     

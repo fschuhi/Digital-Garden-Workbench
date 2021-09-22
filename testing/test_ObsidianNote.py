@@ -48,7 +48,7 @@ class Test_ObsidianNote(unittest.TestCase):
 
         snippets = note.collectMarkdownSnippets()
 
-        assert snippets.text == note.text
+        assert snippets.asText() == note.text
 
         res = snippets.searchSection("^#+ Index", "^#+ Paragraphs")
         assert res is not None
@@ -59,6 +59,9 @@ class Test_ObsidianNote(unittest.TestCase):
         matchedSnippets = snippets[start:end]
         self.assertEqual(matchedSnippets[0].text, "## Index")
         self.assertNotEqual(matchedSnippets[-1].text, "## Paragraphs")
+
+        (start, end, matchFrom, matchTo) = snippets.searchSection("^#+ asdf", "^#+ wert")
+        self.assertIsNone(start)
 
 
 

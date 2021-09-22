@@ -34,24 +34,16 @@ class ObsidianNote:
     @classmethod
     def fromFile(cls, type: ObsidianNoteType, sfn):
         assert os.path.exists(sfn)
-        text = loadStringFromTextFile(sfn)
-        return cls(type, text)
+        textFromFile = loadStringFromTextFile(sfn)
+        return cls(type, textFromFile)
 
-
-    @property
-    def text(self):
-        return self._text
-
-    @text.setter
-    def text(self, newText: str):
-        self._text = newText
-        self.markdown = MarkdownSnippet(self._text)
 
     def collectLines(self) -> list[str]:
-        return self._text.splitlines()
+        return self.text.splitlines()
     
     def assignLines(self, lines: list[str]):
         self.text = '\n'.join(lines) + '\n'
+
 
     def collectYaml(self) -> dict[str,str]:
         yaml = extractYaml(self.collectLines())
@@ -70,11 +62,18 @@ class ObsidianNote:
         self.assignLines(newLines)
 
 
+    def collectMarkdownSnippet(self) -> MarkdownSnippet:
+        return MarkdownSnippet(self.text)    
+
+    def assignMarkdownSnippet(self, snippet: MarkdownSnippet):
+        self.text = snippet.text
+
+
     def collectMarkdownSnippets(self) -> MarkdownSnippets:
         return MarkdownSnippets(self.text)
 
     def assignMarkdownSnippets(self, snippets: MarkdownSnippets):
-        self.text = snippets.text
+        self.text = snippets.asText()
 
 
 
