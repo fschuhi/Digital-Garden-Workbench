@@ -470,6 +470,7 @@ def get_arguments():
     parser.add_argument('--out')
     parser.add_argument('--old')
     parser.add_argument('--new')
+    parser.add_argument('--level')
 
     # sortRBYaml
     parser.add_argument("--sectionsort", action='store_true')
@@ -488,6 +489,7 @@ if __name__ == "__main__":
     retreatName = args.retreatName
     talkName = args.talkName
     indexEntry = args.indexEntry
+    level = args.level
 
     script = args.script
 
@@ -607,33 +609,19 @@ if __name__ == "__main__":
     # temporary stuff
 
     elif script == 'showH':
+        assert level
+        
         filenames = filterExt(haf.allFiles, '.md')
         filenames = [filename for filename in filenames if not re.search(r'Amazon Kindle|\(Kanban\)', filename)]
         for filename in filenames:
             found = False
             lines = loadLinesFromTextFile(filename)
             for line in lines:
-                if re.match(r"^# ", line):
+                if re.match(r"^" + '#'*int(level) + ' ', line):
                     if not found:
                         print(filename)
                         found = True
                     print(line)
-
-    elif script == 'liftH':
-        filenames = [filename for filename in filterExt(haf.allFiles, '.md') if not re.search(r'Amazon Kindle|\(Kanban\)', filename)]
-        for filename in filenames:
-            changed = False
-            lines = loadLinesFromTextFile(filename)
-            for index, line in enumerate(lines):
-                match = re.match(r"^(?P<level>#+) (?P<header>.+)", line)
-                if match:
-                    level = len(match.group('level'))
-                    if level == 6:
-                        changed = True
-                        newline = (level-1)*'#' + ' ' + match.group('header')
-                        lines[index] = newline
-            if changed:
-                saveLinesToTextFile(filename, lines)
 
     elif script == 'addH':
         transcriptFilenames = haf.collectTranscriptFilenames()

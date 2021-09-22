@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
+import os
 import spacy
 from TranscriptModel import TranscriptModel
-from util import ObsidianLinkPattern, searchObsidianLink, TFootnotes
+from util import ObsidianLinkPattern, loadStringFromTextFile, searchObsidianLink, TFootnotes
 from typing import Tuple
 import re
 
@@ -19,9 +20,7 @@ class MarkdownSnippet:
         self.shownLinks = None # type: list[str]
 
 
-# *********************************************
 # links
-# *********************************************
 
     def removeAllLinks(self):
         if not self.footnotes:
@@ -53,8 +52,9 @@ class MarkdownSnippet:
         return searchObsidianLink(self.text[start:])
 
 
-    def replaceMatches(self, matches: list[re.Match], func):
-        self.removeFootnotes()
+    def replaceMatches(self, matches: list[re.Match], func, ignoreFootnotes=True):
+        if ignoreFootnotes:
+            self.removeFootnotes()
         delta = 0
         for match in matches:
             span = match.span()
@@ -62,19 +62,20 @@ class MarkdownSnippet:
             replaced = func(match)
             self.replace(start+delta, end+delta, replaced)
             delta += len(replaced) - (end-start)
-        self.restoreFootnotes()
+        if ignoreFootnotes:
+            self.restoreFootnotes()
 
 
-    def replaceLinks(self, func):
-        self.removeFootnotes()
+    def replaceLinks(self, func, ignoreFootnotes=True):
+        if ignoreFootnotes:
+            self.removeFootnotes()
         matches = self.collectLinkMatches()
         self.replaceMatches(matches, func)
-        self.restoreFootnotes() # not necessary because replaceMatches() also does it, but it doesn't hurt
+        if ignoreFootnotes:
+            self.restoreFootnotes() # not necessary because replaceMatches() also does it, but it doesn't hurt
 
 
-# *********************************************
 # cut, insert, replace
-# *********************************************
 
     def cutSpan(self, span) -> str:
         (start, end) = span
@@ -104,9 +105,7 @@ class MarkdownSnippet:
             self.__updateFootnotePositions(start, lenDelta)
 
 
-# *********************************************
 # removing links, parallel update of footnotes
-# *********************************************
 
     def applySpacy(self, model: TranscriptModel):
         # footnotes might contain links, so they must be off-limits for the indexing
@@ -168,9 +167,7 @@ class MarkdownSnippet:
         self.restoreFootnotes()
 
 
-# *********************************************
 # footnotes
-# *********************************************
 
     def removeFootnotes(self):
         # footnotes might contain links, so they must be off-limits for the indexing
@@ -224,3 +221,52 @@ class MarkdownSnippet:
     def __unhideFootnotes(self):
         for (match, start) in self.footnotes:
             self.text = self.text[:start] + match + self.text[start:]
+
+
+# *********************************************
+# class MarkdownSnippets
+# *********************************************
+
+class MarkdownSnippets:
+    def __init__(self, text: str):
+        self.markdown = MarkdownSnippet(text)
+        self.markdownSnippets = [MarkdownSnippet(line) for line in text.splitlines()]
+
+
+    def __getitem__(self, key):
+        return self.markdownSnippets[key]
+
+
+    @property
+    def text(self) -> str:
+        return '\n'.join( [snippet.text for snippet in self.markdownSnippets] ) + '\n'
+
+
+    @classmethod
+    def fromFile(cls, sfn):
+        assert os.path.exists(sfn)
+        text = loadStringFromTextFile(sfn)
+        return cls(text)
+
+
+    def search(self, pattern, startIndex=0) -> Tuple[int, re.Match]:
+        indexes = range(startIndex, len(self.markdownSnippets))
+        for index in indexes:
+            mdl = self.markdownSnippets[index]
+            match = re.search(pattern, mdl.text)
+            if match:
+                return (index, match)
+        return None
+
+
+    def searchSection(self, fromPattern, toPattern, startIndex=0) -> Tuple[int, int, re.Match, re.Match]:
+        fromSearch = self.search(fromPattern, startIndex)
+        if fromSearch is not None:
+            (fromIndex, fromMatch) = fromSearch
+            toSearch = self.search(toPattern, fromIndex+1)
+            if toSearch:
+                (toIndex, toMatch) = toSearch
+                #print((fromIndex, toIndex, fromMatch, toMatch))
+                return (fromIndex, toIndex, fromMatch, toMatch)
+        
+    

@@ -47,7 +47,7 @@ class TranscriptPage:
                 # IMPORTANT: empty lines are not retained as paragraph
                 # TranscriptPage and its paragraphs is an internal object, not meant to reflect visuals
                 if line.startswith("#"):
-                    # tags are not paragraphs per se
+                    # tags (and headers, since 22.09.21) are not paragraphs per se 
                     # ((VABTJZS)) store tags in page
                     pass
                 else:
