@@ -5,7 +5,7 @@ from util import showMessageBox, thisFunctionName
 
 
 def copyIndexEntryCitationsToClipboard(gui = True):
-    from HAFEnvironment import HAFEnvironment, RetreatDirs
+    from HAFEnvironment import HAFEnvironment
     from consts import HAF_YAML
     haf = HAFEnvironment(HAF_YAML)    
     
@@ -13,8 +13,11 @@ def copyIndexEntryCitationsToClipboard(gui = True):
     data = pyperclip.paste()
     
     import re
-    links = re.split('\]\]\*?\*?, ', data)
-    linkPattern = r"\[\[([^#]+)#\^(([0-9]+)-([0-9]+))\|"
+
+    # 22.09.21 we use dot now instead of comma
+    #links = re.split('\]\]\*?\*?, ', data)
+    links = re.split(r"\]\]\*?\*?", data)
+    linkPattern = r"\[\[([^#]+)#\^?(([0-9]+)-([0-9]+))\|"
 
     citationMarkups = []
     for link in links:
@@ -35,7 +38,11 @@ def copyIndexEntryCitationsToClipboard(gui = True):
                 paragraph = page.findParagraph(pageNr, paragraphNr)
                 text = paragraph.text
                 blockId = f"{pageNr}-{paragraphNr}"
-                citationMarkup = f"> {text} _([[{transcriptName}#^{blockId}|{blockId}]])_"
+
+                # 22.09.21 changed to header target
+                #citationMarkup = f"> {text} _([[{transcriptName}#^{blockId}|{blockId}]])_"
+                citationMarkup = f"> {text} _([[{transcriptName}#{blockId}|{blockId}]])_"
+
                 citationMarkups.append(citationMarkup)
 
     clipboardText = '\n' + '\n\n'.join(citationMarkups) + '\n'

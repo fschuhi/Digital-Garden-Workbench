@@ -14,22 +14,22 @@ import filecmp
 
 class Test_MarkdownSnippet(unittest.TestCase):
 
-
     def test_searchMarkupLink(self):
         match = searchObsidianLink("asdf [[Link1]] wert und [[weiterer Link]]")
         self.assertEqual(match.group('note'), "Link1")
 
         match = searchObsidianLink("ein [[Link2#header]] und [[weiterer Link]]")
         self.assertEqual(match.group('note'), "Link2")
-        self.assertEqual(match.group('header'), "header")
+        self.assertEqual(match.group('target'), "#header")
 
         match = searchObsidianLink("ein [[Link3#header|bla]] und [[weiterer Link]]")
         self.assertEqual(match.group('note'), "Link3")
-        self.assertEqual(match.group('header'), "header")
+        self.assertEqual(match.group('target'), "#header")
         self.assertEqual(match.group('shown'), "bla")
 
         match = searchObsidianLink("ein [[Link4#^reier|reier]] und [[weiterer Link]]")
         self.assertEqual(match.group('note'), "Link4")
+        self.assertEqual(match.group('target'), "#^reier")
         self.assertEqual(match.group('blockid'), "reier")
         self.assertEqual(match.group('shown'), "reier")
 

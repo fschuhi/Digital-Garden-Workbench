@@ -440,6 +440,7 @@ def transferFilesToPublish():
 
     publishing.copyFile("Images/digital-garden-big.png")
     publishing.copyFile("Images/digital-garden-small.png")
+    publishing.copyFile("Images/link.png")
     
     # we do not touch publish.css
 
@@ -603,7 +604,50 @@ if __name__ == "__main__":
         print("deitalizised")
 
 
-    # creating files
+    # temporary stuff
+
+    elif script == 'showH':
+        filenames = filterExt(haf.allFiles, '.md')
+        filenames = [filename for filename in filenames if not re.search(r'Amazon Kindle|\(Kanban\)', filename)]
+        for filename in filenames:
+            found = False
+            lines = loadLinesFromTextFile(filename)
+            for line in lines:
+                if re.match(r"^# ", line):
+                    if not found:
+                        print(filename)
+                        found = True
+                    print(line)
+
+    elif script == 'liftH':
+        filenames = [filename for filename in filterExt(haf.allFiles, '.md') if not re.search(r'Amazon Kindle|\(Kanban\)', filename)]
+        for filename in filenames:
+            changed = False
+            lines = loadLinesFromTextFile(filename)
+            for index, line in enumerate(lines):
+                match = re.match(r"^(?P<level>#+) (?P<header>.+)", line)
+                if match:
+                    level = len(match.group('level'))
+                    if level == 6:
+                        changed = True
+                        newline = (level-1)*'#' + ' ' + match.group('header')
+                        lines[index] = newline
+            if changed:
+                saveLinesToTextFile(filename, lines)
+
+    elif script == 'addH':
+        transcriptFilenames = haf.collectTranscriptFilenames()
+        for filename in transcriptFilenames:
+            lines = loadLinesFromTextFile(filename)
+            for index, line in enumerate(lines):
+                match = re.search(r" \^(?P<blockid>[0-9]+-[0-9]+)$", line)
+                if match:
+                    blockid = match.group('blockid')
+                    lines[index-1] = '###### ' + blockid
+            sfnSave = os.path.join("tmp/h", os.path.basename(filename))
+            saveLinesToTextFile(sfnSave, lines)
+
+# creating files
 
     elif script == 'convertPlainMarkupToTranscript':
         assert talkName
@@ -621,3 +665,4 @@ if __name__ == "__main__":
         print('created')
 
 
+    

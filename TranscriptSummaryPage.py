@@ -48,7 +48,7 @@ class SummaryLineParser:
             return SummaryLineMatch.HEADER
 
         # **[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_
-        pattern = r"(?P<spanStart><span class=\"(keywords|counts)\">)?(\*\*)?\[\[(?P<transcriptName>[0-9]+ [^#]+)#\^(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))(\|(?P<shownLinkText>[0-9]+-[0-9]+))?\]\](\*\*)?(: _)?(?P<counts>[^_<]*)_?(?P<spanEnd></span>)?$"
+        pattern = r"(?P<spanStart><span class=\"(keywords|counts)\">)?(\*\*)?\[\[(?P<transcriptName>[0-9]+ [^#]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))(\|(?P<shownLinkText>[0-9]+-[0-9]+))?\]\](\*\*)?(: _)?(?P<counts>[^_<]*)_?(?P<spanEnd></span>)?$"
         match = re.match(pattern, line)
         if match:
             self.spanStart = match.group('spanStart')
@@ -78,9 +78,9 @@ class SummaryLineParser:
         return SummaryLineMatch.NONE
 
 
-    def canonicalParagraphCounts(self, forceSpan=False):
+    def canonicalParagraphCounts(self, forceSpan=False, targetType='#'):
         bold = '**' if self.counts else ''
-        inside = f"{bold}[[{self.transcriptName}#^{self.blockId}|{self.blockId}]]{bold}" + (f": _{self.counts}_" if self.counts else "")
+        inside = f"{bold}[[{self.transcriptName}{targetType}{self.blockId}|{self.blockId}]]{bold}" + (f": _{self.counts}_" if self.counts else "")
         if (not self.spanStart) and forceSpan:
             assert not self.spanEnd
             self.spanStart = "<span class=\"counts\">"
@@ -121,7 +121,7 @@ class TranscriptSummaryPage:
         #    f.close()
 
 
-    def update(self, transcriptPage: TranscriptPage) -> None:
+    def update(self, transcriptPage: TranscriptPage, targetType='#') -> None:
         # IMPORTANT: number of lines remains unchanged
         assert self.lines
         transcriptName = transcriptPage.transcriptName
@@ -138,7 +138,7 @@ class TranscriptSummaryPage:
                 paragraph = transcriptPage.findParagraph(pageNr, paragraphNr)
                 assert paragraph, f"cannot find ^{pageNr}-{paragraphNr}"
                 parser.counts = paragraph.collectShownLinks() if paragraph.shownLinks else ""
-                self.lines[index] = parser.canonicalParagraphCounts(forceSpan=True)
+                self.lines[index] = parser.canonicalParagraphCounts(forceSpan=True, targetType=targetType)
                 parser.reset()
 
             elif match == SummaryLineMatch.INDEX_COUNTS:

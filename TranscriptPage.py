@@ -133,12 +133,12 @@ class TranscriptPage:
                 counts.append((paragraph, count))
         return counts
 
-    def collectTermLinks(self, term: str, boldLinkTargets: set[str] = None) -> str:
+    def collectTermLinks(self, term: str, boldLinkTargets: set[str] = None, targetType='#') -> str:
         counts = self.collectTermCounts(term)
         links = []
         for paragraph, count in counts:
             blockId = f"{paragraph.pageNr}-{paragraph.paragraphNr}"
-            linkTarget = f"{self.transcriptName}#^{blockId}"
+            linkTarget = f"{self.transcriptName}{targetType}{blockId}"
             link = f"[[{linkTarget}|{blockId}]]"
             if boldLinkTargets and linkTarget in boldLinkTargets:
                 link = '**' + link + '**'

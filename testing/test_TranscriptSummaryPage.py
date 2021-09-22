@@ -45,17 +45,18 @@ class Test_AnonymousClass(MyTestClass):
 class Test_SummaryLineParser(MyTestClass):
     
     headerLine1 = "###### It's going to be about movement, gesture, and voice"
-    countsLine1 = "**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_"
-    countsLine2 = "[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]"
-    countsLine3 = "<span class=\"counts\">**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_</span>"
+    countsLine1a = "**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_"
+    countsLine1b = "**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_"
+    countsLine2 = "[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#1-3|1-3]]"
+    countsLine3 = "<span class=\"counts\">**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_</span>"
 
     headerLine2 = "### Index"
     keywordsLine4 = "<span class=\"counts\">_[[Compassion]] (3) · [[Dukkha]] (2) · [[Contraction]] (2) · [[The Self]]_</span>"
 
-    def test_SummaryLineParser1(self):
+    def test_SummaryLineParser1a(self):
         parser = SummaryLineParser()
         self.assertEqual(parser.matchLine(self.headerLine1), SummaryLineMatch.HEADER)
-        self.assertEqual(parser.matchLine(self.countsLine1), SummaryLineMatch.PARAGRAPH_COUNTS)
+        self.assertEqual(parser.matchLine(self.countsLine1a), SummaryLineMatch.PARAGRAPH_COUNTS)
 
         self.assertEqual(parser.headerText, "It's going to be about movement, gesture, and voice") # ((ATRDIWI))
         self.assertEqual(parser.level, 6)
@@ -64,7 +65,14 @@ class Test_SummaryLineParser(MyTestClass):
         self.assertEqual(parser.paragraphNr, 3)
         self.assertEqual(parser.shownLinkText, "1-3")
         self.assertEqual(parser.blockId, "1-3")
-        self.assertEqual(parser.canonicalParagraphCounts(), self.countsLine1)
+        self.assertEqual(parser.canonicalParagraphCounts(targetType='#^'), self.countsLine1a)
+
+
+    def test_SummaryLineParser1b(self):
+        parser = SummaryLineParser()
+        self.assertEqual(parser.matchLine(self.headerLine1), SummaryLineMatch.HEADER)
+        self.assertEqual(parser.matchLine(self.countsLine1a), SummaryLineMatch.PARAGRAPH_COUNTS)
+        self.assertEqual(parser.canonicalParagraphCounts(targetType='#'), self.countsLine1b)
 
 
     def test_SummaryLineParser2(self):
@@ -116,7 +124,7 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
 
     transcriptName = "0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1"
 
-    def test_update(self):
+    def test_updateWithOldTargetType(self):
         sfnTranscriptMd = self.haf.getTranscriptFilename(self.transcriptName)
         transcriptPage = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
         transcriptPage.applySpacy(self.transcriptModel)
@@ -125,10 +133,25 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
         summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
         summaryPage.loadSummaryMd()
     
-        summaryPage.update(transcriptPage)
+        summaryPage.update(transcriptPage, targetType='#^')
         summaryPage.save("tmp/tmp.md")
         self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnSummaryMd))
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_summary_1.md"))
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_updateWithOldTargetType.md"))
+
+
+    def test_updateWithNewTargetType(self):
+        sfnTranscriptMd = self.haf.getTranscriptFilename(self.transcriptName)
+        transcriptPage = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
+        transcriptPage.applySpacy(self.transcriptModel)
+    
+        sfnSummaryMd = self.haf.getSummaryFilename(self.transcriptName)
+        summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
+        summaryPage.loadSummaryMd()
+    
+        summaryPage.update(transcriptPage, targetType='#')
+        summaryPage.save("tmp/tmp.md")
+        #self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnSummaryMd))
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_updateWithNewTargetType.md"))
 
 
     def test_createNew(self):

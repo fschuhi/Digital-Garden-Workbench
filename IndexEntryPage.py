@@ -73,16 +73,16 @@ class IndexEntryPageHeaderParser:
 
 class CitationParagraphParser:
 
-    def __init__(self, citationParagraph = None) -> None:
+    def __init__(self, citationParagraph = None, targetType='#') -> None:
         if citationParagraph:
-            self.matchCitationParagraph(citationParagraph)
+            self.matchCitationParagraph(citationParagraph, targetType)
 
-    def matchCitationParagraph(self, citationParagraph) -> re.Match:
+    def matchCitationParagraph(self, citationParagraph, targetType='#') -> re.Match:
         self.citationParagraph = self.citation = self.sourceStart = self.markupLink = self.transcriptName = self.blockId = self.pageNr = self.paragraphNr = self.sourceEnd = self.linkTarget = None
 
         self.citationParagraph = citationParagraph
 
-        linkPattern = r"(?P<markupLink>\[\[(?P<transcriptName>[^#[]+)#\^(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))\|[0-9]+-[0-9]+\]\])"
+        linkPattern = r"(?P<markupLink>\[\[(?P<transcriptName>[^#[]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))\|[0-9]+-[0-9]+\]\])"
         pattern = r"^> *(?P<citation>.+?)((?P<sourceStart>(<p/>)?[_(]+)(?P<sourceText>[^[]*))" + linkPattern + r"(?P<sourceEnd>[_)]+)$"
         match = re.match(pattern, citationParagraph)
         if match:
@@ -97,9 +97,14 @@ class CitationParagraphParser:
             self.paragraphNr = int(match.group('paragraphNr'))
             self.sourceEnd = match.group('sourceEnd')
 
-            self.linkTarget = f"{self.transcriptName}#^{self.blockId}"
+            self.linkTarget = f"{self.transcriptName}{targetType}{self.blockId}"
 
         return match
+
+
+    def canonicalCitationParagraph(self) -> None:
+        link = f"[[{self.linkTarget}|{self.blockId}]]"
+        return "> " + self.citation + self.sourceStart + self.sourceText + link + self.sourceEnd
 
 
 # *********************************************
@@ -126,6 +131,8 @@ class IndexEntryPage:
         for line in self.lines:
             match = citationParagraphParser.matchCitationParagraph(line)
             if match:
+                #print("")
+                #print(citationParagraphParser.linkTarget)
                 self.citationLinkTargets.add(citationParagraphParser.linkTarget)
 
 
@@ -136,13 +143,10 @@ class IndexEntryPage:
             match = citationParagraphParser.matchCitationParagraph(line)
             if match:
                 oldCitation = match.group('citation')
-                if True:
-                    ms = MarkdownSnippet(oldCitation)
-                    ms.applySpacy(transcriptModel)
-                    if ms.text != oldCitation:
-                        (start, end) = match.span('citation')
-                        newLine = line[:start] + ms.text + line[end:]
-                        self.lines[index] = newLine
+                ms = MarkdownSnippet(oldCitation)
+                ms.applySpacy(transcriptModel)
+                citationParagraphParser.citation = ms.text
+                self.lines[index] = citationParagraphParser.canonicalCitationParagraph()
 
 
     def updateHeadersAndOccurrences(self, transcripts: dict[str, TranscriptPage]) -> None:

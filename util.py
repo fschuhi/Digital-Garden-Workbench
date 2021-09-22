@@ -51,9 +51,16 @@ def deitalicizeTerms(text: str, terms: list[str]) -> str:
 
 # ((IKTVHOR)) Deitalicize with yaml
 def deitalicizeTermsWithDiacritics(text: str) -> str:
-    return deitalicizeTerms(text, ['dukkha', 'papañca', 'Satipaṭṭhāna Sutta', 'saṃsāra', 'bodhicitta', \
-        'jhāna', 'jhānas', 'mudrā', 'mudrās', 'anattā', 'brahmavihāra', 'brahmavihāras', 'muditā', 'upekkhā', \
-        'mettā', 'samādhi', 'karuṇā', 'samatha', 'dharma', 'dharmas', 'pīti'] )
+    return deitalicizeTerms(text, [\
+        'anattā', 'bodhicitta', 'brahmavihāra', 'brahmavihāras', \
+        'dāna','dharma', 'dharmas', 'dukkha', \
+        'jhāna', 'jhānas', \
+        'karuṇā', \
+        'mettā', 'muditā', 'mudrā', 'mudrās', \
+        'papañca', 'pīti' \
+        'samatha', 'samādhi', 'saṃsāra', 'Satipaṭṭhāna Sutta', 'sīla', \
+        'upekkhā', \
+        ] )
 
 
 # *********************************************
@@ -232,7 +239,8 @@ def forceLFOnly(dir):
 #          blockid: 1-1
 #    shown: part of Obsidian link after |
 
-ObsidianLinkPattern = r"\[\[(?P<complete>(?P<link>(?P<note>[^#\]|]+)(?P<target>#((\^(?P<blockid>[^\]|]+))|(?P<header>[^\]|]+)))?)(\|(?P<shown>.+?))?)\]\]"
+#ObsidianLinkPattern = r"\[\[(?P<complete>(?P<link>(?P<note>[^#\]|]+)(?P<target>#((\^(?P<blockid>[^\]|]+))|(?P<header>[^\]|]+)))?)(\|(?P<shown>.+?))?)\]\]"
+ObsidianLinkPattern = r"\[\[(?P<complete>(?P<link>(?P<note>[^#\]|]+)(?P<target>#(\^(?P<blockid>[^\]|]+))?[^\]|]*)?)(\|(?P<shown>.+?))?)\]\]"
 
 
 def searchObsidianLink(text) -> re.Match:
@@ -278,7 +286,6 @@ def convertMatchedObsidianLink(match, root, filter=None):
     link = match.group('link')
     note = match.group('note')
     target = match.group('target')
-    header = match.group('header')
     shownLink = match.group('shown')
 
     encodedNote = urllib.parse.quote_plus(note)
@@ -286,10 +293,12 @@ def convertMatchedObsidianLink(match, root, filter=None):
     if not target:
         encodedTarget = ''
     elif target.startswith('#^'):
-        encodedTarget = '#^' + urllib.parse.quote_plus(target[2:])
+        blockId = target[2:]
+        encodedTarget = '#^' + urllib.parse.quote_plus(blockId)
         shownLink = shownLink if shownLink else note
     elif target.startswith('#'):
-        encodedTarget = '#' + urllib.parse.quote_plus(target[1:])
+        header = target[1:]
+        encodedTarget = '#' + urllib.parse.quote_plus(header)
         shownLink = shownLink if shownLink else f"{note} > {header}"
     else:
         assert False

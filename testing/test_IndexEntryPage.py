@@ -59,9 +59,9 @@ class Test_IndexEntryPageHeaders(MyTestClass):
 
 class Test_CitationParagraphParser(MyTestClass):
 
-    def test_CitationParagraphParser(self):        
+    def test_OldTargetType(self):        
         citationParagraph  = "> So for the one who is blessed, it's a task in sensitivity. <p/>_Vajra Music: Preliminaries Part 3, [[0303 Preliminaries Regarding Voice, Movement, and Gesture - Part 3#^12-2|12-2]]_"
-        parser = CitationParagraphParser(citationParagraph)
+        parser = CitationParagraphParser(citationParagraph, '#^')
         self.assertEqual(parser.sourceStart, "<p/>_")
         self.assertEqual(parser.sourceText, "Vajra Music: Preliminaries Part 3, ")
         self.assertEqual(parser.transcriptName, "0303 Preliminaries Regarding Voice, Movement, and Gesture - Part 3")
@@ -70,6 +70,19 @@ class Test_CitationParagraphParser(MyTestClass):
         self.assertEqual(parser.paragraphNr, 2)
         self.assertEqual(parser.sourceEnd, "_")
         self.assertEqual(parser.linkTarget, "0303 Preliminaries Regarding Voice, Movement, and Gesture - Part 3#^12-2")
+
+
+    def test_NewTargetType(self):        
+        citationParagraph  = "> So for the one who is blessed, it's a task in sensitivity. <p/>_Vajra Music: Preliminaries Part 3, [[0303 Preliminaries Regarding Voice, Movement, and Gesture - Part 3#12-2|12-2]]_"
+        parser = CitationParagraphParser(citationParagraph, '#')
+        self.assertEqual(parser.sourceStart, "<p/>_")
+        self.assertEqual(parser.sourceText, "Vajra Music: Preliminaries Part 3, ")
+        self.assertEqual(parser.transcriptName, "0303 Preliminaries Regarding Voice, Movement, and Gesture - Part 3")
+        self.assertEqual(parser.blockId, "12-2")
+        self.assertEqual(parser.pageNr, 12)
+        self.assertEqual(parser.paragraphNr, 2)
+        self.assertEqual(parser.sourceEnd, "_")
+        self.assertEqual(parser.linkTarget, "0303 Preliminaries Regarding Voice, Movement, and Gesture - Part 3#12-2")
 
 
 # *********************************************
