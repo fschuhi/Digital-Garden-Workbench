@@ -223,6 +223,16 @@ class MarkdownSnippet:
             self.text = self.text[:start] + match + self.text[start:]
 
 
+# tags
+
+    def collectTagMatches(self) -> list[re.Match]:
+        pattern = r"( |^)#(?P<tag>\b\w+(/\w+)*)"
+        return list(re.finditer(pattern, self.text, re.MULTILINE))
+
+    def collectTags(self) -> list[str]:
+        return [match.group('tag') for match in self.collectTagMatches()]
+
+
 # *********************************************
 # class MarkdownSnippets
 # *********************************************

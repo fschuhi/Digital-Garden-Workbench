@@ -161,6 +161,15 @@ class Test_MarkdownSnippet(unittest.TestCase):
         saveStringToTextFile("tmp/tmp.md", ms.text)
         self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_MarkdownSnippet.test_replaceLinksInOneTranscript.md"))
 
+    def test_tags(self):
+        haf = HAFEnvironment(HAF_YAML_TESTING)
+        talkName = "0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1"        
+        sfnTranscriptMd = haf.getTranscriptFilename(talkName)
+        text = loadStringFromTextFile(sfnTranscriptMd)
+        ms = MarkdownSnippet(text)
+        self.assertListEqual(ms.collectTags(), ['Transcript'])
+
+
 
 if __name__ == "__main__":
     unittest.main()
