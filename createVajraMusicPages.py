@@ -5,7 +5,7 @@
 import os
 import logging
 import re
-from util import baseNameWithoutExt
+from util import basenameWithoutExt
 
 from HAFEnvironment import determineTalkname
 from TranscriptIndex import TranscriptIndex

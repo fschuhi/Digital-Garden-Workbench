@@ -64,7 +64,7 @@ class Publishing:
     def mirrorIndex(self):
         source = self.hafWork
         target = self.hafPublish
-        self.mirrorDir(lambda d: source.dirIndexEntries, lambda d: target.dirIndexEntries)
+        self.mirrorDir(lambda d: source.dirIndex, lambda d: target.dirIndex)
 
 
 
@@ -76,8 +76,8 @@ class Publishing:
             # pass '/' to move the file (with the same name) to the publish root folder
             target = ""
 
-        source = os.path.join(self.hafWork.dirRoot, source)
-        target = os.path.join(self.hafPublish.dirRoot, target)
+        source = os.path.join(self.hafWork.root, source)
+        target = os.path.join(self.hafPublish.root, target)
 
         # make sure that we have a target _filename_, even if path was passed (which is usually the case)
         if os.path.isdir(target):

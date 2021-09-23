@@ -2,7 +2,7 @@
 
 from TranscriptIndex import TranscriptIndex
 from genericpath import exists
-from util import baseNameWithoutExt, loadLinesFromTextFile, saveLinesToTextFile
+from util import basenameWithoutExt, loadLinesFromTextFile, saveLinesToTextFile
 
 from yaml.events import DocumentStartEvent
 from HAFEnvironment import HAFEnvironment, determineTalkname
@@ -218,8 +218,8 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptIndex, 
     sfnPdf = haf.getPDFFilename(talkName)
     summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
 
-    pdfName = baseNameWithoutExt(sfnPdf)
-    transcriptName = baseNameWithoutExt(sfnTranscriptMd)
+    pdfName = basenameWithoutExt(sfnPdf)
+    transcriptName = basenameWithoutExt(sfnTranscriptMd)
     paragraphs = transcriptPage.paragraphs
     summaryPage.createNew(talkName, pdfName, transcriptName, paragraphs)
 

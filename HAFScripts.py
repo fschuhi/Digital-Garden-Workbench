@@ -15,7 +15,7 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage, createTranscriptsDictionary
 from TranscriptSummaryPage import TranscriptSummaryPage, createNewSummaryPage
 from IndexEntryPage import IndexEntryPage
-from util import baseNameWithoutExt, canonicalizeText, convertMatchedObsidianLink, deitalicizeTermsWithDiacritics, filterExt, loadLinesFromTextFile, loadStringFromTextFile, matchedObsidianLinkToString, saveLinesToTextFile, saveStringToTextFile
+from util import basenameWithoutExt, canonicalizeText, convertMatchedObsidianLink, deitalicizeTermsWithDiacritics, filterExt, loadLinesFromTextFile, loadStringFromTextFile, matchedObsidianLinkToString, saveLinesToTextFile, saveStringToTextFile
 from HAFEnvironment import HAFEnvironment, determineTalkname
 
 #import sys
@@ -29,13 +29,14 @@ from HAFEnvironment import HAFEnvironment, determineTalkname
 def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf: HAFEnvironment, retreatName):
     kb = KanbanNote(sfnKanban)
     # look at factory methods to collect all summary pages
-    filenames = filterExt(haf.summaryFilenamesByRetreat[retreatName], '.md')
+    # filenames = filterExt(haf.summaryFilenamesByRetreat[retreatName], '.md')
+    filenames = filterExt(haf.retreatSummaries(retreatName), '.md')
     for sfnSummaryMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnSummaryMd)                
         # load the summary page
         summary = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
         summary.loadSummaryMd()
-        talkName = baseNameWithoutExt(sfnSummaryMd)
+        talkName = basenameWithoutExt(sfnSummaryMd)
 
         # talks can contain brackets, which we need to "escape" for regex searching
         talkName = re.sub("[()]", ".", talkName)
@@ -63,11 +64,12 @@ def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban,
 # *********************************************
 
 def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName, transcriptModel: TranscriptModel):
-    filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
+    # filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
+    filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
         if ext == '.md':
-            markupName = baseNameWithoutExt(sfnTranscriptMd)
+            markupName = basenameWithoutExt(sfnTranscriptMd)
             if re.match(r'[0-9][0-9][0-9][0-9] ', markupName):
                 transcript = loadStringFromTextFile(sfnTranscriptMd)
                 if re.search(r'#Transcript', transcript):
@@ -107,17 +109,19 @@ def replaceLinks(haf_publish, filenames, replaceIndex):
 
 def replaceLinksInAllSummaries():
     haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
-    filenames = list(haf_publish.summaryFilenameByTalk.values())
+    #filenames = list(haf_publish.summaryFilenameByTalk.values())
+    filenames = haf_publish.collectSummaryFilenames()
     replaceLinks(haf_publish, filenames, True)
 
 def replaceLinksInAllRootFilenames():
     haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
-    filenames = list(haf_publish.rootFilenameByTalk.values())
+    #filenames = list(haf_publish.rootFilenameByTalk.values())
+    filenames = haf_publish.collectNotesInToplevelFolder()
     replaceLinks(haf_publish, filenames, False)
 
 def replaceLinksInSpecialFiles():
     haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
-    index = os.path.join(haf_publish.dirRoot, 'Index.md')
+    index = os.path.join(haf_publish.root, 'Index.md')
     assert os.path.exists(index)
     replaceLinks(haf_publish, [index], True)
 
@@ -133,10 +137,11 @@ def convertPlainMarkupToTranscript(haf: HAFEnvironment, talkName):
 
 
 def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
-    filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
+    # filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
+    filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
-        markupName = baseNameWithoutExt(sfnTranscriptMd)
+        markupName = basenameWithoutExt(sfnTranscriptMd)
         if re.match(r'[0-9][0-9][0-9][0-9] ', markupName):
             transcript = loadStringFromTextFile(sfnTranscriptMd)
             if re.search(r'#Transcript', transcript):
@@ -180,7 +185,7 @@ def createNewTranscriptSummariesForRetreat(haf, retreatName):
     filenames = filterExt(haf.retreatTranscriptFilenameLookup[retreatName], '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
-        markupName = baseNameWithoutExt(sfnTranscriptMd)
+        markupName = basenameWithoutExt(sfnTranscriptMd)
         sfnSummaryMd = haf.getSummaryFilename(markupName)
         if os.path.exists(sfnSummaryMd):
             summary = loadStringFromTextFile(sfnSummaryMd)
@@ -219,7 +224,7 @@ def updateSummary(haf, talkName, transcriptModel, sfn=None):
 
 def addMissingCitations(haf: HAFEnvironment, indexEntry, transcriptIndex, transcriptModel):
     # ACHTUNG: index entry is case sensitive!
-    indexEntryPage = IndexEntryPage(haf.dirIndexEntries, indexEntry)
+    indexEntryPage = IndexEntryPage(haf.dirIndex, indexEntry)
     indexEntryPage.loadIndexEntryMd()
 
     #filenames = haf.collectTranscriptFilenamesForRetreat('Vajra Music')
@@ -314,7 +319,7 @@ def sortRBYaml(transcriptIndex: TranscriptIndex, args):
 
     if os.path.abspath(sfnOut) == os.path.abspath(RB_YAML):
         path = os.path.dirname(os.path.abspath(RB_YAML))
-        bak = os.path.join(path, baseNameWithoutExt(RB_YAML) + '.bak.yaml')
+        bak = os.path.join(path, basenameWithoutExt(RB_YAML) + '.bak.yaml')
         copyfile(RB_YAML, bak)
 
     saveLinesToTextFile(sfnOut, sorted)
@@ -535,9 +540,11 @@ if __name__ == "__main__":
             print(f"updated talk summary")
         else:
             if retreatName:
-                talkNames = [baseNameWithoutExt(sfn) for sfn in haf.summaryFilenamesByRetreat[retreatName]]
+                # talkNames = [basenameWithoutExt(sfn) for sfn in haf.summaryFilenamesByRetreat[retreatName]]
+                talkNames = [basenameWithoutExt(sfn) for sfn in haf.retreatSummaries(retreatName)]
             else:
-                talkNames = list(haf.summaryFilenameByTalk.keys())
+                #talkNames = list(haf.summaryFilenameByTalk.keys())
+                talkNames = haf.collectSummaryTalknames()
             for talkName in talkNames:
                 updateSummary(haf, talkName, transcriptModel)
             print(f"updated all talk summaries")
@@ -570,14 +577,14 @@ if __name__ == "__main__":
         print("sorted and saved")
 
     elif script == 'createIndexEntryFiles':
-        transcriptIndex.createObsidianIndexEntryFiles(haf.dirIndexEntries)
+        transcriptIndex.createObsidianIndexEntryFiles(haf.dirIndex)
     
     elif script == 'showOrphansInIndexFolder':
-        showOrphansInIndexFolder(haf, network, transcriptIndex, haf.dirIndexEntries)
+        showOrphansInIndexFolder(haf, network, transcriptIndex, haf.dirIndex)
         print("copied to clipboard")
 
     elif script == 'showOrphansInRBYaml':
-        showOrphansInRBYaml(haf, network, transcriptIndex, haf.dirIndexEntries)
+        showOrphansInRBYaml(haf, network, transcriptIndex, haf.dirIndex)
         print("copied to clipboard")
 
     elif script == 'replaceNoteLink':        

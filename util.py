@@ -4,16 +4,6 @@ import os
 import re
 import yaml
 
-def filterExt(filenames: list[str], targetExt):
-    targetExt = targetExt if targetExt.startswith('.') else '.' + targetExt
-    filteredFilenames = []
-    for filename in filenames:
-        (filenameWithoutExt, ext) = os.path.splitext(filename)
-        if ext == targetExt:
-            filteredFilenames.append(filename)
-    return filteredFilenames
-
-
 # *********************************************
 # shared types
 # *********************************************
@@ -97,7 +87,7 @@ def saveLinesToTextFile(sfn, lines: list[str]):
 # file system
 # *********************************************
 
-def baseNameWithoutExt(sfn):
+def basenameWithoutExt(sfn):
     return os.path.splitext(os.path.basename(sfn))[0]
 
 
@@ -107,6 +97,41 @@ def collectFilenames(dir) -> list[str]:
         if os.path.isfile(entry):
             filenames.append(entry.path)
     return filenames
+
+
+def filterExt(filenames: list[str], targetExt):
+    targetExt = targetExt if targetExt.startswith('.') else '.' + targetExt
+    filteredFilenames = []
+    for filename in filenames:
+        (filenameWithoutExt, ext) = os.path.splitext(filename)
+        if ext == targetExt:
+            filteredFilenames.append(filename)
+    return filteredFilenames
+
+
+def excludeFiles(files, pattern):
+    # interesting other choice, using set differences: https://stackoverflow.com/questions/20638040/glob-exclude-pattern
+    return [filename for filename in files if not re.search(pattern, filename)]
+
+def includeFiles(files, pattern):
+    return [filename for filename in files if re.search(pattern, filename)]
+
+
+def splitall(path):
+    # https://www.oreilly.com/library/view/python-cookbook/0596001673/ch04s16.html
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
 
 
 # *********************************************

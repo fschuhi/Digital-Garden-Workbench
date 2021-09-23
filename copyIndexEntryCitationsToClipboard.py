@@ -28,7 +28,7 @@ def copyIndexEntryCitationsToClipboard(gui = True):
             pageNr = int(match.group(3))
             paragraphNr = int(match.group(4))
 
-            if not haf.talkExists(transcriptName):
+            if not haf.transcriptExists(transcriptName):
                 pass
             else:
                 sfnTranscriptMd = haf.getTranscriptFilename(transcriptName)

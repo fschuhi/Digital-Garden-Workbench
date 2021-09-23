@@ -19,8 +19,8 @@ class Test_HAF(MyTestClass):
         return super().setUpClass()
 
     def test_Parameters(self):
-        self.assertEqual(self.haf.dict['Root'], "testing/data/_Markdown")
-        self.assertListEqual(self.haf.dict['Retreats'], ['2007 Lovingkindness and Compassion As a Path to Awakening', '2020 Vajra Music'])
+        self.assertEqual(self.haf.yaml['Root'], "testing/data/_Markdown")
+        self.assertListEqual(self.haf.yaml['Retreats'], ['2007 Lovingkindness and Compassion As a Path to Awakening', '2020 Vajra Music'])
 
 
     def test_createTranscriptFilename(self):

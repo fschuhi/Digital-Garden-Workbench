@@ -50,6 +50,7 @@ class ObsidianNote:
         return yaml if yaml else {}
     
     def assignYaml(self, newYaml: dict[str,str]):
+        # could probably use the * splat operator somewhere in this method
         newLines = []
         if yaml:
             newLines.append('---')
@@ -81,4 +82,4 @@ if __name__ == "__main__":
     haf = HAFEnvironment(HAF_YAML)
     md = haf.getSummaryFilename("Samadhi in Metta Practice")
     note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, md)
-
+    match = re.search(r"[^#]#[^# ]+", note.text)

@@ -2,7 +2,7 @@
 
 from TranscriptModel import TranscriptModel
 import os
-from util import baseNameWithoutExt
+from util import basenameWithoutExt
 
 from HAFEnvironment import HAFEnvironment
 from TranscriptPage import TranscriptPage
@@ -18,15 +18,15 @@ class TalkData():
         # determine filenames
         cls.sfnPdf = haf.getPDFFilename(talkName)
         assert cls.sfnPdf is not None
-        cls.pdfName = baseNameWithoutExt(cls.sfnPdf)
+        cls.pdfName = basenameWithoutExt(cls.sfnPdf)
 
         cls.sfnTranscript = haf.getTranscriptFilename(talkName)
         cls.sfnSummary = haf.getSummaryFilename(talkName)
 
         # "names" are the filenames, without the path and extentions
         cls.talkName = talkName
-        cls.transcriptName = baseNameWithoutExt(cls.sfnTranscript)
-        cls.summaryName = baseNameWithoutExt(cls.sfnSummary)
+        cls.transcriptName = basenameWithoutExt(cls.sfnTranscript)
+        cls.summaryName = basenameWithoutExt(cls.sfnSummary)
 
         # NOTE that any of the files might be None
         cls.transcriptPage = cls.summaryPage = None

@@ -100,20 +100,20 @@ class Test_IndexEntryPage(MyTestClass):
 
 
     def test_determineTags(self):
-        indexEntryPage = IndexEntryPage(self.haf.dirIndexEntries, 'Inertia')
+        indexEntryPage = IndexEntryPage(self.haf.dirIndex, 'Inertia')
         indexEntryPage.loadIndexEntryMd()
         tags = indexEntryPage.determineTags()
         self.assertListEqual(tags, ['IndexEntry', 'Robology'])
 
 
     def test_determineYamlSection(self):
-        indexEntryPage = IndexEntryPage(self.haf.dirIndexEntries, 'Inertia')
+        indexEntryPage = IndexEntryPage(self.haf.dirIndex, 'Inertia')
         indexEntryPage.loadIndexEntryMd()
         self.assertEquals(indexEntryPage.determineYamlSection(), 'Robology')
 
 
     def test_extractYaml(self):
-        indexEntryPage = IndexEntryPage(self.haf.dirIndexEntries, 'Energy Body')
+        indexEntryPage = IndexEntryPage(self.haf.dirIndex, 'Energy Body')
         indexEntryPage.loadIndexEntryMd()
         yamlDict = indexEntryPage.extractYaml()
         self.assertTrue('ignore-transcript-for-crossref' in yamlDict)

@@ -2,7 +2,7 @@
 
 from typing import Tuple
 from MarkdownSnippet import MarkdownSnippet
-from util import baseNameWithoutExt, filterExt, loadStringFromTextFile
+from util import basenameWithoutExt, filterExt, loadStringFromTextFile
 from HAFEnvironment import HAFEnvironment
 
 import re
@@ -18,7 +18,7 @@ class LinkNetwork:
         self.haf = haf
         
         self.allMd = filterExt(haf.allFiles, '.md')
-        self.allNotes = [baseNameWithoutExt(md) for md in self.allMd]
+        self.allNotes = [basenameWithoutExt(md) for md in self.allMd]
         self.actualNoteNameByNote = {n.lower(): n for n in self.allNotes}
 
         self.filenameByNote = {} # type: dict[str,str]
@@ -28,7 +28,7 @@ class LinkNetwork:
         self.backlinksByNote = {} # type: dict[str,set[str]]
 
         for md in self.allMd:
-            note = baseNameWithoutExt(md)
+            note = basenameWithoutExt(md)
             noteKey = note.lower()
 
             self.filenameByNote[noteKey] = md
