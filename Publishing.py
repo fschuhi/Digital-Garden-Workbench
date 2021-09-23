@@ -54,11 +54,11 @@ class Publishing:
         source = self.hafWork
         target = self.hafPublish
         # we intentionally disregard Audio
-        self.mirrorDir(lambda r: source.dirRetreat(r), lambda r: target.dirRetreat(r))
-        self.mirrorDir(lambda r: source.dirPDF(r), lambda r: target.dirPDF(r), '.pdf')
-        self.mirrorDir(lambda r: source.dirImages(r), lambda r: target.dirImages(r), None)
-        self.mirrorDir(lambda r: source.dirTranscripts(r), lambda r: target.dirTranscripts(r))
-        self.mirrorDir(lambda r: source.dirSummaries(r), lambda r: target.dirSummaries(r))
+        self.mirrorDir(lambda r: source.retreatFolder(r), lambda r: target.retreatFolder(r))
+        self.mirrorDir(lambda r: source.pdfFolder(r), lambda r: target.pdfFolder(r), '.pdf')
+        self.mirrorDir(lambda r: source.imagesFolder(r), lambda r: target.imagesFolder(r), None)
+        self.mirrorDir(lambda r: source.transcriptsFolder(r), lambda r: target.transcriptsFolder(r))
+        self.mirrorDir(lambda r: source.summariesFolder(r), lambda r: target.summariesFolder(r))
 
 
     def mirrorIndex(self):

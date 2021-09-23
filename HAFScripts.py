@@ -30,7 +30,8 @@ def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban,
     kb = KanbanNote(sfnKanban)
     # look at factory methods to collect all summary pages
     # filenames = filterExt(haf.summaryFilenamesByRetreat[retreatName], '.md')
-    filenames = filterExt(haf.retreatSummaries(retreatName), '.md')
+    # filenames = filterExt(haf.retreatSummaries(retreatName), '.md')
+    filenames = filterExt(haf.collectSummaryFilenames(retreatName), '.md')
     for sfnSummaryMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnSummaryMd)                
         # load the summary page
@@ -65,7 +66,8 @@ def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban,
 
 def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName, transcriptModel: TranscriptModel):
     # filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
-    filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
+    # filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
+    filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
         if ext == '.md':
@@ -138,7 +140,8 @@ def convertPlainMarkupToTranscript(haf: HAFEnvironment, talkName):
 
 def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
     # filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
-    filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
+    #filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
+    filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
         markupName = basenameWithoutExt(sfnTranscriptMd)
@@ -541,7 +544,8 @@ if __name__ == "__main__":
         else:
             if retreatName:
                 # talkNames = [basenameWithoutExt(sfn) for sfn in haf.summaryFilenamesByRetreat[retreatName]]
-                talkNames = [basenameWithoutExt(sfn) for sfn in haf.retreatSummaries(retreatName)]
+                # talkNames = [basenameWithoutExt(sfn) for sfn in haf.retreatSummaries(retreatName)]
+                talkNames = [basenameWithoutExt(sfn) for sfn in haf.collectSummaryFilenames(retreatName)]
             else:
                 #talkNames = list(haf.summaryFilenameByTalk.keys())
                 talkNames = haf.collectSummaryTalknames()

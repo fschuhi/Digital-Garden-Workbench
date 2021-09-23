@@ -3,7 +3,6 @@
 import unittest
 import os
 from consts import HAF_YAML_TESTING, VAJRA_MUSIC_TESTING
-from testing import MyTestClass
 from HAFEnvironment import HAFEnvironment, determineTalkname
 
 
@@ -11,12 +10,13 @@ from HAFEnvironment import HAFEnvironment, determineTalkname
 # HAF
 # *********************************************
 
-class Test_HAF(MyTestClass):
+class Test_HAFEnvironment(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.haf = HAFEnvironment(HAF_YAML_TESTING)
         return super().setUpClass()
+        
 
     def test_Parameters(self):
         self.assertEqual(self.haf.yaml['Root'], "testing/data/_Markdown")
@@ -47,8 +47,7 @@ class Test_HAF(MyTestClass):
         self.assertTrue(os.path.exists(sfn))
 
 
-
-    def test_bla(self):
+    def test_collectTranscriptFilenames(self):
         retreatName = os.path.basename(VAJRA_MUSIC_TESTING)
         filenames = self.haf.collectTranscriptFilenames(retreatName)
         self.assertEqual(len(filenames), 2)
