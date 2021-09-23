@@ -35,7 +35,6 @@ class ObsidianVault:
         self.root = os.path.normpath(self.yaml['Root'])
         self.rootDepth = len(splitall(self.root))
         self.retreatNames = self.yaml['Retreats']
-        
 
     def relative(self, sfn):
         parts = splitall(sfn)[self.rootDepth:]
@@ -48,6 +47,9 @@ class ObsidianVault:
     def pathnames(self, *paths):
         return glob.glob(os.path.join(self.root, *paths), recursive=True)
 
+    def allFiles(self):
+        return self.pathnames('**/*.*')
+
     def allNotes(self):
         return self.pathnames('**/*.md')
 
@@ -59,64 +61,6 @@ class ObsidianVault:
     def folderNotes(self, folder):
         return self.folderFiles(folder, 'md')
 
-    # HAF specific
-
-    def transcriptNotes(self):
-        return self.folderNotes('Transcripts')
-
-    def summaryNotes(self):
-        return self.folderNotes('Summaries')
-
-    def retreatNotes(self, retreat):
-        return self.pathnames(retreat, '**/*.md')
-
-    def retreatTranscripts(self, retreat):
-        return self.folderNotes(os.path.join(retreat, 'Transcripts'))
-
-    def retreatSummaries(self, retreat):
-        return self.folderNotes(os.path.join(retreat, 'Summaries'))
-
-    # see HAFEnvironment
-
-    def allFiles(self):
-        return self.pathnames('**/*.*')
-
-    def collectIndexEntryFilenames(self):
-        return self.pathnames('Index/*.md')
-
-    def collectIndexEntryNameSet(self):
-        return set([basenameWithoutExt(filename) for filename in vault.pathnames('Index/*.md')])
-
-    def collectTranscriptFilenames(self, retreat=None):
-        return self.retreatTranscripts(retreat) if retreat else self.transcriptNotes()
-
-    def collectSummaryFilenames(self, retreat=None):
-        return self.retreatSummaries(retreat) if retreat else self.summaryNotes()
-
-
-    _retreatNameByTalknameKey = None # type: dict[str,str]
-
-    def safeRetreatNameByTalknameKey(self) -> dict[str,str]:
-        if not ObsidianVault._retreatNameByTalknameKey:
-            ObsidianVault._retreatNameByTalknameKey = {talknameKeyFromFilename(pathname): self.toplevelFolder(pathname) for pathname in self.transcriptNotes()}
-        return ObsidianVault._retreatNameByTalknameKey
-
-    def retreatNameFromTalkname(self, talkName):
-        return self.safeRetreatNameByTalknameKey[talknameKeyFromFilename(talkName)]
-
-    def transcriptExists(self, talkname):
-        talknameKey = determineTalkname(talkname).lower()
-        return self.safeRetreatNameByTalknameKey()[talknameKey]
-
-
-    def collectNotesInToplevelFolder(self):
-        notesInAllToplevelFolders = self.pathnames('*/*.md')
-        notesInRetreatToplevelFolders = includeFiles(notesInAllToplevelFolders, rf"\\{'|'.join(self.retreatNames)}\\")
-        return notesInRetreatToplevelFolders
-
-    def collectSummaryTalknames(self, retreat=None):
-        return [talknameFromFilename(filename) for filename in self.collectSummaryFilenames(retreat)]
-
 
 # *********************************************
 # HAFEnvironment
@@ -125,88 +69,66 @@ class ObsidianVault:
 class HAFEnvironment():
     def __init__(self, sfnHAFYaml) -> None:
         self.vault = ObsidianVault(sfnHAFYaml)
-
         self.yaml = loadYaml(sfnHAFYaml)
-
         self.root = self.yaml['Root']
         self.retreatNames = self.yaml['Retreats']
         self.dirIndex = os.path.join(self.root, 'Index')
 
-        self.retreatLookup = {}
 
-        self.transcriptFilenamesByRetreat = {}
-        self.summaryFilenamesByRetreat = {}
+    def allFiles(self):
+        return self.vault.allFiles()
 
-        self.rootFilenameByTalk = self.__createTalknameLookup(self.dirRetreat)
-        self.transcriptFilenameByTalk = self.__createTalknameLookup(self.dirTranscripts)
-        self.summaryFilenameByTalk = self.__createTalknameLookup(self.dirSummaries)        
-        self.pdfFilenameByTalk = self.__createTalknameLookup(self.dirPDF)
 
-        # https://thispointer.com/python-how-to-get-list-of-files-in-directory-and-sub-directories/
-        self.allFiles = list()
-        for (dirpath, dirnames, filenames) in os.walk(self.root):
-            self.allFiles += [os.path.join(dirpath, file) for file in filenames]
+    def PDFs(self):
+        return self.vault.folderFiles('PDF', 'pdf')
 
-        #saveLinesToTextFile("tmp/tmp.dir", listOfFiles)
-        #saveLinesToTextFile("tmp/root.dir", self.retreatRootFilenameLookup['2020 Vajra Music'])
-        
+    def transcriptNotes(self):
+        return self.vault.folderNotes('Transcripts')
 
-    def __createTalknameLookup(self, funcSubdir) -> dict[str,str]:
-        allFilenames = []
-        for retreatName in self.retreatNames:
-            subdir = funcSubdir(retreatName)
-            filenamesForRetreat = collectFilenames(subdir)
+    def summaryNotes(self):
+        return self.vault.folderNotes('Summaries')
 
-            # this is ugly
-            if funcSubdir == self.dirTranscripts:
-                self.transcriptFilenamesByRetreat[retreatName] = filenamesForRetreat
-            if funcSubdir == self.dirSummaries:
-                self.summaryFilenamesByRetreat[retreatName] = filenamesForRetreat
 
-            allFilenames.extend(filenamesForRetreat)
+    def retreatNotes(self, retreat):
+        return self.vault.pathnames(retreat, '**/*.md')
 
-            for filename in filenamesForRetreat:
-                talkNameKey = determineTalkname(basenameWithoutExt(filename)).lower()
-                self.retreatLookup[talkNameKey] = retreatName
-
-        lookup = {}
-        for filename in allFilenames:
-            talkNameKey = determineTalkname(basenameWithoutExt(filename)).lower()
-            lookup[talkNameKey] = filename
-        return lookup
-
+    def retreatPDFs(self, retreat):
+        return self.vault.folderNotes(os.path.join(retreat, 'PDF'))
 
     def retreatTranscripts(self, retreat):
-        # return self.transcriptFilenamesByRetreat[retreat]
-        return self.vault.retreatTranscripts(retreat)
+        return self.vault.folderNotes(os.path.join(retreat, 'Transcripts'))
 
     def retreatSummaries(self, retreat):
-        #return self.summaryFilenamesByRetreat[retreat]
-        return self.vault.retreatSummaries(retreat)
+        return self.vault.folderNotes(os.path.join(retreat, 'Summaries'))
 
 
-    def retreatNameFromTalkname(self, talkName):
-        key = determineTalkname(talkName).lower()
-        return self.retreatLookup[key]
-
-
-    def collectNotesInToplevelFolder(self):
-        #return list(haf.rootFilenameByTalk.values())
-        return self.vault.collectNotesInToplevelFolder()
-
-    def collectSummaryFilenames(self):
-        #return list(haf.summaryFilenameByTalk.values())
-        return self.vault.collectSummaryFilenames()
-
-    def collectSummaryTalknames(self):
-        #return list(haf.summaryFilenameByTalk.keys())
-        return self.vault.collectSummaryTalknames()
-
+    def retreatNameFromTalkname(self, talkname):
+        filename = self.getTranscriptFilename(talkname)
+        return self.vault.toplevelFolder(filename) if filename else None
 
     def transcriptExists(self, talkname):
-        #talkNameKey = determineTalkname(talkname).lower()
-        #return talkNameKey in self.transcriptFilenameByTalk
-        return self.vault.transcriptExists(talkname)
+        return self.retreatNameFromTalkname(talkname) is not None
+
+
+    def collectNotesInRetreatsFolders(self):
+        notesInAllToplevelFolders = self.vault.pathnames('*/*.md')
+        notesInRetreatToplevelFolders = includeFiles(notesInAllToplevelFolders, rf"\\{'|'.join(self.retreatNames)}\\")
+        return notesInRetreatToplevelFolders
+
+    def collectPDFFilenames(self, retreat=None):
+        return self.retreatPDFs(retreat) if retreat else self.PDFs()
+
+    def collectTranscriptFilenames(self, retreat=None):
+        return self.retreatTranscripts(retreat) if retreat else self.transcriptNotes()
+
+    def collectSummaryFilenames(self, retreat=None):
+        return self.retreatSummaries(retreat) if retreat else self.summaryNotes()
+
+    def collectTranscriptTalknames(self, retreat=None):
+        return [talknameFromFilename(filename) for filename in self.collectTranscriptFilenames(retreat)]
+
+    def collectSummaryTalknames(self, retreat=None):
+        return [talknameFromFilename(filename) for filename in self.collectSummaryFilenames(retreat)]
 
 
     def dirRetreat(self, retreatName):
@@ -233,61 +155,46 @@ class HAFEnvironment():
         return os.path.join(dirRetreat, 'Images')
 
 
-    def collectIndexEntryNameSet(self) -> set[str]:
-        return self.vault.collectIndexEntryNameSet()
-        if False:
-            names = set()
-            filenames = collectFilenames(self.dirIndex)
-            for filename in filenames:
-                pageName = basenameWithoutExt(filename)
-                names.add(pageName)
-            return names
+    def collectIndexEntryNameSet(self):
+        indexEntryFilenames = self.vault.pathnames('Index/*.md')
+        return set([basenameWithoutExt(filename) for filename in indexEntryFilenames])
 
 
-    def getPDFFilename(self, talkName):
-        talkNameKey = determineTalkname(talkName).lower()
-        return self.pdfFilenameByTalk[talkNameKey] if talkNameKey in self.pdfFilenameByTalk else None
+    def determineFilenameFromTalkname(self, filenames, talkname):
+        talknameKey = determineTalkname(talkname).lower()
+        foundFilenames = [filename for filename in filenames if talknameKeyFromFilename(filename) == talknameKey]
+        return foundFilenames[0] if foundFilenames else None
 
+    def getPDFFilename(self, talkname):
+        return self.determineFilenameFromTalkname(self.collectPDFFilenames(), talkname)
 
-    def getTranscriptFilename(self, talkName):
-        talkNameKey = determineTalkname(talkName).lower()
-        return self.transcriptFilenameByTalk[talkNameKey] if talkNameKey in self.transcriptFilenameByTalk else self.createTranscriptFilename(talkName)
+    def getTranscriptFilename(self, talkname):
+        return self.determineFilenameFromTalkname(self.collectTranscriptFilenames(), talkname)
+
+    def getSummaryFilename(self, talkname):
+        return self.determineFilenameFromTalkname(self.collectSummaryFilenames(), talkname)
+
 
     def createTranscriptFilename(self, talkName):
         sfnPDF = self.getPDFFilename(talkName)
-        if sfnPDF is None:
-            print("PROBLEM: " + talkName)
-        assert sfnPDF is not None
+        assert sfnPDF is not None, "PROBLEM: " + talkName
+        
         pdfName = basenameWithoutExt(sfnPDF)
         match = re.match(r'[0-9]+_([0-9]+)', pdfName)
         assert match
         date = match.group(1)
 
-        #talkNameKey = determineTalkname(talkName).lower()
-        #assert talkNameKey in self.retreatLookup
-        #retreatName = self.retreatLookup[talkNameKey]
         retreatName = self.retreatNameFromTalkname(talkName)
         dirTranscripts = self.dirTranscripts(retreatName)
         
         return os.path.join(dirTranscripts, f"{date} {talkName}.md")
 
 
-    def getSummaryFilename(self, talkName):
-        talkNameKey = determineTalkname(talkName).lower()
-        return self.summaryFilenameByTalk[talkNameKey] if talkNameKey in self.summaryFilenameByTalk else self.createSummaryFilename(talkName)
-
     def createSummaryFilename(self, talkName):
-        #talkNameKey = determineTalkname(talkName).lower()
-        #assert talkNameKey in self.retreatLookup
-        #retreatName = self.retreatLookup[talkNameKey]
         retreatName = self.retreatNameFromTalkname(talkName)
         dirSummaries = self.dirSummaries(retreatName)
         return os.path.join(dirSummaries, talkName + '.md')
 
-
-    def collectTranscriptFilenames(self, retreatName = None) -> list[str]:
-        #return list(self.transcriptFilenameByTalk.values()) if retreatName is None else self.transcriptFilenamesByRetreat[os.path.basename(retreatName)]
-        return list(self.transcriptFilenameByTalk.values()) if retreatName is None else self.retreatTranscripts(os.path.basename(retreatName))
 
 
 
@@ -299,12 +206,19 @@ if __name__ == "__main__":
     retreatNames = dict['Retreats']
 
     retreat = '2020 Vajra Music'
+    talkname = 'Samadhi in Metta Practice'
 
     vault = ObsidianVault(HAF_YAML)
     pathnames = []
 
-    print(haf.collectSummaryTalknames())
-    print(vault.collectSummaryTalknames())
+    print(haf.createTranscriptFilename(talkname))
+
+    sfn = haf.getTranscriptFilename(talkname)
+    print(sfn)
+    print(vault.toplevelFolder(sfn))
+    print(haf.retreatNameFromTalkname(talkname))
+
+    #print(vault.collectSummaryTalknames())
 
     #pathnames = glob.glob(os.path.join(root, '*/*.md'), recursive=True)
     #pathnames = vault.pathnames('*/*.md')
@@ -312,7 +226,7 @@ if __name__ == "__main__":
 
     #notes = excludeFiles(notes, r"\\(Amazon Kindle|css-snippets|Journal|Python|templates|Work)\\")
     # pathnames = includeFiles(pathnames, rf"\\{'|'.join(retreatNames)}\\")
-    saveLinesToTextFile("tmp/dir.lst", pathnames)
+    #saveLinesToTextFile("tmp/dir.lst", pathnames)
     exit()
 
 

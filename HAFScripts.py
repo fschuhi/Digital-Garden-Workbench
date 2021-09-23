@@ -116,7 +116,7 @@ def replaceLinksInAllSummaries():
 def replaceLinksInAllRootFilenames():
     haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
     #filenames = list(haf_publish.rootFilenameByTalk.values())
-    filenames = haf_publish.collectNotesInToplevelFolder()
+    filenames = haf_publish.collectNotesInRetreatsFolders()
     replaceLinks(haf_publish, filenames, False)
 
 def replaceLinksInSpecialFiles():
@@ -618,7 +618,7 @@ if __name__ == "__main__":
     elif script == 'showH':
         assert level
         
-        filenames = filterExt(haf.allFiles, '.md')
+        filenames = filterExt(haf.allFiles(), '.md')
         filenames = [filename for filename in filenames if not re.search(r'Amazon Kindle|\(Kanban\)', filename)]
         for filename in filenames:
             found = False

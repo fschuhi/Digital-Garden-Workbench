@@ -49,7 +49,8 @@ class Test_HAF(MyTestClass):
 
 
     def test_bla(self):
-        filenames = self.haf.collectTranscriptFilenames(VAJRA_MUSIC_TESTING)
+        retreatName = os.path.basename(VAJRA_MUSIC_TESTING)
+        filenames = self.haf.collectTranscriptFilenames(retreatName)
         self.assertEqual(len(filenames), 2)
 
 

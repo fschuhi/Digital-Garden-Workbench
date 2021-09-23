@@ -87,7 +87,7 @@ class Publishing:
 
     
     def convertAllMarkdownFiles(self):
-        filenames = filterExt(self.hafPublish.allFiles, '.md')
+        filenames = filterExt(self.hafPublish.allFiles(), '.md')
         for filename in filenames:
             convertedLines = self.convertMarkdownFile(filename)
             saveLinesToTextFile(filename, convertedLines)

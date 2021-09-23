@@ -17,7 +17,7 @@ class LinkNetwork:
     def __init__(self, haf: HAFEnvironment) -> None:
         self.haf = haf
         
-        self.allMd = filterExt(haf.allFiles, '.md')
+        self.allMd = filterExt(haf.allFiles(), '.md')
         self.allNotes = [basenameWithoutExt(md) for md in self.allMd]
         self.actualNoteNameByNote = {n.lower(): n for n in self.allNotes}
 
