@@ -7,8 +7,6 @@ from TranscriptPage import TranscriptPage
 from TranscriptParagraph import applySpacyToParagraphs
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
-import os
-import re
 
 # *********************************************
 # TranscriptPage

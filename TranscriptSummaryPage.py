@@ -4,15 +4,11 @@ from TranscriptIndex import TranscriptIndex
 from genericpath import exists
 from util import basenameWithoutExt, loadLinesFromTextFile, saveLinesToTextFile
 
-from yaml.events import DocumentStartEvent
 from HAFEnvironment import HAFEnvironment, determineTalkname
 from TranscriptParagraph import TranscriptParagraph
 from TranscriptPage import TranscriptPage
 import os
 import re
-
-from TranscriptPdfLoader import TBlock
-from util import canonicalizeText
 
 
 # *********************************************

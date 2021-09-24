@@ -16,6 +16,9 @@ class TranscriptModel:
 
 
     def __init__(self, transcriptIndex: TranscriptIndex) -> None:        
+        import warnings
+        warnings.simplefilter('ignore', category=DeprecationWarning)
+
         self.nlp = English()        
         self.transcriptIndex = transcriptIndex
 

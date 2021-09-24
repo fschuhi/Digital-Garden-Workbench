@@ -9,8 +9,6 @@ from TranscriptSummaryPage import SummaryLineMatch, TranscriptSummaryPage, Summa
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 import filecmp
-import re
-import os
 
 # *********************************************
 # anonymous class

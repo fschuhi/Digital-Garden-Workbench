@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from HAFScripts import addMissingCitations
 import unittest
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 
@@ -8,8 +7,6 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from IndexEntryPage import IndexEntryPage, IndexEntryPageHeaderParser, CitationParagraphParser, canonicalHeaderLineFromParams
 from HAFEnvironment import HAFEnvironment
-import logging
-import os
 
 # *********************************************
 # IndexEntryPageHeadePParser
@@ -94,7 +91,6 @@ class Test_IndexEntryPage(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.haf = HAFEnvironment(HAF_YAML_TESTING)
         cls.transcriptIndex = TranscriptIndex(RB_YAML_TESTING)
-        cls.transcriptModel = TranscriptModel(cls.transcriptIndex)        
         return super().setUpClass()
 
 

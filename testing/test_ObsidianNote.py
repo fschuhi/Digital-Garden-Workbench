@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 
-import sys
-sys.path.append(r"S:\work\python\HAF")
-
 import unittest
 from HAFEnvironment import HAFEnvironment
 from ObsidianNote import ObsidianNoteType, ObsidianNote
 from consts import HAF_YAML
-from MarkdownLine import MarkdownLine
 
 # *********************************************
 # Publishing

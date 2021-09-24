@@ -2,7 +2,10 @@
 
 import re
 
-from TranscriptPdfLoader import TBlock
+from typing import Tuple
+TBlock = Tuple[int, int, str]
+TBlocks = list[TBlock]
+
 from TranscriptModel import TranscriptModel
 from MarkdownLine import MarkdownLine
 
