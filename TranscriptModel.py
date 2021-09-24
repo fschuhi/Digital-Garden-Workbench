@@ -14,12 +14,17 @@ class TranscriptModel:
     # https://spacy.io/usage/rule-based-matching
     # https://explosion.ai/demos/matcher
 
+    _nlp = None
 
     def __init__(self, transcriptIndex: TranscriptIndex) -> None:        
         import warnings
         warnings.simplefilter('ignore', category=DeprecationWarning)
 
-        self.nlp = English()        
+        # only load English once
+        if not TranscriptModel._nlp:
+            TranscriptModel._nlp = English()
+        self.nlp = TranscriptModel._nlp
+
         self.transcriptIndex = transcriptIndex
 
         self.ignored = set()
