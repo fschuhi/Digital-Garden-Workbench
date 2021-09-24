@@ -3,7 +3,6 @@
 from HAFScripts import addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat
 from TranscriptSummaryPage import TranscriptSummaryPage
 from HAFEnvironment import HAFEnvironment
-from testing import MyTestClass
 import unittest
 
 from KanbanNote import KanbanNote
@@ -17,7 +16,7 @@ import os
 # KanbanNote
 # *********************************************
 
-class Test_KanbanNote(MyTestClass):
+class Test_KanbanNote(unittest.TestCase):
 
     def test_PythonPipelineKanbanNote(self):
         kb = KanbanNote("testing/data/Test_KanbanNote.Python pipeline (Kanban).md")

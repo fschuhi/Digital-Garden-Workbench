@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import unittest
-from testing import MyTestClass
 from consts import HAF_YAML_TESTING
 
 import os
@@ -14,7 +13,7 @@ from HAFEnvironment import HAFEnvironment
 # TalkData
 # *********************************************
 
-class Test_TalkData(MyTestClass):
+class Test_TalkData(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:

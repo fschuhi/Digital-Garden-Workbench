@@ -3,7 +3,6 @@
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptParagraph import TranscriptParagraph, applySpacyToParagraphs
-from testing import MyTestClass
 from consts import RB_YAML_TESTING
 import unittest
 
@@ -11,7 +10,7 @@ import unittest
 # paragraphs
 # *********************************************
 
-class Test_Paragraph(MyTestClass):
+class Test_Paragraph(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -37,8 +36,8 @@ class Test_Paragraph(MyTestClass):
         pageNr = 10
         paragraphNr = 4
         paragraph = TranscriptParagraph( pageNr, paragraphNr, self.defaultText())
-        self.assertEquals(paragraph.pageNr, pageNr)
-        self.assertEquals(paragraph.paragraphNr, paragraphNr)
+        self.assertEqual(paragraph.pageNr, pageNr)
+        self.assertEqual(paragraph.paragraphNr, paragraphNr)
 
         # applying Spacy inserts links to index entries
         paragraph.applySpacy(self.transcriptModel)
@@ -59,9 +58,9 @@ class Test_Paragraph(MyTestClass):
     def test_CheckTermCounts(self):
         paragraph = TranscriptParagraph( 0, 0, self.defaultText())
         paragraph.applySpacy(self.transcriptModel)
-        self.assertEquals(repr(paragraph.shownLinks), "['Preliminaries', 'Tibetan Buddhism']")
-        self.assertEquals(paragraph.termCounts['Preliminaries'], 2)
-        self.assertEquals(paragraph.termCounts['Tibetan Buddhism'], 1)
+        self.assertEqual(repr(paragraph.shownLinks), "['Preliminaries', 'Tibetan Buddhism']")
+        self.assertEqual(paragraph.termCounts['Preliminaries'], 2)
+        self.assertEqual(paragraph.termCounts['Tibetan Buddhism'], 1)
 
 
 if __name__ == "__main__":

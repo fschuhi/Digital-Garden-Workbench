@@ -7,7 +7,6 @@ from HAFEnvironment import HAFEnvironment
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptPage import TranscriptPage
-from testing import MyTestClass
 from consts import HAF_YAML, HAF_YAML_TESTING, RB_YAML, RB_YAML_TESTING, VAJRA_MUSIC
 import unittest
 import os
@@ -18,7 +17,7 @@ from igraph import *
 # network
 # *********************************************
 
-class Test_LinkNetwork(MyTestClass):
+class Test_LinkNetwork(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -73,7 +72,6 @@ class Test_LinkNetwork(MyTestClass):
         linkingNotes = network.getBacklinksByNote(targetNote)
 
         linkingTranscripts = [note for note in linkingNotes if network.filenameByNote[note].__contains__("Transcripts")]
-        print(linkingTranscripts)
         return
         for linkingNote in linkingNotes:
             markdown = network.getMarkdownSnippetByNote(linkingNote)

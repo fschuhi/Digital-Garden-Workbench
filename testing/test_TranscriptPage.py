@@ -5,7 +5,6 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptPage import TranscriptPage
 from TranscriptParagraph import applySpacyToParagraphs
-from testing import MyTestClass
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 import os
@@ -15,7 +14,7 @@ import re
 # TranscriptPage
 # *********************************************
 
-class Test_TranscriptPage(MyTestClass):
+class Test_TranscriptPage(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:

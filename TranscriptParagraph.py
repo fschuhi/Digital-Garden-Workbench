@@ -4,7 +4,7 @@ import re
 
 from TranscriptPdfLoader import TBlock
 from TranscriptModel import TranscriptModel
-from MarkdownSnippet import MarkdownSnippet
+from MarkdownLine import MarkdownLine
 
 # *********************************************
 # class TranscriptParagraph
@@ -14,8 +14,7 @@ class TranscriptParagraph:
     def __init__(self, pageNr, paragraphNr, text) -> None:
         self.pageNr = pageNr
         self.paragraphNr = paragraphNr
-        self.snippet = MarkdownSnippet(text)
-        self.hasAppliedSpacy = False
+        self.markdown = MarkdownLine(text)
 
 
     @classmethod
@@ -36,34 +35,27 @@ class TranscriptParagraph:
 
     @property
     def text(self): 
-        return self.snippet.text
+        return self.markdown.text
 
     @property
     def termCounts(self):
-        return self.snippet.termCounts
+        return self.markdown.termCounts
 
     @property
     def shownLinks(self):
-        return self.snippet.shownLinks
+        return self.markdown.shownLinks
 
 
     # ((JJFZHVO)) Keywords section on summary page
     def collectShownLinks(self) -> str:
-        assert self.hasAppliedSpacy, "must first apply spacy to this paragraph"
-        entryFunc = lambda entry : f"[[{entry}]]" if self.termCounts[entry] == 1 else f"[[{entry}]] ({self.termCounts[entry]})"
-        links = [entryFunc(link) for link in self.shownLinks]
-        # return ", ".join(links)
-        return " · ".join(links)
+        return self.markdown.collectShownLinks()
 
     def countTerm(self, term: str) -> int:
-        assert self.hasAppliedSpacy, "must first apply spacy to this paragraph"        
-        return self.termCounts[term] if term in self.termCounts else 0
+        return self.markdown.countTerm(term)
 
 
     def applySpacy(self, model: TranscriptModel, force: bool = False) -> None:
-        if (not self.hasAppliedSpacy) or force:
-            self.snippet.applySpacy(model)
-            self.hasAppliedSpacy = True
+        self.markdown.applySpacy(model)
 
 
 # *********************************************

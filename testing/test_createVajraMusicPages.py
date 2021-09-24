@@ -5,7 +5,6 @@ import logging
 import re
 import unittest
 
-from testing import MyTestClass
 from consts import VAJRA_MUSIC_TESTING
 from createVajraMusicPages import RetreatDirs, TalkFiles
 
@@ -13,7 +12,7 @@ from createVajraMusicPages import RetreatDirs, TalkFiles
 # TalkFiles
 # *********************************************
 
-class Test_TalkFiles(MyTestClass):
+class Test_TalkFiles(unittest.TestCase):
 
     def test_TalkFiles(self):
         pdfName = "2020_0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1"
@@ -35,7 +34,7 @@ class Test_TalkFiles(MyTestClass):
 # RetreatDirs
 # *********************************************
 
-class Test_RetreatDirs(MyTestClass):
+class Test_RetreatDirs(unittest.TestCase):
 
     def test_RetreatDirs(self):
         baseDir = VAJRA_MUSIC_TESTING

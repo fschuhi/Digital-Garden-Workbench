@@ -2,7 +2,6 @@
 
 from HAFScripts import addMissingCitations
 import unittest
-from testing import MyTestClass
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 
 from TranscriptIndex import TranscriptIndex
@@ -16,7 +15,7 @@ import os
 # IndexEntryPageHeadePParser
 # *********************************************
 
-class Test_IndexEntryPageHeaders(MyTestClass):
+class Test_IndexEntryPageHeaders(unittest.TestCase):
 
     def test_canonicalHeaderLine(self):
         self.assertEqual(canonicalHeaderLineFromParams(None, "wert", "asdf", None, None, None), "###### wert [[asdf|(Transcript)]]")
@@ -57,7 +56,7 @@ class Test_IndexEntryPageHeaders(MyTestClass):
 # CitationParagraphParser
 # *********************************************
 
-class Test_CitationParagraphParser(MyTestClass):
+class Test_CitationParagraphParser(unittest.TestCase):
 
     def test_OldTargetType(self):        
         citationParagraph  = "> So for the one who is blessed, it's a task in sensitivity. <p/>_Vajra Music: Preliminaries Part 3, [[0303 Preliminaries Regarding Voice, Movement, and Gesture - Part 3#^12-2|12-2]]_"
@@ -89,7 +88,7 @@ class Test_CitationParagraphParser(MyTestClass):
 # IndexEntryPage
 # *********************************************
 
-class Test_IndexEntryPage(MyTestClass):
+class Test_IndexEntryPage(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -109,7 +108,7 @@ class Test_IndexEntryPage(MyTestClass):
     def test_determineYamlSection(self):
         indexEntryPage = IndexEntryPage(self.haf.dirIndex, 'Inertia')
         indexEntryPage.loadIndexEntryMd()
-        self.assertEquals(indexEntryPage.determineYamlSection(), 'Robology')
+        self.assertEqual(indexEntryPage.determineYamlSection(), 'Robology')
 
 
     def test_extractYaml(self):

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from TranscriptIndex import TranscriptIndex
-from testing import MyTestClass
 from consts import RB_YAML_TESTING
 import unittest
 
@@ -9,7 +8,7 @@ import unittest
 # index entries
 # *********************************************
 
-class Test_IndexEntries(MyTestClass):
+class Test_IndexEntries(unittest.TestCase):
 
     def test_TranscriptIndex(self):
         transcriptIndex = TranscriptIndex(RB_YAML_TESTING)

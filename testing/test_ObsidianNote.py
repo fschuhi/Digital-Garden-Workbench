@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+import sys
+sys.path.append(r"S:\work\python\HAF")
+
 import unittest
 from HAFEnvironment import HAFEnvironment
 from ObsidianNote import ObsidianNoteType, ObsidianNote
 from consts import HAF_YAML
-from MarkdownSnippet import MarkdownSnippet
+from MarkdownLine import MarkdownLine
 
 # *********************************************
 # Publishing
@@ -35,18 +38,18 @@ class Test_ObsidianNote(unittest.TestCase):
     def test_changeLine(self):
         note = self.createNote("Samadhi in Metta Practice")
 
-        lines = note.collectLines()
+        lines = note.collectTextLines()
         lines[4] = "asdfasdf"
-        note.assignLines(lines)
+        note.assignTextLines(lines)
 
-        lines = note.collectLines()
+        lines = note.collectTextLines()
         self.assertEqual(lines[4], "asdfasdf")
 
 
     def test_markdownSnippets(self):
         note = self.createNote("Samadhi in Metta Practice")
 
-        snippets = note.collectMarkdownSnippets()
+        snippets = note.collectMarkdownLines()
 
         assert snippets.asText() == note.text
 

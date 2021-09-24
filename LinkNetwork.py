@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import Tuple
-from MarkdownSnippet import MarkdownSnippet
+from MarkdownLine import MarkdownLine
 from util import basenameWithoutExt, filterExt, loadStringFromTextFile
 from HAFEnvironment import HAFEnvironment
 
@@ -22,7 +22,7 @@ class LinkNetwork:
         self.actualNoteNameByNote = {n.lower(): n for n in self.allNotes}
 
         self.filenameByNote = {} # type: dict[str,str]
-        self.markdownSnippetByNote = {} # type: dict[str, MarkdownSnippet]
+        self.markdownByNote = {} # type: dict[str, MarkdownLine]
         self.linkMatchesByNote = {} # type: dict[str,list[re.Match]]
         self.linksByNote = {} # type: dict[str,set[str]]
         self.backlinksByNote = {} # type: dict[str,set[str]]
@@ -33,11 +33,11 @@ class LinkNetwork:
 
             self.filenameByNote[noteKey] = md
         
-            markup = loadStringFromTextFile(md)
-            markdownSnippet = MarkdownSnippet(markup)
-            self.markdownSnippetByNote[noteKey] = markdownSnippet
+            markdownText = loadStringFromTextFile(md)
+            markdown = MarkdownLine(markdownText)
+            self.markdownByNote[noteKey] = markdown
 
-            matches = markdownSnippet.collectLinkMatches()
+            matches = markdown.collectLinkMatches()
             self.linkMatchesByNote[noteKey] = matches
 
             # create sets for all outgoing links to notes (linksByNote) and refererencing links back from other notes (backlinksByNote)            
@@ -64,8 +64,8 @@ class LinkNetwork:
     def getFilenameByNote(self, note) -> str:
         return self.filenameByNote[note.lower()]
 
-    def getMarkdownSnippetByNote(self, note) -> MarkdownSnippet:
-        return self.markdownSnippetByNote[note.lower()]
+    def getMarkdownByNote(self, note) -> MarkdownLine:
+        return self.markdownByNote[note.lower()]
 
 
     def getLinksByNote(self, note) -> set[str]:

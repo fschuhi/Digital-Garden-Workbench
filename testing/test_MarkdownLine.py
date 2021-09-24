@@ -12,7 +12,7 @@ import filecmp
 # MarkdownSnippet
 # *********************************************
 
-class Test_MarkdownLine(unittest.TestCase):
+class Test_MarkdownSnippet(unittest.TestCase):
 
     def test_searchMarkupLink(self):
         match = searchObsidianLink("asdf [[Link1]] wert und [[weiterer Link]]")

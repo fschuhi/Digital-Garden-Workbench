@@ -6,7 +6,6 @@ from HAFEnvironment import HAFEnvironment, determineTalkname
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptSummaryPage import SummaryLineMatch, TranscriptSummaryPage, SummaryLineParser, createNewSummaryPage
-from testing import MyTestClass
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 import filecmp
@@ -20,7 +19,7 @@ import os
 # https://stackoverflow.com/questions/1123000/does-python-have-anonymous-classes
 Bunch = SimpleNamespace
 
-class Test_AnonymousClass(MyTestClass):
+class Test_AnonymousClass(unittest.TestCase):
 
     def test_2(self):
         foo = dict(bla = "asdf", heul = 1)
@@ -31,18 +30,18 @@ class Test_AnonymousClass(MyTestClass):
     def test_3(self):
         foo = Bunch(bla = "asdf", heul = 1)
         bar = Bunch(heul = 1, bla = "asdf")
-        print(foo.bla)
+        #print(foo.bla)
         self.assertEqual(foo, bar)
 
 
     def test_4(self):
         foo = SimpleNamespace(bla = "asdf", heul = 1)
         bar = SimpleNamespace(heul = 1, bla = "asdf")
-        print(foo.bla)
+        #print(foo.bla)
         self.assertEqual(foo, bar)
 
 
-class Test_SummaryLineParser(MyTestClass):
+class Test_SummaryLineParser(unittest.TestCase):
     
     headerLine1 = "###### It's going to be about movement, gesture, and voice"
     countsLine1a = "**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_"

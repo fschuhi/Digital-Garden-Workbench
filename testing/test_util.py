@@ -2,14 +2,13 @@
 
 import unittest
 from util import askRUN, askYesNoCancel, canonicalizeText, deitalicizeTermsWithDiacritics, deitalicizeWithReplace, deitalicizeTerm
-from testing import MyTestClass
 
 
 # *********************************************
 # TalkData
 # *********************************************
 
-class Test_util(MyTestClass):
+class Test_util(unittest.TestCase):
 
     def test_askYesNoCancel(self):
         # this is just a test to show how to use askYesNoCancel() and askRUN()

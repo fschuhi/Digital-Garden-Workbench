@@ -3,21 +3,24 @@
 import os
 import spacy
 from TranscriptModel import TranscriptModel
-from util import ObsidianLinkPattern, loadStringFromTextFile, searchObsidianLink, TFootnotes
+from util import *
 from typing import Tuple
 import re
 
 # *********************************************
-# class MarkdownSnippet
+# class MarkdownLine
 # *********************************************
 
-class MarkdownSnippet:
+class MarkdownLine:
 
     def __init__(self, text) -> None:
         self.text = text
         self.footnotes = None # type: TFootnotes
         self.termCounts = None # type: dict[str,int]
         self.shownLinks = None # type: list[str]
+        self.hasAppliedSpacy = False
+        self.next = None # type: MarkdownLine
+        self.prev = None # type: MarkdownLine
 
 
 # links
@@ -107,7 +110,10 @@ class MarkdownSnippet:
 
 # removing links, parallel update of footnotes
 
-    def applySpacy(self, model: TranscriptModel):
+    def applySpacy(self, model: TranscriptModel, force: bool = False):
+        if self.hasAppliedSpacy and not force:
+            return
+
         # footnotes might contain links, so they must be off-limits for the indexing
         self.removeFootnotes()
 
@@ -165,6 +171,23 @@ class MarkdownSnippet:
         # The paragraph now contains links, but not yet footnotes =>  add footnotes to the paragraph
         # NOTE: character position of the footnotes will have changed, due to inserting links; see ((XYYSBMS))
         self.restoreFootnotes()
+
+        self.hasAppliedSpacy = True
+
+
+# using spacy results (previously in TranscriptParagraph)
+
+    # ((JJFZHVO)) Keywords section on summary page
+    def collectShownLinks(self) -> str:
+        assert self.hasAppliedSpacy, "must first apply spacy to this paragraph"
+        entryFunc = lambda entry : f"[[{entry}]]" if self.termCounts[entry] == 1 else f"[[{entry}]] ({self.termCounts[entry]})"
+        links = [entryFunc(link) for link in self.shownLinks]
+        return " · ".join(links)
+
+    def countTerm(self, term: str) -> int:
+        assert self.hasAppliedSpacy, "must first apply spacy to this paragraph"        
+        return self.termCounts[term] if term in self.termCounts else 0
+
 
 
 # footnotes
@@ -234,33 +257,52 @@ class MarkdownSnippet:
 
 
 # *********************************************
-# class MarkdownSnippets
+# class MarkdownLines
 # *********************************************
 
-class MarkdownSnippets:
-    def __init__(self, text: str):
-        self.markdownSnippets = [MarkdownSnippet(line) for line in text.splitlines()]
+class MarkdownLines:
+    def __init__(self, textLines: list[str]):
+        self.markdownLines = [MarkdownLine(textLine) for textLine in textLines] # type: list[MarkdownLine]
+        self.linkLines()
 
+    def linkLines(self):
+        for index, markdownLine in enumerate(self.markdownLines):
+            prev = self.markdownLines[index-1] if index-1 >= 0 else None
+            next = self.markdownLines[index+1] if index+1 < len(self.markdownLines) else None
+            markdownLine.prev = prev
+            markdownLine.next = next
 
-    def __getitem__(self, key):
-        return self.markdownSnippets[key]
-
-
-    def asText(self) -> str:
-        return '\n'.join( [snippet.text for snippet in self.markdownSnippets] ) + '\n'
-
+    @classmethod
+    def fromLines(cls, textLines: list[str]):
+        return cls(textLines)
 
     @classmethod
     def fromFile(cls, sfn):
         assert os.path.exists(sfn)
-        text = loadStringFromTextFile(sfn)
-        return cls(text)
+        textLines = loadLinesFromTextFile(sfn)
+        return cls(textLines)
+
+    @classmethod
+    def fromText(cls, text):
+        textLines = text.splitlines()
+        return cls(textLines)
+
+
+    def __getitem__(self, key):
+        return self.markdownLines[key]
+
+
+    def asText(self) -> str:
+        return '\n'.join( [markdownLine.text for markdownLine in self.markdownLines] ) + '\n'
+
+    def collectTextLines(self) -> list[str]:
+        return [markdown.text for markdown in self.markdownLines]
 
 
     def search(self, pattern, startIndex=0) -> Tuple[int, re.Match]:
-        indexes = range(startIndex, len(self.markdownSnippets))
+        indexes = range(startIndex, len(self.markdownLines))
         for index in indexes:
-            mdl = self.markdownSnippets[index]
+            mdl = self.markdownLines[index]
             match = re.search(pattern, mdl.text)
             if match:
                 return (index, match)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from MarkdownSnippet import MarkdownSnippet
+from MarkdownLine import MarkdownLine
 from TranscriptModel import TranscriptModel
 from genericpath import exists
 
@@ -143,7 +143,7 @@ class IndexEntryPage:
             match = citationParagraphParser.matchCitationParagraph(line)
             if match:
                 oldCitation = match.group('citation')
-                ms = MarkdownSnippet(oldCitation)
+                ms = MarkdownLine(oldCitation)
                 ms.applySpacy(transcriptModel)
                 citationParagraphParser.citation = ms.text
                 self.lines[index] = citationParagraphParser.canonicalCitationParagraph()

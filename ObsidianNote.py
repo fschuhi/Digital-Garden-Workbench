@@ -8,7 +8,7 @@ import os
 import re
 import yaml
 from util import extractYaml, loadLinesFromTextFile, loadStringFromTextFile, saveStringToTextFile
-from MarkdownSnippet import MarkdownSnippet, MarkdownSnippets
+from MarkdownLine import MarkdownLine, MarkdownLines
 from typing import Tuple
 
 
@@ -26,27 +26,44 @@ class ObsidianNoteType(Enum):
 # *********************************************
 
 class ObsidianNote:
-    def __init__(self, type: ObsidianNoteType, text: str):
+    def __init__(self, type: ObsidianNoteType, textLines: list[str]):
         self.type = type
-        self.text = text
-
+        self.assignTextLines(textLines)
 
     @classmethod
-    def fromFile(cls, type: ObsidianNoteType, sfn):
+    def fromLines(cls, type: ObsidianNoteType, textLines: list[str]):
+        return cls(type, textLines)
+
+    @classmethod
+    def fromFile(cls, type: ObsidianNoteType, sfn: str):
         assert os.path.exists(sfn)
-        textFromFile = loadStringFromTextFile(sfn)
-        return cls(type, textFromFile)
+        textLines = loadLinesFromTextFile(sfn)
+        return cls(type, textLines)
+
+    @classmethod
+    def fromText(cls, type: ObsidianNoteType, text: str):
+        textLines = text.splitlines()
+        return cls(type, textLines)
 
 
-    def collectLines(self) -> list[str]:
-        return self.text.splitlines()
+    @property
+    def text(self):
+        return self.markdownLines.asText()
+
+    @text.setter
+    def text(self, text):
+        self.markdownLines = MarkdownLines.fromText(text)
+
+
+    def collectTextLines(self) -> list[str]:
+        return self.markdownLines.collectTextLines()
     
-    def assignLines(self, lines: list[str]):
-        self.text = '\n'.join(lines) + '\n'
+    def assignTextLines(self, textLines: list[str]):
+        self.markdownLines = MarkdownLines(textLines)
 
 
     def collectYaml(self) -> dict[str,str]:
-        yaml = extractYaml(self.collectLines())
+        yaml = extractYaml(self.collectTextLines())
         return yaml if yaml else {}
     
     def assignYaml(self, newYaml: dict[str,str]):
@@ -56,30 +73,20 @@ class ObsidianNote:
             newLines.append('---')
             newLines.extend(yaml.dump(newYaml).splitlines())
             newLines.append('---')
-        lines = self.collectLines()
+        lines = self.collectTextLines()
         oldYaml = extractYaml(lines)
         firstAfterYaml = 0 if not oldYaml else len(oldYaml) + 2
         newLines.extend(lines[firstAfterYaml:])
-        self.assignLines(newLines)
+        self.assignTextLines(newLines)
 
 
-    def collectMarkdownSnippet(self) -> MarkdownSnippet:
-        return MarkdownSnippet(self.text)    
+    def collectMarkdownLines(self) -> MarkdownLines:
+        return MarkdownLines.fromText(self.text)
 
-    def assignMarkdownSnippet(self, snippet: MarkdownSnippet):
-        self.text = snippet.text
-
-
-    def collectMarkdownSnippets(self) -> MarkdownSnippets:
-        return MarkdownSnippets(self.text)
-
-    def assignMarkdownSnippets(self, snippets: MarkdownSnippets):
-        self.text = snippets.asText()
+    def assignMarkdownLines(self, markdownLines: MarkdownLines):
+        self.text = markdownLines.asText()
 
 
 
 if __name__ == "__main__":
-    haf = HAFEnvironment(HAF_YAML)
-    md = haf.getSummaryFilename("Samadhi in Metta Practice")
-    note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, md)
-    match = re.search(r"[^#]#[^# ]+", note.text)
+    pass

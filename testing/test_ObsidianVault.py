@@ -25,7 +25,6 @@ class Test_ObsidianVault(unittest.TestCase):
     def test_relative(self):
         self.assertEqual(self.vault.root, r'testing\data\_Markdown')
         sfn = os.path.join(self.vault.root, r"2006 New Year's Retreat\Transcripts\1228 Equanimity (talk).md")
-        print(sfn)
         self.assertEqual(self.vault.relative(sfn), r"2006 New Year's Retreat\Transcripts\1228 Equanimity (talk).md")
         self.assertEqual(self.vault.toplevelFolder(sfn), "2006 New Year's Retreat")
 

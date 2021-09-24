@@ -4,7 +4,7 @@ import re
 import os
 
 from LinkNetwork import LinkNetwork
-from MarkdownSnippet import MarkdownSnippet
+from MarkdownLine import MarkdownLine
 from TranscriptParagraph import applySpacyToParagraphs
 from Publishing import Publishing
 from TranscriptModel import TranscriptModel
@@ -104,7 +104,7 @@ def replaceLinks(haf_publish, filenames, replaceIndex):
     for filename in filenames:
         # print(baseNameWithoutExt(sfnSummaryMd))
         text = loadStringFromTextFile(filename)
-        ms = MarkdownSnippet(text)
+        ms = MarkdownLine(text)
         ms.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filterLinks)}")
         saveStringToTextFile(filename, ms.text)
 
@@ -408,7 +408,7 @@ def replaceNoteLink(haf: HAFEnvironment, network: LinkNetwork, args):
     linkingNotes = network.getBacklinksByNote(oldNote)
     found = len(linkingNotes)
     for linkingNote in linkingNotes:
-        markdown = network.getMarkdownSnippetByNote(linkingNote)
+        markdown = network.getMarkdownByNote(linkingNote)
         oldText = markdown.text
         matches = network.getLinkMatchesByNote(linkingNote, oldNote)
         retainShown = linkingNote != 'index'

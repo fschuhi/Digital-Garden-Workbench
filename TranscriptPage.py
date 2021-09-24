@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from genericpath import exists
-from util import canonicalizeText, deitalicizeTermsWithDiacritics, extractYaml, loadLinesFromTextFile, saveLinesToTextFile
+from util import *
+# from util import canonicalizeText, deitalicizeTermsWithDiacritics, extractYaml, loadLinesFromTextFile, saveLinesToTextFile
 
 import os
 import re
@@ -147,6 +148,8 @@ class TranscriptPage:
             links.append(link)
         return " · ".join(links)
 
+
+    # ist das was für HAFEnvironment?
 
     def determineRetreat(self) -> str:
         return os.path.normpath(self.sfnTranscriptMd).split(os.path.sep)[-3]

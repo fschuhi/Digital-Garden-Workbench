@@ -3,7 +3,6 @@
 import filecmp
 import unittest
 from util import saveStringToTextFile
-from testing import MyTestClass
 
 from copyIndexEntryCitationsToClipboard import copyIndexEntryCitationsToClipboard
 
@@ -11,7 +10,7 @@ from copyIndexEntryCitationsToClipboard import copyIndexEntryCitationsToClipboar
 # tests
 # *********************************************
 
-class Test_copyIndexEntryCitationsToClipboard(MyTestClass):
+class Test_copyIndexEntryCitationsToClipboard(unittest.TestCase):
 
     def test_copyIndexEntryCitationsToClipboard(self):
         occurances = "_occurrences: **[[0302 Preliminaries Regarding Voice, Movement, and Gesture - Part 2#^3-4|3-4 (1)]]**, [[0302 Preliminaries Regarding Voice, Movement, and Gesture - Part 2#^4-1|4-1 (1)]]_"

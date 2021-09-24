@@ -46,7 +46,7 @@ def copyIndexEntryCitationsToClipboard(gui = True):
                 citationMarkups.append(citationMarkup)
 
     clipboardText = '\n' + '\n\n'.join(citationMarkups) + '\n'
-    print(clipboardText)
+    #print(clipboardText)
     pyperclip.copy(clipboardText)
 
     if gui:
