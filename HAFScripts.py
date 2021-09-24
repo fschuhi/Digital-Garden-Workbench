@@ -216,7 +216,7 @@ def updateSummary(haf, talkName, transcriptModel, sfn=None):
     sfnSummaryMd = haf.getSummaryFilename(talkName)
     summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
     summaryPage.loadSummaryMd()
-    summaryPage.update(transcriptPage)
+    summaryPage.update(transcriptPage, targetType='#^')
     
     summaryPage.save(sfn)
 
@@ -264,7 +264,7 @@ def updateAlphabeticalIndex(haf: HAFEnvironment, transcriptIndex: TranscriptInde
     for c, l in groupby:
         sortedPagesByFirstChar[c] = l
 
-    indexMd = r"s:\work\Python\HAF\Dropbox-Papers-_Markdown\Rob Burbea\Index.md"
+    indexMd = r"s:\work\Python\HAF\_Markdown\Rob Burbea\Index.md"
 
     lines = loadLinesFromTextFile(indexMd)
     for index, line in enumerate(lines):
@@ -643,7 +643,8 @@ if __name__ == "__main__":
                 if match:
                     blockid = match.group('blockid')
                     lines[index-1] = '###### ' + blockid
-            sfnSave = os.path.join("tmp/h", os.path.basename(filename))
+            #sfnSave = os.path.join("tmp/h", os.path.basename(filename))
+            sfnSave = filename
             saveLinesToTextFile(sfnSave, lines)
 
 # creating files

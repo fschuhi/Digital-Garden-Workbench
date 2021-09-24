@@ -14,9 +14,11 @@ class TranscriptModel:
     # https://spacy.io/usage/rule-based-matching
     # https://explosion.ai/demos/matcher
 
+    # only load English once
     _nlp = None
 
-    def __init__(self, transcriptIndex: TranscriptIndex) -> None:        
+    def __init__(self, transcriptIndex: TranscriptIndex) -> None:
+        # https://stackoverflow.com/questions/51045319/how-to-suppress-importwarning-in-a-python-unittest-script
         import warnings
         warnings.simplefilter('ignore', category=DeprecationWarning)
 

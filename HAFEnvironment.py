@@ -102,6 +102,9 @@ class HAFEnvironment():
         indexEntryFilenames = self.vault.pathnames('Index/*.md')
         return set([basenameWithoutExt(filename) for filename in indexEntryFilenames])
 
+    def collectTranscriptNameSet(self):
+        return set([basenameWithoutExt(filename) for filename in self.collectTranscriptFilenames()])
+
 
     def determineFilenameFromTalkname(self, filenames, talkname):
         talknameKey = determineTalkname(talkname).lower()
@@ -138,3 +141,7 @@ class HAFEnvironment():
         dirSummaries = self.summariesFolder(retreatName)
         return os.path.join(dirSummaries, talkName + '.md')
 
+    def website(self):
+        # Obsidian Publish doesn't need the website address in <a href ...
+        # return self.dict['Website']
+        return ''
