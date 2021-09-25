@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from util import loadLinesFromTextFile
+from util import loadLinesFromTextFile, parseParagraph
 from HAFEnvironment import HAFEnvironment
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
@@ -27,7 +27,10 @@ class Test_TranscriptPage(unittest.TestCase):
 
     def test_hasCorrectNumberOfParagraphs(self):
         page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
-        self.assertEqual(len(page.markdownLines), 85)
+        paragraphs = [markdownLine for markdownLine in page.markdownLines if markdownLine.text != '']
+        self.assertEqual(len(paragraphs), 85)
+        paragraphs = [markdownLine for markdownLine in page.markdownLines if parseParagraph(markdownLine.text) != (None, None, None)]
+        self.assertEqual(len(paragraphs), 85)
 
 
     def test_applySpacyToParagraphs(self):

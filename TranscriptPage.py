@@ -23,6 +23,7 @@ class TranscriptPage(ObsidianNote):
     def __init__(self, sfnTranscriptMd: str, textLines: list[str]) -> None:
 
         # ObsidianNote generates a MarkdownLines object from the passed list[str]
+        self.markdownLines = None #type: MarkdownLines
         super().__init__(ObsidianNoteType.TRANSCRIPT, textLines)
         assert self.markdownLines
 
@@ -45,7 +46,8 @@ class TranscriptPage(ObsidianNote):
             if index < skipAtBeginning:
                 continue
             line = line.strip()
-            if line:
+            if True:
+            #if line:
                 # IMPORTANT: empty lines are not retained as paragraph
                 # TranscriptPage and its paragraphs is an internal object, not meant to reflect visuals
                 if line.startswith("#"):
@@ -69,25 +71,30 @@ class TranscriptPage(ObsidianNote):
         # we generate trailing blockids for the paragraphs in this method
 
         textLines = []
+        textLines.append('')
 
         nPageIndicators = 0
-        pageNr = 0
+        pageNr = 1
         paragraphNr = 0
-        firstLine = True
         for line in lines:
             line = line.strip()            
-            if line:
+            if not line:
+                textLines.append('')
+            else:
                 # doing the indexing as a reindexing (i.e. there are block indicators) is allowed
                 line = re.sub(r" \^[0-9]+-[0-9]+$", "", line)
                 line = canonicalizeText(line)
                 line = deitalicizeTermsWithDiacritics(line)
-                if firstLine or line == "#":
-                    # line w/ a single # marks a new page
-                    pageNr += 1
-                    paragraphNr = 0
-                    firstLine = False                
+                # if firstLine or line == "#":
+                #     # line w/ a single # marks a new page
+                #     pageNr += 1
+                #     paragraphNr = 0
+                #     firstLine = False                
 
                 if line == "#":
+                    pageNr += 1
+                    paragraphNr = 0
+                    textLines.append('')
                     nPageIndicators += 1
                 else:
                     # this is a regular line, to be turned into a paragraph
@@ -110,15 +117,26 @@ class TranscriptPage(ObsidianNote):
 
 
     def saveToObsidian(self, sfnTranscriptMd):
-        f = open(sfnTranscriptMd, 'w', encoding='utf-8', newline='\n')        
-        # ((GDPHRFQ))
-        print("---", file=f)
-        print("obsidianUIMode: preview", file=f)
-        print("---", file=f)
-        print("#Transcript\n", file=f)
-        for markdownLine in self.markdownLines:
-            print(markdownLine.text + '\n', file=f)
-        f.close()
+        out = []
+        out.append("---")
+        out.append("obsidianUIMode: preview")
+        out.append("---")
+        out.append("#Transcript")
+
+        markdownTextLines = self.markdownLines.collectTextLines()
+        out.extend(markdownTextLines)
+        saveLinesToTextFile(sfnTranscriptMd, out)
+
+    # def saveToObsidian(self, sfnTranscriptMd):
+    #     f = open(sfnTranscriptMd, 'w', encoding='utf-8', newline='\n')        
+    #     # ((GDPHRFQ))
+    #     print("---", file=f)
+    #     print("obsidianUIMode: preview", file=f)
+    #     print("---", file=f)
+    #     print("#Transcript\n", file=f)
+    #     for markdownLine in self.markdownLines:
+    #         print(markdownLine.text + '\n', file=f)
+    #     f.close()
 
 
     def applySpacy(self, model: TranscriptModel, force: bool = False):

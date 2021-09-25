@@ -173,13 +173,14 @@ class TranscriptSummaryPage:
             ])
         for markdownLine  in markdownLines:
             (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
-            blockId = f"{pageNr}-{paragraphNr}"
-            counts = f": _{markdownLine.collectShownLinks()}_" if markdownLine.shownLinks else ""
-            newLines.extend([ \
-                "###### ...", \
-                f"**[[{transcriptName}#^{blockId}|{blockId}]]**{counts}\n", \
-                "---", \
-                ])
+            if pageNr:
+                blockId = f"{pageNr}-{paragraphNr}"
+                counts = f": _{markdownLine.collectShownLinks()}_" if markdownLine.shownLinks else ""
+                newLines.extend([ \
+                    "###### ...", \
+                    f"**[[{transcriptName}#^{blockId}|{blockId}]]**{counts}\n", \
+                    "---", \
+                    ])
         self.lines = newLines
 
 
