@@ -25,17 +25,15 @@ class KanbanNote():
     def parseLines(self):        
         currentList = None
         currentCards = None
-        for line in self.lines:
-            match = re.match(r"#+ (?P<list>.+)", line)
-            if match:
+        for line in self.lines:            
+            if (match := re.match(r"#+ (?P<list>.+)", line)):
                 if currentList is not None:
                     self.cardsByList[currentList] = currentCards
                 currentList = match.group('list')
                 self.lists.append(currentList)
                 currentCards = []
-            else:
-                match = re.match(r"- \[(?P<todo>[ x])\] +(?P<card>.*)", line)
-                if match:
+            else:                
+                if (match := re.match(r"- \[(?P<todo>[ x])\] +(?P<card>.*)", line)):
                     done = match.group('todo') == 'x'
                     card = match.group('card')
                     currentCards.append( (card, done) )

@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-from numpy import flatiter
 from consts import HAF_YAML
 from HAFEnvironment import HAFEnvironment
-import sys
 import os
-import re
 import yaml
-from util import extractYaml, loadLinesFromTextFile, loadStringFromTextFile, saveStringToTextFile
+from util import *
 from MarkdownLine import MarkdownLine, MarkdownLines
 from typing import Tuple
 from util import *
@@ -89,8 +86,6 @@ class ObsidianNote:
         markdownTextLines = self.markdownLines.collectTextLines()
         out.extend(markdownTextLines)
         saveLinesToTextFile(sfn, out)
-
-
 
 
 if __name__ == "__main__":

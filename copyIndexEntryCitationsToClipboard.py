@@ -2,27 +2,25 @@
 
 import tkinter
 from util import *
+from TranscriptPage import TranscriptPage
+import pyperclip
+from HAFEnvironment import HAFEnvironment
+from consts import HAF_YAML
 
 
 def copyIndexEntryCitationsToClipboard(gui = True):
-    from HAFEnvironment import HAFEnvironment
-    from consts import HAF_YAML
     haf = HAFEnvironment(HAF_YAML)    
     
-    import pyperclip
     data = pyperclip.paste()
     
     import re
 
-    # 22.09.21 we use dot now instead of comma
-    #links = re.split('\]\]\*?\*?, ', data)
     links = re.split(r"\]\]\*?\*?", data)
     linkPattern = r"\[\[([^#]+)#\^?(([0-9]+)-([0-9]+))\|"
 
     citationMarkups = []
-    for link in links:
-        match = re.search(linkPattern, link)
-        if match:
+    for link in links:        
+        if (match := re.search(linkPattern, link)):
 
             transcriptName = match.group(1)
             pageNr = int(match.group(3))
@@ -33,7 +31,6 @@ def copyIndexEntryCitationsToClipboard(gui = True):
             else:
                 sfnTranscriptMd = haf.getTranscriptFilename(transcriptName)
 
-                from TranscriptPage import TranscriptPage
                 page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
 
                 markdownLine = page.findParagraph(pageNr, paragraphNr)

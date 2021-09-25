@@ -26,9 +26,8 @@ class MarkdownLine:
     def removeAllLinks(self):
         if not self.footnotes:
             self.footnotes = []
-        while True:
-            matchLink = re.search(r"\[\[.+?\]\]", self.text)
-            if not matchLink:
+        while True:            
+            if not (matchLink := re.search(r"\[\[.+?\]\]", self.text)):
                 break
 
             link = matchLink[0]        
@@ -296,9 +295,8 @@ class MarkdownLines:
     def search(self, pattern, startIndex=0) -> Tuple[int, re.Match]:
         indexes = range(startIndex, len(self.markdownLines))
         for index in indexes:
-            markdownLine = self.markdownLines[index]
-            match = re.search(pattern, markdownLine.text)
-            if match:
+            markdownLine = self.markdownLines[index]            
+            if (match := re.search(pattern, markdownLine.text)):
                 return (index, match)
         return (None, None)
 
@@ -308,7 +306,6 @@ class MarkdownLines:
         if fromIndex is not None:
             (toIndex, toMatch) = self.search(toPattern, fromIndex+1)
             if toIndex:
-                #print((fromIndex, toIndex, fromMatch, toMatch))
                 return (fromIndex, toIndex, fromMatch, toMatch)
         return (None, None, None, None)
         

@@ -42,14 +42,5 @@ class ObsidianVault:
         return parts[0]
 
 
-if __name__ == "__main__":
-    dict = loadYaml(HAF_YAML_TESTING)
-    root = os.path.normpath(dict['Root'])
-    rootDepth = len(splitall(root))
-    retreatNames = dict['Retreats']
-
-    vault = ObsidianVault(root)
-    print(vault.folderNotes('2020 Vajra Music/**'))
-
 
 

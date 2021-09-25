@@ -61,8 +61,7 @@ class TranscriptPage(ObsidianNote):
         pageNr = 1
         paragraphNr = 0
         for line in lines:
-            line = line.strip()            
-            if not line:
+            if not (line := line.strip()):
                 textLines.append('')
             else:
                 # doing the indexing as a reindexing (i.e. there are block indicators) is allowed
@@ -108,9 +107,8 @@ class TranscriptPage(ObsidianNote):
 
         def collectTermCounts(term: str) -> list[tuple[int,int, int]]:
             counts = []
-            for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
-                count = markdownLine.countTerm(term)
-                if count:
+            for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():                
+                if (count := markdownLine.countTerm(term)):
                     counts.append( (pageNr, paragraphNr, count) )
             return counts
 

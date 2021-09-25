@@ -33,8 +33,8 @@ class SummaryLineParser:
 
 
     def matchLine(self, line) -> SummaryLineMatch:
-        match = re.match(r"(#+ )(.+)", line)
-        if match:
+        
+        if (match := re.match(r"(#+ )(.+)", line)):
             self.headerLine = line        
             self.level = len(match.group(1).strip())
             self.headerText = match.group(2)
@@ -44,9 +44,8 @@ class SummaryLineParser:
             return SummaryLineMatch.HEADER
 
         # **[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_
-        pattern = r"(?P<spanStart><span class=\"(keywords|counts)\">)?(\*\*)?\[\[(?P<transcriptName>[0-9]+ [^#]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))(\|(?P<shownLinkText>[0-9]+-[0-9]+))?\]\](\*\*)?(: _)?(?P<counts>[^_<]*)_?(?P<spanEnd></span>)?$"
-        match = re.match(pattern, line)
-        if match:
+        pattern = r"(?P<spanStart><span class=\"(keywords|counts)\">)?(\*\*)?\[\[(?P<transcriptName>[0-9]+ [^#]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))(\|(?P<shownLinkText>[0-9]+-[0-9]+))?\]\](\*\*)?(: _)?(?P<counts>[^_<]*)_?(?P<spanEnd></span>)?$"        
+        if (match := re.match(pattern, line)):
             self.spanStart = match.group('spanStart')
             if self.spanStart:
                 self.spanStart = self.spanStart.replace('"keywords"', '"counts"')
@@ -60,9 +59,8 @@ class SummaryLineParser:
             return SummaryLineMatch.PARAGRAPH_COUNTS
 
         # <span class="counts">_[[Compassion]] (3) · [[Dukkha]] (2) · [[Contraction]] (2) · [[The Self]]_</span>
-        pattern = r"(?P<spanStart><span class=\"counts\">)?_?(?P<counts>\[\[[^\]]+\]\] \([0-9]+\)( · \[\[[^\]]+\]\]( \([0-9]+\))?)*)_?(?P<spanEnd></span>)?$"
-        match = re.match(pattern, line)
-        if match:
+        pattern = r"(?P<spanStart><span class=\"counts\">)?_?(?P<counts>\[\[[^\]]+\]\] \([0-9]+\)( · \[\[[^\]]+\]\]( \([0-9]+\))?)*)_?(?P<spanEnd></span>)?$"        
+        if (match := re.match(pattern, line)):
             if self.headerText != 'Index':
                 pass
             else:
@@ -112,9 +110,6 @@ class TranscriptSummaryPage:
     def loadSummaryMd(self) -> None:
         assert os.path.exists(self.sfnSummaryMd)
         self.lines = loadLinesFromTextFile(self.sfnSummaryMd)
-        #with open(self.sfnSummaryMd, encoding='utf8') as f:
-        #    self.lines = f.read().splitlines()
-        #    f.close()
 
 
     def update(self, transcriptPage: TranscriptPage, targetType='#') -> None:
@@ -123,10 +118,8 @@ class TranscriptSummaryPage:
         transcriptName = transcriptPage.transcriptName
         parser = SummaryLineParser()
 
-        for index, line in enumerate(self.lines):
-            match = parser.matchLine(line)
-
-            if match == SummaryLineMatch.PARAGRAPH_COUNTS:
+        for index, line in enumerate(self.lines):            
+            if (match := parser.matchLine(line)) == SummaryLineMatch.PARAGRAPH_COUNTS:
                 assert parser.transcriptName == transcriptName
                 # headers on a summary page refer to paragraphs in the transcript
                 pageNr = parser.pageNr
@@ -197,9 +190,8 @@ class TranscriptSummaryPage:
         assert self.lines
         pageNrs = set()
         parser = SummaryLineParser()
-        for line in self.lines:
-            match = parser.matchLine(line)
-            if match == SummaryLineMatch.PARAGRAPH_COUNTS:
+        for line in self.lines:            
+            if (match := parser.matchLine(line)) == SummaryLineMatch.PARAGRAPH_COUNTS:
                 if (not parser.headerText) or parser.headerText == '...':
                     pageNrs.add(parser.pageNr)
         return len(pageNrs)

@@ -29,14 +29,11 @@ class Publishing:
 
 
     def mirrorDir(self, funcSource, funcTarget, ext='.md'):
-        for retreatName in self.hafWork.retreatNames:
-            source = funcSource(retreatName)
-            if not os.path.isdir(source):
+        for retreatName in self.hafWork.retreatNames:            
+            if not os.path.isdir(source := funcSource(retreatName)):
                 continue
 
-            target = funcTarget(retreatName)
-
-            if os.path.isdir(target):
+            if os.path.isdir(target := funcTarget(retreatName)):
                 filenamesToDelete = [f for f in collectFilenames(target) if os.path.isfile(f)]
                 for filename in filenamesToDelete:
                     os.remove(filename)
@@ -65,7 +62,6 @@ class Publishing:
         source = self.hafWork
         target = self.hafPublish
         self.mirrorDir(lambda d: source.dirIndex, lambda d: target.dirIndex)
-
 
 
     def copyFile(self, source, target=None):
