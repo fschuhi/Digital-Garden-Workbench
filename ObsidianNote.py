@@ -27,11 +27,12 @@ class ObsidianNoteType(Enum):
 
 class ObsidianNote:
     def __init__(self, type: ObsidianNoteType, textLines: list[str]):
-        self.type = type
+        self.type = type # type: ObsidianNoteType
+        self.markdownLines = None # type: list[MarkdownLine]
         self.assignTextLines(textLines)
 
     @classmethod
-    def fromLines(cls, type: ObsidianNoteType, textLines: list[str]):
+    def fromTextLines(cls, type: ObsidianNoteType, textLines: list[str]):
         return cls(type, textLines)
 
     @classmethod

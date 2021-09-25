@@ -132,7 +132,7 @@ class TranscriptSummaryPage:
                 pageNr = parser.pageNr
                 paragraphNr = parser.paragraphNr
 
-                markdownLine = transcriptPage.findMarkdownLine(pageNr, paragraphNr)
+                markdownLine = transcriptPage.findParagraph(pageNr, paragraphNr)
                 assert markdownLine, f"cannot find ^{pageNr}-{paragraphNr}"
                 parser.counts = markdownLine.collectShownLinks() if markdownLine.shownLinks else ""
 
@@ -182,28 +182,6 @@ class TranscriptSummaryPage:
                 ])
         self.lines = newLines
 
-    # def createNew(self, talkName: str, pdfName: str, transcriptName: str, paragraphs: list[TranscriptParagraph]) -> None:
-    #     assert not self.lines, "can only create a fresh summary page (use update)"
-    #     newLines = []
-    #     newLines.extend([ \
-    #         "#TranscriptSummary\n", \
-    #         f"## {talkName}\n", \
-    #         f"Transcript note: [[{transcriptName}]]", \
-    #         f"Transcript PDF: [[{pdfName}.pdf]]", \
-    #         "<br/>\n", \
-    #         "### Paragraphs\n", \
-    #         ])
-    #     for paragraph in paragraphs:
-    #         blockId = f"{paragraph.pageNr}-{paragraph.paragraphNr}"
-    #         markdownLine = paragraph.markdown
-    #         counts = f": _{markdownLine.collectShownLinks()}_" if markdownLine.shownLinks else ""
-    #         newLines.extend([ \
-    #             "###### ...", \
-    #             f"**[[{transcriptName}#^{blockId}|{blockId}]]**{counts}\n", \
-    #             "---", \
-    #             ])
-    #     self.lines = newLines
-
 
     def save(self, sfnSummaryMd = None):
         assert self.lines, "missing lines to save to summary page"
@@ -241,8 +219,6 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptIndex, 
 
     pdfName = basenameWithoutExt(sfnPdf)
     transcriptName = basenameWithoutExt(sfnTranscriptMd)
-    #paragraphs = transcriptPage.paragraphs
-    #summaryPage.createNew(talkName, pdfName, transcriptName, paragraphs)
     markdownLines = transcriptPage.markdownLines
     summaryPage.createNew(talkName, pdfName, transcriptName, markdownLines)
 

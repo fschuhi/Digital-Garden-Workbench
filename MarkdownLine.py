@@ -19,8 +19,6 @@ class MarkdownLine:
         self.termCounts = None # type: dict[str,int]
         self.shownLinks = None # type: list[str]
         self.hasAppliedSpacy = False
-        self.next = None # type: MarkdownLine
-        self.prev = None # type: MarkdownLine
 
 
 # links
@@ -264,14 +262,6 @@ class MarkdownLine:
 class MarkdownLines:
     def __init__(self, textLines: list[str]):
         self.markdownLines = [MarkdownLine(textLine) for textLine in textLines] # type: list[MarkdownLine]
-        self.linkLines()
-
-    def linkLines(self):
-        for index, markdownLine in enumerate(self.markdownLines):
-            prev = self.markdownLines[index-1] if index-1 >= 0 else None
-            next = self.markdownLines[index+1] if index+1 < len(self.markdownLines) else None
-            markdownLine.prev = prev
-            markdownLine.next = next
 
     @classmethod
     def fromLines(cls, textLines: list[str]):
@@ -303,8 +293,8 @@ class MarkdownLines:
     def search(self, pattern, startIndex=0) -> Tuple[int, re.Match]:
         indexes = range(startIndex, len(self.markdownLines))
         for index in indexes:
-            mdl = self.markdownLines[index]
-            match = re.search(pattern, mdl.text)
+            markdownLine = self.markdownLines[index]
+            match = re.search(pattern, markdownLine.text)
             if match:
                 return (index, match)
         return (None, None)

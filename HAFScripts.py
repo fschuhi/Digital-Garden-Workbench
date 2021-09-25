@@ -103,9 +103,9 @@ def replaceLinks(haf_publish, filenames, replaceIndex):
     for filename in filenames:
         # print(baseNameWithoutExt(sfnSummaryMd))
         text = loadStringFromTextFile(filename)
-        ms = MarkdownLine(text)
-        ms.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filterLinks)}")
-        saveStringToTextFile(filename, ms.text)
+        markdown = MarkdownLine(text)
+        markdown.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filterLinks)}")
+        saveStringToTextFile(filename, markdown.text)
 
 
 def replaceLinksInAllSummaries():
@@ -133,7 +133,7 @@ def replaceLinksInSpecialFiles():
 
 def convertPlainMarkupToTranscript(haf: HAFEnvironment, talkName):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
-    page = TranscriptPage.fromPlainMarkup(sfnTranscriptMd)
+    page = TranscriptPage.fromPlainMarkdownFile(sfnTranscriptMd)
     page.saveToObsidian(sfnTranscriptMd)
 
 
@@ -153,7 +153,7 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 # we need to deitalize manually
                 transcript = deitalicizeTermsWithDiacritics(transcript)
                 lines = transcript.splitlines()
-                page = TranscriptPage.fromPlainMarkupLines(sfnTranscriptMd, lines)
+                page = TranscriptPage.fromPlainMarkdownLines(sfnTranscriptMd, lines)
 
                 # create backup (if it doesn't exist yet)
                 from shutil import copyfile

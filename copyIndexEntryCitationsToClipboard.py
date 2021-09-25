@@ -36,7 +36,7 @@ def copyIndexEntryCitationsToClipboard(gui = True):
                 from TranscriptPage import TranscriptPage
                 page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
 
-                markdownLine = page.findMarkdownLine(pageNr, paragraphNr)
+                markdownLine = page.findParagraph(pageNr, paragraphNr)
                 (_, _, text) = parseParagraph(markdownLine.text)
 
                 blockId = f"{pageNr}-{paragraphNr}"

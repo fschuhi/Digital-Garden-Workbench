@@ -143,9 +143,9 @@ class IndexEntryPage:
             match = citationParagraphParser.matchCitationParagraph(line)
             if match:
                 oldCitation = match.group('citation')
-                ms = MarkdownLine(oldCitation)
-                ms.applySpacy(transcriptModel)
-                citationParagraphParser.citation = ms.text
+                markdown = MarkdownLine(oldCitation)
+                markdown.applySpacy(transcriptModel)
+                citationParagraphParser.citation = markdown.text
                 self.lines[index] = citationParagraphParser.canonicalCitationParagraph()
 
 

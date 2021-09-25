@@ -12,20 +12,8 @@ TSections = dict[str, list[str]]
 
 class TranscriptIndex:
     def __init__(self, sfnDictionaryYAML) -> None:
-        #logging.info(f"TranscriptIndex: load from {sfnDictionaryYAML}")
 
         self.dictionary = loadYaml(sfnDictionaryYAML)
-        #with open(sfnDictionaryYAML, 'r', encoding='utf8', newline='\n') as stream:
-        #    self.dictionary = yaml.load(stream, Loader=yaml.FullLoader)
-        #    stream.close()
-
-        #sorted = yaml.dump(self.dictionary)
-        #print(sorted)
-        #with open("sorted", 'w', encoding='utf8') as f:
-        #    for line in sorted:
-        #        print(line, file=f)
-        #    f.close()
-
         self.patternLinks = {}
         self.pages = [] # type: list[str]
         self.pagesSet = set()
