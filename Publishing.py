@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from util import collectFilenames, filterExt, loadLinesFromTextFile, saveLinesToTextFile
+from util import *
 from HAFEnvironment import HAFEnvironment
 from consts import HAF_PUBLISH_YAML, HAF_YAML
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from util import matchedObsidianLinkToString, saveStringToTextFile
+from util import *
 from LinkNetwork import LinkNetwork
 from igraph import Graph
 from HAFEnvironment import HAFEnvironment

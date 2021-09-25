@@ -4,7 +4,6 @@ from ObsidianNote import ObsidianNote, ObsidianNoteType
 from MarkdownLine import MarkdownLine, MarkdownLines
 from genericpath import exists
 from util import *
-# from util import canonicalizeText, deitalicizeTermsWithDiacritics, extractYaml, loadLinesFromTextFile, saveLinesToTextFile
 
 import os
 import re
@@ -88,19 +87,20 @@ class TranscriptPage(ObsidianNote):
         return cls(sfnPlainMd, textLines)
 
 
+    def collectParagraphs(self):
+        # https://realpython.com/python-walrus-operator/        
+        return [(v[0], v[1], markdownLine) for markdownLine in self.markdownLines if (v := parseParagraph(markdownLine.text)) != (None, None, None)]
+
+
     def findParagraph(self, thePageNr, theParagraphNr) -> MarkdownLine:
-        for markdownLine in self.markdownLines:
-            (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
+        for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
             if (pageNr == thePageNr) and (paragraphNr == theParagraphNr):
                 return markdownLine
         return None
 
 
-    def collectParagraphs(self):
-        return [markdownLine for markdownLine in self.markdownLines if parseParagraph(markdownLine.text) != (None, None, None)]
-
     def applySpacy(self, model: TranscriptModel, force: bool = False):
-        for markdownLine in self.collectParagraphs():
+        for (_, _, markdownLine) in self.collectParagraphs():
             markdownLine.applySpacy(model, force)      
 
 
@@ -108,12 +108,10 @@ class TranscriptPage(ObsidianNote):
 
         def collectTermCounts(term: str) -> list[tuple[int,int, int]]:
             counts = []
-            for markdownLine in self.collectParagraphs():
-                (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
-                assert pageNr
+            for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
                 count = markdownLine.countTerm(term)
                 if count:
-                    counts.append((pageNr, paragraphNr, count))
+                    counts.append( (pageNr, paragraphNr, count) )
             return counts
 
         counts = collectTermCounts(term)
@@ -122,7 +120,10 @@ class TranscriptPage(ObsidianNote):
             blockId = f"{pageNr}-{paragraphNr}"
             linkTarget = f"{self.transcriptName}{targetType}{blockId}"
             link = f"[[{linkTarget}|{blockId}]]"
-
+            if boldLinkTargets and linkTarget in boldLinkTargets:
+                link = '**' + link + '**'
+            if count > 1:
+                link += f" ({count})"
             links.append(link)
         return " · ".join(links)        
 

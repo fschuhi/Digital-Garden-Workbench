@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import Tuple
-from util import extractYaml, loadLinesFromTextFile, saveLinesToTextFile
+from util import *
 from HAFEnvironment import HAFEnvironment
 
 import re

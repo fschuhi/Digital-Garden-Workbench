@@ -2,7 +2,7 @@
 
 import filecmp
 import unittest
-from util import saveStringToTextFile
+from util import *
 
 from copyIndexEntryCitationsToClipboard import copyIndexEntryCitationsToClipboard
 

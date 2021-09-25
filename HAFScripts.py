@@ -14,7 +14,7 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage, createTranscriptsDictionary
 from TranscriptSummaryPage import TranscriptSummaryPage, createNewSummaryPage
 from IndexEntryPage import IndexEntryPage
-from util import basenameWithoutExt, canonicalizeText, convertMatchedObsidianLink, deitalicizeTermsWithDiacritics, filterExt, loadLinesFromTextFile, loadStringFromTextFile, matchedObsidianLinkToString, saveLinesToTextFile, saveStringToTextFile
+from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname
 
 #import sys

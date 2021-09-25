@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from util import loadLinesFromTextFile, parseParagraph
+from util import *
 from HAFEnvironment import HAFEnvironment
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
@@ -23,6 +23,15 @@ class Test_TranscriptPage(unittest.TestCase):
 
         cls.sfnTranscriptMd1 = cls.haf.getTranscriptFilename("Preliminaries Regarding Voice, Movement, and Gesture - Part 1")
         return super().setUpClass()
+
+
+    def test_walrus(self):
+        # https://realpython.com/python-walrus-operator/
+        page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
+        paragraphs = page.collectParagraphs()
+        self.assertTrue(paragraphs[0][0] == 1 and paragraphs[0][1] == 1)
+        self.assertTrue(paragraphs[1][0] == 1 and paragraphs[1][1] == 2)
+        self.assertTrue(paragraphs[5][0] == 2 and paragraphs[5][1] == 1)
 
 
     def test_hasCorrectNumberOfParagraphs(self):
@@ -62,6 +71,8 @@ class Test_TranscriptPage(unittest.TestCase):
             "[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#4-5|4-5]] · "\
             "[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#13-2|13-2]] · "\
             "[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#14-2|14-2]]")
+
+        self.assertEqual(page.collectTermLinks('Devotion'), "[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#2-3|2-3]] (2)")
 
 
     def test_saveToObsidian(self):

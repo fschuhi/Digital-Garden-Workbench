@@ -2,7 +2,7 @@
 
 from typing import Tuple
 from MarkdownLine import MarkdownLine
-from util import basenameWithoutExt, filterExt, loadStringFromTextFile
+from util import *
 from HAFEnvironment import HAFEnvironment
 
 import re

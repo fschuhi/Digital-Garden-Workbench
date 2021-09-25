@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from util import loadYaml
+from util import *
 
 from typing import Tuple
 TPatterns = list[Tuple[str,list[str]]]

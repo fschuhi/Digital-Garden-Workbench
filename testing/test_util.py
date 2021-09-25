@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from util import askRUN, askYesNoCancel, canonicalizeText, deitalicizeTermsWithDiacritics, deitalicizeWithReplace, deitalicizeTerm
+from util import *
 
 
 # *********************************************

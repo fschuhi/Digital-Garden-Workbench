@@ -3,7 +3,7 @@
 from MarkdownLine import MarkdownLine
 from TranscriptIndex import TranscriptIndex
 from genericpath import exists
-from util import basenameWithoutExt, loadLinesFromTextFile, parseParagraph, saveLinesToTextFile
+from util import *
 
 from HAFEnvironment import HAFEnvironment, determineTalkname
 from TranscriptPage import TranscriptPage

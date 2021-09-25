@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tkinter
-from util import parseParagraph, showMessageBox, thisFunctionName
+from util import *
 
 
 def copyIndexEntryCitationsToClipboard(gui = True):

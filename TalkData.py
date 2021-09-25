@@ -2,7 +2,7 @@
 
 from TranscriptModel import TranscriptModel
 import os
-from util import basenameWithoutExt
+from util import *
 
 from HAFEnvironment import HAFEnvironment
 from TranscriptPage import TranscriptPage
