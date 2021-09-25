@@ -154,7 +154,7 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
     def test_createNew(self):
         talkName = determineTalkname(self.transcriptName)
         createNewSummaryPage(talkName, self.haf, self.transcriptModel, "tmp/tmp.md")
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_CreateNew.md"))
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_createNew.md"))
 
 
     def test_collectMissingParagraphHeaderTexts(self):

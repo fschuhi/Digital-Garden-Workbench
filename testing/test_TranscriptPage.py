@@ -27,8 +27,6 @@ class Test_TranscriptPage(unittest.TestCase):
 
     def test_hasCorrectNumberOfParagraphs(self):
         page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
-        paragraphs = [markdownLine for markdownLine in page.markdownLines if markdownLine.text != '']
-        self.assertEqual(len(paragraphs), 85)
         paragraphs = [markdownLine for markdownLine in page.markdownLines if parseParagraph(markdownLine.text) != (None, None, None)]
         self.assertEqual(len(paragraphs), 85)
 

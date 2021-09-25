@@ -46,16 +46,7 @@ class TranscriptPage(ObsidianNote):
             if index < skipAtBeginning:
                 continue
             line = line.strip()
-            if True:
-            #if line:
-                # IMPORTANT: empty lines are not retained as paragraph
-                # TranscriptPage and its paragraphs is an internal object, not meant to reflect visuals
-                if line.startswith("#"):
-                    # tags (and headers, since 22.09.21) are not paragraphs per se 
-                    # ((VABTJZS)) store tags in page
-                    pass
-                else:
-                    textLines.append(line)
+            textLines.append(line)
 
         return cls(sfnTranscriptMd, textLines)
 
@@ -71,6 +62,10 @@ class TranscriptPage(ObsidianNote):
         # we generate trailing blockids for the paragraphs in this method
 
         textLines = []
+        textLines.append("---")
+        textLines.append("obsidianUIMode: preview")
+        textLines.append("---")
+        textLines.append("#Transcript")
         textLines.append('')
 
         nPageIndicators = 0
@@ -85,11 +80,6 @@ class TranscriptPage(ObsidianNote):
                 line = re.sub(r" \^[0-9]+-[0-9]+$", "", line)
                 line = canonicalizeText(line)
                 line = deitalicizeTermsWithDiacritics(line)
-                # if firstLine or line == "#":
-                #     # line w/ a single # marks a new page
-                #     pageNr += 1
-                #     paragraphNr = 0
-                #     firstLine = False                
 
                 if line == "#":
                     pageNr += 1
@@ -121,23 +111,11 @@ class TranscriptPage(ObsidianNote):
         out.append("---")
         out.append("obsidianUIMode: preview")
         out.append("---")
-        out.append("#Transcript")
+        #out.append("#Transcript")
 
         markdownTextLines = self.markdownLines.collectTextLines()
         out.extend(markdownTextLines)
         saveLinesToTextFile(sfnTranscriptMd, out)
-
-    # def saveToObsidian(self, sfnTranscriptMd):
-    #     f = open(sfnTranscriptMd, 'w', encoding='utf-8', newline='\n')        
-    #     # ((GDPHRFQ))
-    #     print("---", file=f)
-    #     print("obsidianUIMode: preview", file=f)
-    #     print("---", file=f)
-    #     print("#Transcript\n", file=f)
-    #     for markdownLine in self.markdownLines:
-    #         print(markdownLine.text + '\n', file=f)
-    #     f.close()
-
 
     def applySpacy(self, model: TranscriptModel, force: bool = False):
         for markdownLine in self.markdownLines:
