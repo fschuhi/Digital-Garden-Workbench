@@ -48,9 +48,8 @@ class IndexEntryPageHeaderParser:
         # ###### Vajra Music - Preliminaries - Part 1 [[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1|(Transcript)]] 🟢 ^some-block-pointer
         # ###### Vajra Music - Preliminaries - Part 1 [[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1|(Transcript)]] ^some-block-pointer
         # ###### [[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1|Vajra Music: Prelims Part 1 (Transcript)]]
-        pattern = r"(?P<level>#+ )(?P<headerText1>[^[]+)?\[\[(?P<transcriptName>[0-9]+ [^|]+)\|(?P<linkText>[^(]+)?\(Transcript\)]\](?P<headerText2>[^^]+)?(\^(?P<trailingBlockId>.+))?"
-        match = re.match(pattern, headerLine)
-        if not match:
+        pattern = r"(?P<level>#+ )(?P<headerText1>[^[]+)?\[\[(?P<transcriptName>[0-9]+ [^|]+)\|(?P<linkText>[^(]+)?\(Transcript\)]\](?P<headerText2>[^^]+)?(\^(?P<trailingBlockId>.+))?"        
+        if not (match := re.match(pattern, headerLine)):
             return False
 
         setMatchField(self, "level", match, lambda m: len(m.strip()))
@@ -83,9 +82,8 @@ class CitationParagraphParser:
         self.citationParagraph = citationParagraph
 
         linkPattern = r"(?P<markdownLink>\[\[(?P<transcriptName>[^#[]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))\|[0-9]+-[0-9]+\]\])"
-        pattern = r"^> *(?P<citation>.+?)((?P<sourceStart>(<p/>)?[_(]+)(?P<sourceText>[^[]*))" + linkPattern + r"(?P<sourceEnd>[_)]+)$"
-        match = re.match(pattern, citationParagraph)
-        if match:
+        pattern = r"^> *(?P<citation>.+?)((?P<sourceStart>(<p/>)?[_(]+)(?P<sourceText>[^[]*))" + linkPattern + r"(?P<sourceEnd>[_)]+)$"        
+        if (match := re.match(pattern, citationParagraph)):
 
             self.citation = match.group('citation')
             self.sourceStart = match.group('sourceStart')
@@ -129,19 +127,15 @@ class IndexEntryPage:
         self.citationLinkTargets = set()
         citationParagraphParser = CitationParagraphParser()
         for line in self.lines:
-            match = citationParagraphParser.matchCitationParagraph(line)
-            if match:
-                #print("")
-                #print(citationParagraphParser.linkTarget)
+            if citationParagraphParser.matchCitationParagraph(line):
                 self.citationLinkTargets.add(citationParagraphParser.linkTarget)
 
 
     def updateCitations(self, transcriptModel: TranscriptModel) -> None:        
         assert self.lines
         citationParagraphParser = CitationParagraphParser()
-        for index, line in enumerate(self.lines):
-            match = citationParagraphParser.matchCitationParagraph(line)
-            if match:
+        for index, line in enumerate(self.lines):            
+            if (match := citationParagraphParser.matchCitationParagraph(line)):
                 oldCitation = match.group('citation')
                 markdown = MarkdownLine(oldCitation)
                 markdown.applySpacy(transcriptModel)
@@ -161,9 +155,7 @@ class IndexEntryPage:
         currentTranscriptName = None
         for index, line in enumerate(self.lines):
 
-            match = headerParser.matchHeaderLine(line)
-            if match:                
-                #print(headerParser.canonicalHeaderLine())
+            if headerParser.matchHeaderLine(line):
                 currentTranscriptName = headerParser.transcriptName
                 self.transcriptsSet.add(currentTranscriptName)
                 self.lines[index] = headerParser.canonicalHeaderLine()

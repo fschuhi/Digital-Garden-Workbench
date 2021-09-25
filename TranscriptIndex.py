@@ -75,8 +75,6 @@ class TranscriptIndex:
                                 # no heading qualification, so just point the pattern to the page
                                 patternsInSection.append(patternListEntry)
                                 self.patternLinks[patternListEntry.lower()] = pageWithMultiplePatterns
-                                #print(pageWithMultiplePatterns)
-                                #self.sectionFromPage[pageWithMultiplePatterns] = section
 
                 else:
                     # just a list entry (pattern), without multiple patterns
