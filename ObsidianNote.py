@@ -10,6 +10,7 @@ import yaml
 from util import extractYaml, loadLinesFromTextFile, loadStringFromTextFile, saveStringToTextFile
 from MarkdownLine import MarkdownLine, MarkdownLines
 from typing import Tuple
+from util import *
 
 
 from enum import Enum
@@ -29,7 +30,15 @@ class ObsidianNote:
     def __init__(self, type: ObsidianNoteType, textLines: list[str]):
         self.type = type # type: ObsidianNoteType
         self.markdownLines = None # type: list[MarkdownLine]
+
+        # IMPORTANT: frontmatter is *not* markdown
+        self.yaml = extractYaml(textLines)
+        if self.yaml:
+            skipAtBeginning = len(self.yaml) + 2
+            textLines = [line for index, line in enumerate(textLines) if index >= skipAtBeginning]
+
         self.assignTextLines(textLines)
+
 
     @classmethod
     def fromTextLines(cls, type: ObsidianNoteType, textLines: list[str]):
@@ -63,29 +72,24 @@ class ObsidianNote:
         self.markdownLines = MarkdownLines(textLines)
 
 
-    def collectYaml(self) -> dict[str,str]:
-        yaml = extractYaml(self.collectTextLines())
-        return yaml if yaml else {}
-    
-    def assignYaml(self, newYaml: dict[str,str]):
-        # could probably use the * splat operator somewhere in this method
-        newLines = []
-        if yaml:
-            newLines.append('---')
-            newLines.extend(yaml.dump(newYaml).splitlines())
-            newLines.append('---')
-        lines = self.collectTextLines()
-        oldYaml = extractYaml(lines)
-        firstAfterYaml = 0 if not oldYaml else len(oldYaml) + 2
-        newLines.extend(lines[firstAfterYaml:])
-        self.assignTextLines(newLines)
-
-
     def collectMarkdownLines(self) -> MarkdownLines:
         return MarkdownLines.fromText(self.text)
 
     def assignMarkdownLines(self, markdownLines: MarkdownLines):
         self.text = markdownLines.asText()
+
+
+    def saveToFile(self, sfn):
+        out = []
+        if self.yaml:
+            out.append("---")
+            out.extend(yaml.dump(self.yaml).splitlines())
+            out.append("---")
+
+        markdownTextLines = self.markdownLines.collectTextLines()
+        out.extend(markdownTextLines)
+        saveLinesToTextFile(sfn, out)
+
 
 
 

@@ -24,14 +24,9 @@ class TranscriptPage(ObsidianNote):
         # even a new transcript page is never empty, e.g. has #Transcript tag at the beginning etc.
         assert textLines
 
-        # IMPORTANT: frontmatter is *not* markdown
-        self.yaml = extractYaml(textLines)
-        if self.yaml:
-            skipAtBeginning = len(self.yaml) + 2
-            textLines = [line for index, line in enumerate(textLines) if index >= skipAtBeginning]
-
         # ObsidianNote generates a MarkdownLines object from the passed list[str]
-        self.markdownLines = None #type: MarkdownLines
+        self.markdownLines = None # type: MarkdownLines
+        self.yaml = None # type: dict[str,str]
         super().__init__(ObsidianNoteType.TRANSCRIPT, textLines)
         assert self.markdownLines
 
@@ -101,33 +96,24 @@ class TranscriptPage(ObsidianNote):
         return None
 
 
-    def saveToObsidian(self, sfnTranscriptMd):
-        out = []
-        if self.yaml:
-            out.append("---")
-            out.extend(yaml.dump(self.yaml).splitlines())
-            out.append("---")
-
-        markdownTextLines = self.markdownLines.collectTextLines()
-        out.extend(markdownTextLines)
-        saveLinesToTextFile(sfnTranscriptMd, out)
-
+    def collectParagraphs(self):
+        return [markdownLine for markdownLine in self.markdownLines if parseParagraph(markdownLine.text) != (None, None, None)]
 
     def applySpacy(self, model: TranscriptModel, force: bool = False):
-        for markdownLine in self.markdownLines:
-            markdownLine.applySpacy(model, force)
+        for markdownLine in self.collectParagraphs():
+            markdownLine.applySpacy(model, force)      
 
 
     def collectTermLinks(self, term: str, boldLinkTargets: set[str] = None, targetType='#') -> str:
 
         def collectTermCounts(term: str) -> list[tuple[int,int, int]]:
             counts = []
-            for markdownLine in self.markdownLines:
+            for markdownLine in self.collectParagraphs():
                 (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
-                if pageNr:
-                    count = markdownLine.countTerm(term)
-                    if count:
-                        counts.append((pageNr, paragraphNr, count))
+                assert pageNr
+                count = markdownLine.countTerm(term)
+                if count:
+                    counts.append((pageNr, paragraphNr, count))
             return counts
 
         counts = collectTermCounts(term)

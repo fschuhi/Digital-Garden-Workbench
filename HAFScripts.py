@@ -76,7 +76,7 @@ def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName,
                 if re.search(r'#Transcript', transcript):
                     page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
                     page.applySpacy(transcriptModel)
-                    page.saveToObsidian(sfnTranscriptMd)
+                    page.saveToFile(sfnTranscriptMd)
 
 
 def replaceLinks(haf_publish, filenames, replaceIndex):
@@ -134,7 +134,7 @@ def replaceLinksInSpecialFiles():
 def convertPlainMarkdownToTranscript(haf: HAFEnvironment, talkName):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
     page = TranscriptPage.fromPlainMarkdownFile(sfnTranscriptMd)
-    page.saveToObsidian(sfnTranscriptMd)
+    page.saveToFile(sfnTranscriptMd)
 
 
 def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
@@ -161,7 +161,7 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 if not os.path.exists(bak):
                     copyfile(sfnTranscriptMd, bak)
 
-                page.saveToObsidian(sfnTranscriptMd)
+                page.saveToFile(sfnTranscriptMd)
 
 
 def deitalicizeTranscript(haf: HAFEnvironment, talkName):

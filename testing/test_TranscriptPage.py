@@ -35,7 +35,7 @@ class Test_TranscriptPage(unittest.TestCase):
         page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
         page.applySpacy(self.transcriptModel)
         #applySpacyToParagraphs(self.transcriptModel, page.paragraphs)
-        page.saveToObsidian("tmp/tmp.md")
+        page.saveToFile("tmp/tmp.md")
         import filecmp
         self.assertTrue(filecmp.cmp("tmp/tmp.md", self.sfnTranscriptMd1))
         self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptPage.test_transcript_1.md"))
@@ -69,7 +69,7 @@ class Test_TranscriptPage(unittest.TestCase):
         page.applySpacy(self.transcriptModel)
 
         # check that TranscriptPage is "idempotent", i.e. exactly the same if saved w/o any changes from the version we loaded
-        page.saveToObsidian("tmp/tmp.md")
+        page.saveToFile("tmp/tmp.md")
         self.assertTrue(filecmp.cmp("tmp/tmp.md", self.sfnTranscriptMd1))
 
 
@@ -81,7 +81,7 @@ class Test_TranscriptPage(unittest.TestCase):
 
         lines = loadLinesFromTextFile(sfnPlainMdInput)
         page = TranscriptPage.fromPlainMarkdownLines(sfnPlainMdCompare, lines)
-        page.saveToObsidian("tmp/tmp.md")        
+        page.saveToFile("tmp/tmp.md")        
         self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnPlainMdCompare))
 
 

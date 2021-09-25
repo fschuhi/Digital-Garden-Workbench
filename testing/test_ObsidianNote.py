@@ -19,16 +19,10 @@ class Test_ObsidianNote(unittest.TestCase):
 
 
     def test_yaml(self):
-        note = self.createNote("Samadhi in Metta Practice")
-
-        yaml = note.collectYaml()
-        self.assertDictEqual(yaml, {'obsidianUIMode': 'preview'})
-        
-        yaml['bla'] = 'heul'
-        self.assertDictEqual(yaml, {'bla': 'heul', 'obsidianUIMode': 'preview'})
-        note.assignYaml(yaml)
-        yaml = note.collectYaml()
-        self.assertDictEqual(yaml, {'bla': 'heul', 'obsidianUIMode': 'preview'})
+        note = self.createNote("Samadhi in Metta Practice")        
+        self.assertDictEqual(note.yaml, {'obsidianUIMode': 'preview'})
+        note.yaml['bla'] = 'heul'
+        self.assertDictEqual(note.yaml, {'bla': 'heul', 'obsidianUIMode': 'preview'})
 
 
     def test_changeLine(self):
