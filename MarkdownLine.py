@@ -282,6 +282,9 @@ class MarkdownLines:
     def __getitem__(self, key):
         return self.markdownLines[key]
 
+    def __len__(self):
+        return len(self.markdownLines)
+
 
     def asText(self) -> str:
         return '\n'.join( [markdownLine.text for markdownLine in self.markdownLines] ) + '\n'

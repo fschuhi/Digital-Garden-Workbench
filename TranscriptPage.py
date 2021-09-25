@@ -20,11 +20,14 @@ from typing import Tuple
 # *********************************************
 
 class TranscriptPage(ObsidianNote):
-    def __init__(self, sfnTranscriptMd: str, markdownLines: list[MarkdownLine]) -> None:
-        #super().__init__(ObsidianNoteType.TRANSCRIPT, )
+    def __init__(self, sfnTranscriptMd: str, textLines: list[str]) -> None:
+
+        # ObsidianNote generates a MarkdownLines object from the passed list[str]
+        super().__init__(ObsidianNoteType.TRANSCRIPT, textLines)
+        assert self.markdownLines
+
         self.sfnTranscriptMd = sfnTranscriptMd
         self.transcriptName = os.path.splitext(os.path.basename(sfnTranscriptMd))[0]
-        self.markdownLines = markdownLines
         self.yaml = None
 
 
@@ -32,7 +35,7 @@ class TranscriptPage(ObsidianNote):
     def fromTranscriptFilename(cls, sfnTranscriptMd)  :
         assert os.path.exists(sfnTranscriptMd), "cannot find " + sfnTranscriptMd
       
-        markdownLines = [] # type: list[markdownLine]
+        textLines = [] # type: list[str]
         lines = loadLinesFromTextFile(sfnTranscriptMd)
         
         cls.yaml = extractYaml(lines)
@@ -50,10 +53,9 @@ class TranscriptPage(ObsidianNote):
                     # ((VABTJZS)) store tags in page
                     pass
                 else:
-                    markdownLine = MarkdownLine(line)
-                    markdownLines.append(markdownLine)
+                    textLines.append(line)
 
-        return cls(sfnTranscriptMd, markdownLines)
+        return cls(sfnTranscriptMd, textLines)
 
     
     @classmethod
@@ -66,7 +68,7 @@ class TranscriptPage(ObsidianNote):
         # IMPORTANT: passed sfnPlainMd is a sfnTranscriptMd, but contains only raw markup
         # we generate trailing blockids for the paragraphs in this method
 
-        markdownLines = []
+        textLines = []
 
         nPageIndicators = 0
         pageNr = 0
@@ -91,13 +93,12 @@ class TranscriptPage(ObsidianNote):
                     # this is a regular line, to be turned into a paragraph
                     paragraphNr += 1
                     paragraphAsIfOnPage  = line + f" ^{pageNr}-{paragraphNr}"
-                    markdownLine = MarkdownLine(paragraphAsIfOnPage)
-                    markdownLines.append(markdownLine)
+                    textLines.append(paragraphAsIfOnPage)
                 
         # we need "#" new page indicators, otherwise the danger is too high that we wreck a properly blockid-indexed transcript
         assert nPageIndicators != 0
 
-        return cls(sfnPlainMd, markdownLines)
+        return cls(sfnPlainMd, textLines)
 
 
     def findParagraph(self, thePageNr, theParagraphNr) -> MarkdownLine:
