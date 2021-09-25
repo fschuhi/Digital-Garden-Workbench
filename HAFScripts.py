@@ -70,8 +70,8 @@ def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName,
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
         if ext == '.md':
-            markupName = basenameWithoutExt(sfnTranscriptMd)
-            if re.match(r'[0-9][0-9][0-9][0-9] ', markupName):
+            markdownName = basenameWithoutExt(sfnTranscriptMd)
+            if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
                 transcript = loadStringFromTextFile(sfnTranscriptMd)
                 if re.search(r'#Transcript', transcript):
                     page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
@@ -131,7 +131,7 @@ def replaceLinksInSpecialFiles():
 # new transcripts
 # *********************************************
 
-def convertPlainMarkupToTranscript(haf: HAFEnvironment, talkName):
+def convertPlainMarkdownToTranscript(haf: HAFEnvironment, talkName):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
     page = TranscriptPage.fromPlainMarkdownFile(sfnTranscriptMd)
     page.saveToObsidian(sfnTranscriptMd)
@@ -143,8 +143,8 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
     filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
-        markupName = basenameWithoutExt(sfnTranscriptMd)
-        if re.match(r'[0-9][0-9][0-9][0-9] ', markupName):
+        markdownName = basenameWithoutExt(sfnTranscriptMd)
+        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
             transcript = loadStringFromTextFile(sfnTranscriptMd)
             if re.search(r'#Transcript', transcript):
                 # it's a regular transcript page - - already indexed
@@ -187,19 +187,19 @@ def createNewTranscriptSummariesForRetreat(haf, retreatName):
     filenames = filterExt(haf.retreatTranscriptFilenameLookup[retreatName], '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
-        markupName = basenameWithoutExt(sfnTranscriptMd)
-        sfnSummaryMd = haf.getSummaryFilename(markupName)
+        markdownName = basenameWithoutExt(sfnTranscriptMd)
+        sfnSummaryMd = haf.getSummaryFilename(markdownName)
         if os.path.exists(sfnSummaryMd):
             summary = loadStringFromTextFile(sfnSummaryMd)
             if re.search(r'#TranscriptSummary', summary):
                 #print(markupName + " - continue")
                 continue
 
-        if re.match(r'[0-9][0-9][0-9][0-9] ', markupName):
+        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
             transcript = loadStringFromTextFile(sfnTranscriptMd)
             if re.search(r'#Transcript', transcript):
                 # we need to deitalize manually
-                talkName = determineTalkname(markupName)
+                talkName = determineTalkname(markdownName)
                 #print(talkName + " - createNew")
                 createNewSummaryPage(talkName, haf, transcriptModel)
             else:
@@ -650,7 +650,7 @@ if __name__ == "__main__":
 
     elif script == 'convertPlainMarkupToTranscript':
         assert talkName
-        convertPlainMarkupToTranscript(haf, talkName)
+        convertPlainMarkdownToTranscript(haf, talkName)
         print("converted")
 
     elif script == 'firstIndexingOfRetreatFolder':

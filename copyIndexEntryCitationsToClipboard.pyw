@@ -19,7 +19,7 @@ def copyIndexEntryCitationsToClipboard(gui = True):
     links = re.split(r"\]\]\*?\*?", data)
     linkPattern = r"\[\[([^#]+)#\^?(([0-9]+)-([0-9]+))\|"
 
-    citationMarkups = []
+    citationMarkdowns = []
     for link in links:
         match = re.search(linkPattern, link)
         if match:
@@ -41,16 +41,16 @@ def copyIndexEntryCitationsToClipboard(gui = True):
 
                 # 22.09.21 changed to header target
                 #citationMarkup = f"> {text} _([[{transcriptName}#^{blockId}|{blockId}]])_"
-                citationMarkup = f"> {text} _([[{transcriptName}#{blockId}|{blockId}]])_"
+                citationMarkdown = f"> {text} _([[{transcriptName}#{blockId}|{blockId}]])_"
 
-                citationMarkups.append(citationMarkup)
+                citationMarkdowns.append(citationMarkdown)
 
-    clipboardText = '\n' + '\n\n'.join(citationMarkups) + '\n'
+    clipboardText = '\n' + '\n\n'.join(citationMarkdowns) + '\n'
     print(clipboardText)
     pyperclip.copy(clipboardText)
 
     if gui:
-        showMessageBox(f"copied {len(citationMarkups)} citations to clipboard ({len(clipboardText)} chars)", thisFunctionName())
+        showMessageBox(f"copied {len(citationMarkdowns)} citations to clipboard ({len(clipboardText)} chars)", thisFunctionName())
 
 
 if __name__ == "__main__":

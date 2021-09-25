@@ -21,6 +21,14 @@ from typing import Tuple
 
 class TranscriptPage(ObsidianNote):
     def __init__(self, sfnTranscriptMd: str, textLines: list[str]) -> None:
+        # even a new transcript page is never empty, e.g. has #Transcript tag at the beginning etc.
+        assert textLines
+
+        # IMPORTANT: frontmatter is *not* markdown
+        self.yaml = extractYaml(textLines)
+        if self.yaml:
+            skipAtBeginning = len(self.yaml) + 2
+            textLines = [line for index, line in enumerate(textLines) if index >= skipAtBeginning]
 
         # ObsidianNote generates a MarkdownLines object from the passed list[str]
         self.markdownLines = None #type: MarkdownLines
@@ -29,25 +37,12 @@ class TranscriptPage(ObsidianNote):
 
         self.sfnTranscriptMd = sfnTranscriptMd
         self.transcriptName = os.path.splitext(os.path.basename(sfnTranscriptMd))[0]
-        self.yaml = None
 
 
     @classmethod
     def fromTranscriptFilename(cls, sfnTranscriptMd)  :
         assert os.path.exists(sfnTranscriptMd), "cannot find " + sfnTranscriptMd
-      
-        textLines = [] # type: list[str]
-        lines = loadLinesFromTextFile(sfnTranscriptMd)
-        
-        cls.yaml = extractYaml(lines)
-        skipAtBeginning = len(cls.yaml) + 2 if cls.yaml else 0
-
-        for index, line in enumerate(lines):
-            if index < skipAtBeginning:
-                continue
-            line = line.strip()
-            textLines.append(line)
-
+        textLines = loadLinesFromTextFile(sfnTranscriptMd)
         return cls(sfnTranscriptMd, textLines)
 
     
@@ -58,7 +53,7 @@ class TranscriptPage(ObsidianNote):
     
     @classmethod
     def fromPlainMarkdownLines(cls, sfnPlainMd, lines: list[str]):
-        # IMPORTANT: passed sfnPlainMd is a sfnTranscriptMd, but contains only raw markup
+        # IMPORTANT: passed sfnPlainMd is a sfnTranscriptMd, but contains only raw markdown
         # we generate trailing blockids for the paragraphs in this method
 
         textLines = []
@@ -108,14 +103,15 @@ class TranscriptPage(ObsidianNote):
 
     def saveToObsidian(self, sfnTranscriptMd):
         out = []
-        out.append("---")
-        out.append("obsidianUIMode: preview")
-        out.append("---")
-        #out.append("#Transcript")
+        if self.yaml:
+            out.append("---")
+            out.extend(yaml.dump(self.yaml).splitlines())
+            out.append("---")
 
         markdownTextLines = self.markdownLines.collectTextLines()
         out.extend(markdownTextLines)
         saveLinesToTextFile(sfnTranscriptMd, out)
+
 
     def applySpacy(self, model: TranscriptModel, force: bool = False):
         for markdownLine in self.markdownLines:

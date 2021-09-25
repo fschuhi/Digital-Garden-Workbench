@@ -23,7 +23,7 @@ class Test_MarkdownSnippet(unittest.TestCase):
         return super().setUpClass()
 
 
-    def test_searchMarkupLink(self):
+    def test_searchMarkdownLink(self):
         match = searchObsidianLink("asdf [[Link1]] wert und [[weiterer Link]]")
         self.assertEqual(match.group('note'), "Link1")
 
@@ -91,13 +91,13 @@ class Test_MarkdownSnippet(unittest.TestCase):
         spans = markdown.collectLinkSpans()
         self.assertListEqual(spans, [(12,21), (35,44)])
 
-        match = markdown.searchMarkupLink()
+        match = markdown.searchMarkdownLink()
         self.assertIsNotNone(match)
         cutText1 = markdown.cutSpan(match.span())
         self.assertEqual(cutText1, "[[Link1]]")
         self.assertEqual(markdown.text, "Das ist ein  und noch ein [[Link2]] das war es.")
 
-        match = markdown.searchMarkupLink()
+        match = markdown.searchMarkdownLink()
         self.assertIsNotNone(match)
         cutText2 = markdown.cutSpan(match.span())
         self.assertEqual(cutText2, "[[Link2]]")
@@ -111,8 +111,8 @@ class Test_MarkdownSnippet(unittest.TestCase):
         self.assertEqual(markdown.text, "Das ist ein [[Link1]] hier noch ein [[Link2]] das war es.")
         self.assertEqual(markdown.footnotes, [('^[ist eine Footnote]', 26)])
 
-        cutText1 = markdown.cutSpan(markdown.searchMarkupLink().span())
-        cutText2 = markdown.cutSpan(markdown.searchMarkupLink().span())
+        cutText1 = markdown.cutSpan(markdown.searchMarkdownLink().span())
+        cutText2 = markdown.cutSpan(markdown.searchMarkdownLink().span())
         self.assertEqual(markdown.text, "Das ist ein  hier noch ein  das war es.")
 
         markdown.restoreFootnotes()

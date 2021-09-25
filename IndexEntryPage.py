@@ -78,11 +78,11 @@ class CitationParagraphParser:
             self.matchCitationParagraph(citationParagraph, targetType)
 
     def matchCitationParagraph(self, citationParagraph, targetType='#') -> re.Match:
-        self.citationParagraph = self.citation = self.sourceStart = self.markupLink = self.transcriptName = self.blockId = self.pageNr = self.paragraphNr = self.sourceEnd = self.linkTarget = None
+        self.citationParagraph = self.citation = self.sourceStart = self.markdownLink = self.transcriptName = self.blockId = self.pageNr = self.paragraphNr = self.sourceEnd = self.linkTarget = None
 
         self.citationParagraph = citationParagraph
 
-        linkPattern = r"(?P<markupLink>\[\[(?P<transcriptName>[^#[]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))\|[0-9]+-[0-9]+\]\])"
+        linkPattern = r"(?P<markdownLink>\[\[(?P<transcriptName>[^#[]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))\|[0-9]+-[0-9]+\]\])"
         pattern = r"^> *(?P<citation>.+?)((?P<sourceStart>(<p/>)?[_(]+)(?P<sourceText>[^[]*))" + linkPattern + r"(?P<sourceEnd>[_)]+)$"
         match = re.match(pattern, citationParagraph)
         if match:
@@ -90,7 +90,7 @@ class CitationParagraphParser:
             self.citation = match.group('citation')
             self.sourceStart = match.group('sourceStart')
             self.sourceText = match.group('sourceText')
-            self.markupLink = match.group('markupLink')
+            self.markdownLink = match.group('markdownLink')
             self.transcriptName = match.group('transcriptName')
             self.blockId = match.group('blockId')
             self.pageNr = int(match.group('pageNr'))

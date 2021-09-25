@@ -73,11 +73,11 @@ class Test_TranscriptPage(unittest.TestCase):
         self.assertTrue(filecmp.cmp("tmp/tmp.md", self.sfnTranscriptMd1))
 
 
-    def test_fromPlainMarkupLines(self):
-        sfnPlainMdInput = "testing/data/Test_TranscriptPage.test_fromPlainMarkupLines.plain.md"
+    def test_fromPlainMarkdownLines(self):
+        sfnPlainMdInput = "testing/data/Test_TranscriptPage.test_fromPlainMarkdownLines.plain.md"
 
         # target is not exactly like the transcript in 2020 Vajra Music/Transcript, because _jhana_ is not deitalicised
-        sfnPlainMdCompare = "testing/data/Test_TranscriptPage.test_fromPlainMarkupLines.compare.md"
+        sfnPlainMdCompare = "testing/data/Test_TranscriptPage.test_fromPlainMarkdownLines.compare.md"
 
         lines = loadLinesFromTextFile(sfnPlainMdInput)
         page = TranscriptPage.fromPlainMarkdownLines(sfnPlainMdCompare, lines)

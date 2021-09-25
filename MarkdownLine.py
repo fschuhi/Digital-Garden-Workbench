@@ -49,7 +49,7 @@ class MarkdownLine:
         return [m.span() for m in self.collectLinkMatches()]
 
 
-    def searchMarkupLink(self, start=0) -> re.Match:
+    def searchMarkdownLink(self, start=0) -> re.Match:
         return searchObsidianLink(self.text[start:])
 
 
