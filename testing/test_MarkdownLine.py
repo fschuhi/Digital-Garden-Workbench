@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-from util import convertMatchedObsidianLink, loadStringFromTextFile, saveLinesToTextFile, saveStringToTextFile, searchObsidianLink
+from TranscriptModel import TranscriptModel
+from TranscriptIndex import TranscriptIndex
+from util import convertMatchedObsidianLink, loadStringFromTextFile, parseParagraph, saveLinesToTextFile, saveStringToTextFile, searchObsidianLink
 from HAFEnvironment import HAFEnvironment
 from MarkdownLine import MarkdownLine
-from consts import HAF_YAML, HAF_YAML_TESTING
+from consts import HAF_YAML, HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 
 import filecmp
@@ -13,6 +15,13 @@ import filecmp
 # *********************************************
 
 class Test_MarkdownSnippet(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.transcriptIndex = TranscriptIndex(RB_YAML_TESTING)
+        cls.transcriptModel = TranscriptModel(cls.transcriptIndex)        
+        return super().setUpClass()
+
 
     def test_searchMarkupLink(self):
         match = searchObsidianLink("asdf [[Link1]] wert und [[weiterer Link]]")
@@ -168,6 +177,43 @@ class Test_MarkdownSnippet(unittest.TestCase):
         text = loadStringFromTextFile(sfnTranscriptMd)
         ms = MarkdownLine(text)
         self.assertListEqual(ms.collectTags(), ['Transcript'])
+
+
+    # originally in test_TranscriptParagraph
+
+    def defaultText(self):
+        return "It's about preliminaries, if you know that word that's used in Tibetan Buddhist circles, preliminary excercises."
+
+    def expectedText(self):
+        return "It's about [[preliminaries]], if you know that word that's used in [[Tibetan Buddhism|Tibetan Buddhist]] circles, preliminary excercises."
+
+    def test_parseParagraph(self):
+        paragraphOnPage = self.defaultText() + " ^5-3"
+        pageNr, paragraphNr, paragraphText = parseParagraph(paragraphOnPage)
+        self.assertEqual(pageNr, 5)
+        self.assertEqual(paragraphNr, 3)
+
+
+    def test_ReplaceIndexEntries(self):
+        # applying Spacy inserts links to index entries
+        markdown = MarkdownLine(self.defaultText())
+        markdown.applySpacy(self.transcriptModel)
+        self.assertEqual(markdown.text, self.expectedText())
+
+
+    def test_ReplaceIndexEntriesWithFootnotes(self):
+        textWithFootnotes = self.defaultText().replace(",", "^[footnote in middle]") + "^[footnote at end]"
+        markdown = MarkdownLine(textWithFootnotes)
+        markdown.applySpacy(self.transcriptModel)
+        self.assertEqual(markdown.text, self.expectedText().replace(",", "^[footnote in middle]") + "^[footnote at end]")
+
+
+    def test_CheckTermCounts(self):
+        markdown = MarkdownLine(self.defaultText())
+        markdown.applySpacy(self.transcriptModel)
+        self.assertEqual(repr(markdown.shownLinks), "['Preliminaries', 'Tibetan Buddhism']")
+        self.assertEqual(markdown.termCounts['Preliminaries'], 2)
+        self.assertEqual(markdown.termCounts['Tibetan Buddhism'], 1)
 
 
 

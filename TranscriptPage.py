@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from MarkdownLine import MarkdownLine, MarkdownLines
 from genericpath import exists
 from util import *
 # from util import canonicalizeText, deitalicizeTermsWithDiacritics, extractYaml, loadLinesFromTextFile, saveLinesToTextFile
@@ -10,7 +11,6 @@ import logging
 import sys
 
 from TranscriptModel import TranscriptModel
-from TranscriptParagraph import TranscriptParagraph, applySpacyToParagraphs
 
 from typing import Tuple
 
@@ -21,10 +21,10 @@ from typing import Tuple
 # *********************************************
 
 class TranscriptPage:
-    def __init__(self, sfnTranscriptMd: str, paragraphs: list[TranscriptParagraph]) -> None:        
+    def __init__(self, sfnTranscriptMd: str, markdownLines: list[MarkdownLine]) -> None:        
         self.sfnTranscriptMd = sfnTranscriptMd
         self.transcriptName = os.path.splitext(os.path.basename(sfnTranscriptMd))[0]
-        self.paragraphs = paragraphs
+        self.markdownLines = markdownLines
         self.yaml = None
 
 
@@ -34,7 +34,7 @@ class TranscriptPage:
         # TODO: do more logging like this (or remove everything :)
         # logging.info(f"TranscriptPage.fromTranscriptMD( {sfnTranscriptMd} )")
       
-        paragraphs = [] # type: list[TranscriptParagraph]
+        markdownLines = [] # type: list[markdownLine]
         lines = loadLinesFromTextFile(sfnTranscriptMd)
         
         cls.yaml = extractYaml(lines)
@@ -52,12 +52,12 @@ class TranscriptPage:
                     # ((VABTJZS)) store tags in page
                     pass
                 else:
-                    paragraph = TranscriptParagraph.fromParagraph(line)
-                    paragraphs.append(paragraph)
+                    markdownLine = MarkdownLine(line)
+                    markdownLines.append(markdownLine)
 
-        return cls(sfnTranscriptMd, paragraphs)
+        return cls(sfnTranscriptMd, markdownLines)
 
-
+    
     @classmethod
     def fromPlainMarkup(cls, sfnPlainMd):
         lines = loadLinesFromTextFile(sfnPlainMd)
@@ -68,7 +68,7 @@ class TranscriptPage:
         # IMPORTANT: passed sfnPlainMd is a sfnTranscriptMd, but contains only raw markup
         # we generate trailing blockids for the paragraphs in this method
 
-        paragraphs = []
+        markdownLines = []
 
         nPageIndicators = 0
         pageNr = 0
@@ -93,22 +93,24 @@ class TranscriptPage:
                     # this is a regular line, to be turned into a paragraph
                     paragraphNr += 1
                     paragraphAsIfOnPage  = line + f" ^{pageNr}-{paragraphNr}"
-                    paragraph = TranscriptParagraph.fromParagraph(paragraphAsIfOnPage)
-                    paragraphs.append(paragraph)
+                    markdownLine = MarkdownLine(paragraphAsIfOnPage)
+                    markdownLines.append(markdownLine)
                 
         # we need "#" new page indicators, otherwise the danger is too high that we wreck a properly blockid-indexed transcript
         assert nPageIndicators != 0
 
-        return cls(sfnPlainMd, paragraphs)
+        return cls(sfnPlainMd, markdownLines)
 
 
-    def findParagraph(self, pageNr, paragraphNr) -> TranscriptParagraph:
-        for paragraph in self.paragraphs:
-            if (paragraph.pageNr == pageNr) and (paragraph.paragraphNr == paragraphNr):
-                return paragraph
+    def findMarkdownLine(self, thePageNr, theParagraphNr) -> MarkdownLine:
+        for markdownLine in self.markdownLines:
+            (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
+            #if (paragraph.pageNr == thePageNr) and (paragraph.paragraphNr == theParagraphNr):
+            if (pageNr == thePageNr) and (paragraphNr == theParagraphNr):
+                return markdownLine
         return None
 
-    
+
     def saveToObsidian(self, sfnTranscriptMd):
         logging.info(f"writing to '{sfnTranscriptMd}'")
         f = open(sfnTranscriptMd, 'w', encoding='utf-8', newline='\n')        
@@ -117,28 +119,22 @@ class TranscriptPage:
         print("obsidianUIMode: preview", file=f)
         print("---", file=f)
         print("#Transcript\n", file=f)
-        for paragraph in self.paragraphs:
-            print(f"{paragraph.text} ^{paragraph.pageNr}-{paragraph.paragraphNr}\n", file=f)
+        for markdownLine in self.markdownLines:
+            print(markdownLine.text + '\n', file=f)
         f.close()
 
 
     def applySpacy(self, model: TranscriptModel, force: bool = False):
-        applySpacyToParagraphs(model, self.paragraphs, force)
+        for markdownLine in self.markdownLines:
+            markdownLine.applySpacy(model, force)
 
-
-    def collectTermCounts(self, term: str) -> list[tuple[TranscriptParagraph, int]]:
-        counts = []
-        for paragraph in self.paragraphs:
-            count = paragraph.countTerm(term)
-            if count:
-                counts.append((paragraph, count))
-        return counts
 
     def collectTermLinks(self, term: str, boldLinkTargets: set[str] = None, targetType='#') -> str:
-        counts = self.collectTermCounts(term)
         links = []
-        for paragraph, count in counts:
-            blockId = f"{paragraph.pageNr}-{paragraph.paragraphNr}"
+        for markdownLine in self.markdownLines:
+            count = markdownLine.countTerm(term)
+            (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
+            blockId = f"{pageNr}-{paragraphNr}"
             linkTarget = f"{self.transcriptName}{targetType}{blockId}"
             link = f"[[{linkTarget}|{blockId}]]"
             if boldLinkTargets and linkTarget in boldLinkTargets:
@@ -147,6 +143,29 @@ class TranscriptPage:
                 link += f" ({count})"
             links.append(link)
         return " · ".join(links)
+
+    # def collectTermCounts(self, term: str) -> list[tuple[TranscriptParagraph, int]]:
+    #     counts = []
+    #     for paragraph in self.paragraphs:
+    #         count = paragraph.markdownLine.countTerm(term)
+    #         if count:
+    #             counts.append((paragraph, count))
+    #     return counts
+
+    # def collectTermLinks2(self, term: str, boldLinkTargets: set[str] = None, targetType='#') -> str:
+    #     counts = self.collectTermCounts(term)
+    #     links = []
+    #     for paragraph, count in counts:
+    #         (pageNr, paragraphNr, _) = parseParagraph(paragraph.markdown.text)
+    #         blockId = f"{pageNr}-{paragraphNr}"
+    #         linkTarget = f"{self.transcriptName}{targetType}{blockId}"
+    #         link = f"[[{linkTarget}|{blockId}]]"
+    #         if boldLinkTargets and linkTarget in boldLinkTargets:
+    #             link = '**' + link + '**'
+    #         if count > 1:
+    #             link += f" ({count})"
+    #         links.append(link)
+    #     return " · ".join(links)
 
 
     # ist das was für HAFEnvironment?

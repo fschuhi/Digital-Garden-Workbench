@@ -43,14 +43,3 @@ class TalkData():
         self.summaryPage.loadSummaryMd()
 
 
-    def createNewSummaryPage(self, model: TranscriptModel):
-        assert self.pdfName is not None
-        assert self.transcriptName is not None
-        assert self.transcriptPage is not None
-        self.transcriptPage.applySpacy(model)
-
-        sfnSummary = self.haf.getSummaryFilename(self.talkName)
-        self.summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummary)
-        self.summaryPage.createNew(self.talkName, self.pdfName, self.transcriptName, self.transcriptPage.paragraphs)
-
-

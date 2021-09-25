@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+from MarkdownLine import MarkdownLine
 from TranscriptIndex import TranscriptIndex
 from genericpath import exists
-from util import basenameWithoutExt, loadLinesFromTextFile, saveLinesToTextFile
+from util import basenameWithoutExt, loadLinesFromTextFile, parseParagraph, saveLinesToTextFile
 
 from HAFEnvironment import HAFEnvironment, determineTalkname
-from TranscriptParagraph import TranscriptParagraph
 from TranscriptPage import TranscriptPage
 import os
 import re
@@ -131,16 +131,18 @@ class TranscriptSummaryPage:
                 # headers on a summary page refer to paragraphs in the transcript
                 pageNr = parser.pageNr
                 paragraphNr = parser.paragraphNr
-                paragraph = transcriptPage.findParagraph(pageNr, paragraphNr)
-                assert paragraph, f"cannot find ^{pageNr}-{paragraphNr}"
-                parser.counts = paragraph.collectShownLinks() if paragraph.shownLinks else ""
+
+                markdownLine = transcriptPage.findMarkdownLine(pageNr, paragraphNr)
+                assert markdownLine, f"cannot find ^{pageNr}-{paragraphNr}"
+                parser.counts = markdownLine.collectShownLinks() if markdownLine.shownLinks else ""
+
                 self.lines[index] = parser.canonicalParagraphCounts(forceSpan=True, targetType=targetType)
                 parser.reset()
 
             elif match == SummaryLineMatch.INDEX_COUNTS:
                 allTermCounts = {} # type: dict[str,int]
-                for paragraph in transcriptPage.paragraphs:
-                    termCounts = paragraph.termCounts
+                for markdownLine in transcriptPage.markdownLines:
+                    termCounts = markdownLine.termCounts
                     for entry, count in termCounts.items():
                         if entry in allTermCounts:
                             allTermCounts[entry] += count
@@ -158,7 +160,7 @@ class TranscriptSummaryPage:
                 parser.reset()
 
 
-    def createNew(self, talkName: str, pdfName: str, transcriptName: str, paragraphs: list[TranscriptParagraph]) -> None:
+    def createNew(self, talkName: str, pdfName: str, transcriptName: str, markdownLines: list[MarkdownLine]) -> None:
         assert not self.lines, "can only create a fresh summary page (use update)"
         newLines = []
         newLines.extend([ \
@@ -169,15 +171,38 @@ class TranscriptSummaryPage:
             "<br/>\n", \
             "### Paragraphs\n", \
             ])
-        for paragraph in paragraphs:
-            blockId = f"{paragraph.pageNr}-{paragraph.paragraphNr}"
-            counts = f": _{paragraph.collectShownLinks()}_" if paragraph.shownLinks else ""
+        for markdownLine  in markdownLines:
+            (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
+            blockId = f"{pageNr}-{paragraphNr}"
+            counts = f": _{markdownLine.collectShownLinks()}_" if markdownLine.shownLinks else ""
             newLines.extend([ \
                 "###### ...", \
                 f"**[[{transcriptName}#^{blockId}|{blockId}]]**{counts}\n", \
                 "---", \
                 ])
         self.lines = newLines
+
+    # def createNew(self, talkName: str, pdfName: str, transcriptName: str, paragraphs: list[TranscriptParagraph]) -> None:
+    #     assert not self.lines, "can only create a fresh summary page (use update)"
+    #     newLines = []
+    #     newLines.extend([ \
+    #         "#TranscriptSummary\n", \
+    #         f"## {talkName}\n", \
+    #         f"Transcript note: [[{transcriptName}]]", \
+    #         f"Transcript PDF: [[{pdfName}.pdf]]", \
+    #         "<br/>\n", \
+    #         "### Paragraphs\n", \
+    #         ])
+    #     for paragraph in paragraphs:
+    #         blockId = f"{paragraph.pageNr}-{paragraph.paragraphNr}"
+    #         markdownLine = paragraph.markdown
+    #         counts = f": _{markdownLine.collectShownLinks()}_" if markdownLine.shownLinks else ""
+    #         newLines.extend([ \
+    #             "###### ...", \
+    #             f"**[[{transcriptName}#^{blockId}|{blockId}]]**{counts}\n", \
+    #             "---", \
+    #             ])
+    #     self.lines = newLines
 
 
     def save(self, sfnSummaryMd = None):
@@ -216,8 +241,10 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptIndex, 
 
     pdfName = basenameWithoutExt(sfnPdf)
     transcriptName = basenameWithoutExt(sfnTranscriptMd)
-    paragraphs = transcriptPage.paragraphs
-    summaryPage.createNew(talkName, pdfName, transcriptName, paragraphs)
+    #paragraphs = transcriptPage.paragraphs
+    #summaryPage.createNew(talkName, pdfName, transcriptName, paragraphs)
+    markdownLines = transcriptPage.markdownLines
+    summaryPage.createNew(talkName, pdfName, transcriptName, markdownLines)
 
     summaryPage.save(sfn)
 

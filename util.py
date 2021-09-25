@@ -337,3 +337,12 @@ def convertMatchedObsidianLink(match, root, filter=None):
     # h.obsidian.md/rob-burbea/2020+Vajra+Music/Transcript+pages/0301+Preliminaries+Regarding+Voice%2C+Movement%2C+and+Gesture+-+Part+1#^1-1
     return f'<a data-href="{link}" href="{root}{encodedNote}{encodedTarget}" class="internal-link" target="_blank" rel="noopener">{shownLink}</a>'
 
+
+def parseParagraph(paragraphOnPage: str):
+    match = re.search(r"^(.+) \^([0-9]+)-([0-9]+)$", paragraphOnPage)
+    if not match:
+        return (None, None, None)
+    paragraphText = match.group(1)
+    pageNr = int(match.group(2))
+    paragraphNr = int(match.group(3))
+    return pageNr, paragraphNr, paragraphText

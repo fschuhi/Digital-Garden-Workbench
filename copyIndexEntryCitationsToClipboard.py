@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tkinter
-from util import showMessageBox, thisFunctionName
+from util import parseParagraph, showMessageBox, thisFunctionName
 
 
 def copyIndexEntryCitationsToClipboard(gui = True):
@@ -35,8 +35,10 @@ def copyIndexEntryCitationsToClipboard(gui = True):
 
                 from TranscriptPage import TranscriptPage
                 page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
-                paragraph = page.findParagraph(pageNr, paragraphNr)
-                text = paragraph.text
+
+                markdownLine = page.findMarkdownLine(pageNr, paragraphNr)
+                (_, _, text) = parseParagraph(markdownLine.text)
+
                 blockId = f"{pageNr}-{paragraphNr}"
 
                 # 22.09.21 changed to header target

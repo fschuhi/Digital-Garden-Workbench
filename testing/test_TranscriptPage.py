@@ -4,7 +4,6 @@ from HAFEnvironment import HAFEnvironment
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptPage import TranscriptPage
-from TranscriptParagraph import applySpacyToParagraphs
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 
@@ -24,13 +23,14 @@ class Test_TranscriptPage(unittest.TestCase):
     def test_hasCorrectNumberOfParagraphs(self):
         sfnTranscriptMd = self.haf.getTranscriptFilename("Preliminaries Regarding Voice, Movement, and Gesture - Part 1")
         page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
-        self.assertEqual(len(page.paragraphs), 85)
+        self.assertEqual(len(page.markdownLines), 85)
 
 
     def test_applySpacyToParagraphs(self):
         sfnTranscriptMd = self.haf.getTranscriptFilename("Preliminaries Regarding Voice, Movement, and Gesture - Part 1")
         page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
-        applySpacyToParagraphs(self.transcriptModel, page.paragraphs)
+        page.applySpacy(self.transcriptModel)
+        #applySpacyToParagraphs(self.transcriptModel, page.paragraphs)
         page.saveToObsidian("tmp/tmp.md")
         import filecmp
         self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnTranscriptMd))

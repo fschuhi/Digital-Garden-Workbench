@@ -5,7 +5,6 @@ import os
 
 from LinkNetwork import LinkNetwork
 from MarkdownLine import MarkdownLine
-from TranscriptParagraph import applySpacyToParagraphs
 from Publishing import Publishing
 from TranscriptModel import TranscriptModel
 from shutil import copyfile
@@ -76,7 +75,7 @@ def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName,
                 transcript = loadStringFromTextFile(sfnTranscriptMd)
                 if re.search(r'#Transcript', transcript):
                     page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
-                    applySpacyToParagraphs(transcriptModel, page.paragraphs)
+                    page.applySpacy(transcriptModel)
                     page.saveToObsidian(sfnTranscriptMd)
 
 
