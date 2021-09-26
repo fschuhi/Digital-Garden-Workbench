@@ -263,7 +263,8 @@ def updateAlphabeticalIndex(haf: HAFEnvironment, transcriptIndex: TranscriptInde
     for c, l in groupby:
         sortedPagesByFirstChar[c] = l
 
-    indexMd = r"s:\work\Python\HAF\_Markdown\Rob Burbea\Index.md"
+    #indexMd = r"s:\work\Python\HAF\_Markdown\Rob Burbea\Index.md"
+    indexMd = haf.vault.pathnames(r"**/Index.md")[0]
 
     lines = loadLinesFromTextFile(indexMd)
     for index, line in enumerate(lines):

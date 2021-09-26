@@ -192,6 +192,7 @@ Buddhology:
       - push-pull
       - the push, the pull
       - pushing and pulling
+      - graspring
   - Dakini:
       - ḍākinī
       - consort
@@ -281,12 +282,13 @@ Buddhology:
       - sense pleasures
       - uddhata
       - uddhacca
-      - chanda
       - chandaraga
       - hitacchanda
       - restlessness
       - ill will
       - ill-will
+  - Chanda:
+      - noble aspiration
   - Human Relationship:
       - human relationships
   - Ignorance:
@@ -401,6 +403,7 @@ Buddhology:
       - retreats
       - meditation retreat
       - meditation retreats
+      - meditation centre
       - retreat setting
       - on retreat
       - on personal retreat
@@ -891,7 +894,11 @@ Robology:
   - Meaningfulness:
       - imaginal meaningfulness
   - Measuring mind
-  - Mode of mind
+  - Mode of mind:
+      - modes of mind
+  - Mind state:
+      - mind states
+      - present mind state
   - Music:
       - music school
       - Jazz: .

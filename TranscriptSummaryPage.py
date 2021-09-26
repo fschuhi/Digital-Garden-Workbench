@@ -135,12 +135,12 @@ class TranscriptSummaryPage:
             elif match == SummaryLineMatch.INDEX_COUNTS:
                 allTermCounts = {} # type: dict[str,int]
                 for markdownLine in transcriptPage.markdownLines:
-                    termCounts = markdownLine.termCounts
-                    for entry, count in termCounts.items():
-                        if entry in allTermCounts:
-                            allTermCounts[entry] += count
-                        else:
-                            allTermCounts[entry] = count
+                    if (termCounts := markdownLine.termCounts):
+                        for entry, count in termCounts.items():
+                            if entry in allTermCounts:
+                                allTermCounts[entry] += count
+                            else:
+                                allTermCounts[entry] = count
 
                 # resulting tuples is sorted descending by counts, for each count ascending by index entry
                 tuples = sorted(allTermCounts.items(), key=lambda x: x[0])

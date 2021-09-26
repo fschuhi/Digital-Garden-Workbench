@@ -2,8 +2,8 @@
 
 import unittest
 import os
-from consts import HAF_YAML_TESTING, VAJRA_MUSIC_TESTING
 from HAFEnvironment import HAFEnvironment, determineTalkname
+from consts import HAF_YAML_TESTING, VAJRA_MUSIC_TESTING
 
 
 # *********************************************
@@ -51,6 +51,11 @@ class Test_HAFEnvironment(unittest.TestCase):
         retreatName = os.path.basename(VAJRA_MUSIC_TESTING)
         filenames = self.haf.collectTranscriptFilenames(retreatName)
         self.assertEqual(len(filenames), 2)
+
+
+    def test_indexFile(self):
+        #print(self.haf.vault.pathnames(r"**\Index.md"))
+        self.assertTrue(len(self.haf.vault.pathnames(r"**\Index.md")) == 1)
 
 
 if __name__ == "__main__":
