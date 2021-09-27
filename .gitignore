@@ -7,7 +7,3 @@ __pycache__/
 *.bat
 ~$*
 *.pyc
-*.bak.yaml
-
-Dropbox-audio-*
-Dropbox-Papers-*
