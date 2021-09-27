@@ -448,6 +448,7 @@ def transferFilesToPublish():
 
     publishing.copyFile("Images/digital-garden-big.png")
     publishing.copyFile("Images/digital-garden-small.png")
+    publishing.copyFile("Images/Rob Burbea.png")
     publishing.copyFile("Images/link.png")
     
     # we do not touch publish.css

@@ -7,7 +7,7 @@ from HAFEnvironment import HAFEnvironment
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptPage import TranscriptPage
-from consts import HAF_YAML, HAF_YAML_TESTING, RB_YAML, RB_YAML_TESTING, VAJRA_MUSIC
+from consts import HAF_YAML, HAF_YAML_TESTING, RB_YAML, RB_YAML_TESTING
 import unittest
 import os
 import re
@@ -37,6 +37,9 @@ class Test_LinkNetwork(unittest.TestCase):
             retainShown = note != 'Index'
             result.append('  ' + matchedObsidianLinkToString(match, 'blabla', retainShown))
         self.assertListEqual(result, [ \
+            "Index", \
+            "  [[Brahmaviharas]]", \
+            "  [[blabla]]", \
             "Samadhi in Metta Practice", \
             "  [[Brahmaviharas]]", \
             "  [[blabla|Brahmaviharas]]", \
@@ -90,7 +93,7 @@ class Test_LinkNetwork(unittest.TestCase):
 
         import time
         tic = time.perf_counter()
-        transcriptFilenames = self.haf.collectTranscriptFilenames(VAJRA_MUSIC)
+        transcriptFilenames = self.haf.collectTranscriptFilenames(VAJRA_MUSIC_TESTING)
         for filename in transcriptFilenames:
             termCounts = dict()
             page = TranscriptPage.fromTranscriptFilename(filename)
