@@ -28,40 +28,59 @@ class Publishing:
         self.hafPublish = HAFEnvironment(HAF_PUBLISH_YAML)
 
 
-    def mirrorDir(self, funcSource, funcTarget, ext='.md'):
+    def mirrorDir(self, source, target, ext='.md'):
+        if not (os.path.isdir(target) and os.path.isdir(source)):
+            return
+
+        nAdded = 0
+
+        filenamesToDelete = [f for f in collectFilenames(target) if os.path.isfile(f)]
+        for filename in filenamesToDelete:
+            os.remove(filename)
+
+        filenames = collectFilenames(source)
+        if ext:
+            filenames = filterExt(filenames, ext)
+        for filename in filenames:
+            # copy2 because want to copy all metadata, otherwise no automatic pickup by the Obsidian display frontend
+            # would also work w/ copy and copyfile, though
+            #print(filename, target)
+            shutil.copy(filename, target)
+            nAdded += 1
+
+        return nAdded
+
+
+    def mirrorRetreatsDir(self, funcSource, funcTarget, ext='.md'):
+        nAdded = 0
+
         for retreatName in self.hafWork.retreatNames:            
-            if not os.path.isdir(source := funcSource(retreatName)):
+            source = funcSource(retreatName)
+            if not os.path.isdir(source):
                 continue
 
-            if os.path.isdir(target := funcTarget(retreatName)):
-                filenamesToDelete = [f for f in collectFilenames(target) if os.path.isfile(f)]
-                for filename in filenamesToDelete:
-                    os.remove(filename)
+            target = funcTarget(retreatName)
+            assert os.path.isdir(target)
+            nAdded += self.mirrorDir(source, target, ext)
 
-            filenames = collectFilenames(source)
-            if ext:
-                filenames = filterExt(filenames, ext)
-            for filename in filenames:
-                # copy2 because want to copy all metadata, otherwise no automatic pickup by the Obsidian display frontend
-                # would also work w/ copy and copyfile, though
-                shutil.copy2(filename, target)
+        return nAdded
 
 
     def mirrorRetreatFiles(self):
         source = self.hafWork
         target = self.hafPublish
         # we intentionally disregard Audio
-        self.mirrorDir(lambda r: source.retreatFolder(r), lambda r: target.retreatFolder(r))
-        self.mirrorDir(lambda r: source.pdfFolder(r), lambda r: target.pdfFolder(r), '.pdf')
-        self.mirrorDir(lambda r: source.imagesFolder(r), lambda r: target.imagesFolder(r), None)
-        self.mirrorDir(lambda r: source.transcriptsFolder(r), lambda r: target.transcriptsFolder(r))
-        self.mirrorDir(lambda r: source.summariesFolder(r), lambda r: target.summariesFolder(r))
+        self.mirrorRetreatsDir(lambda r: source.retreatFolder(r), lambda r: target.retreatFolder(r))
+        self.mirrorRetreatsDir(lambda r: source.pdfFolder(r), lambda r: target.pdfFolder(r), '.pdf')
+        self.mirrorRetreatsDir(lambda r: source.imagesFolder(r), lambda r: target.imagesFolder(r), None)
+        self.mirrorRetreatsDir(lambda r: source.transcriptsFolder(r), lambda r: target.transcriptsFolder(r))
+        self.mirrorRetreatsDir(lambda r: source.summariesFolder(r), lambda r: target.summariesFolder(r))
 
 
     def mirrorIndex(self):
         source = self.hafWork
         target = self.hafPublish
-        self.mirrorDir(lambda d: source.dirIndex, lambda d: target.dirIndex)
+        self.mirrorDir(source.dirIndex, target.dirIndex)
 
 
     def copyFile(self, source, target=None):

@@ -1,5 +1,5 @@
 # Digital Workbench for Rob Burbea's Digital Garden
-This is a collection of Python scripts for the [Digital Garden of Rob Burbea's Teachings](http://publish.obsidian.md/rob-burbea (from here on call just "Digital Garden".)
+This is a collection of Python scripts for the [Digital Garden of Rob Burbea's Teachings](http://publish.obsidian.md/rob-burbea] (from here on call just "Digital Garden".)
 
 Certain workbench scripts refer to "HAF", the [_Hermes Amara Foundation_](mailto:hermes.amara@gmail.com). HAF is a sangha-led organisation that was established to preserve and develop [Rob](https://publish.obsidian.md/rob-burbea/Rob+Burbea)'s vast Dharma teaching legacy. HAF holds the rights to all of Rob's talks. You are invited to use the workbench for your own purposes. Note, though, that the workbench is very much in flux and heavily geared to be used for just one task: managing the Digital Garden.
 
@@ -15,13 +15,13 @@ Internally, the Obsidian desktop application organizes the notes in "vaults". In
 
 The contents of the publish vault can be found [here](https://github.com/fschuhi/rob-burbea-digital-garden-publish).
 
-The workbench is a command line tool to help the "gardening", see the page ["Gardening"](https://publish.obsidian.md/rob-burbea/Gardening) in the Digital Garden.
-
-The command line can be accessed with 
+The workbench is a command line tool to help the ["gardening"](https://publish.obsidian.md/rob-burbea/Gardening):
 
 ```console
 S:\python HAFScripts.py
 ```
+
+For the possible switches see the *.py
 
 Among others, the workbench is used for the following tasks:
 * copy notes from the work to the publish vault
@@ -33,7 +33,4 @@ Among others, the workbench is used for the following tasks:
 * create skeleton notes for talk summaries
 * handle diacritics
 * transform tools to transformation tools to make the markdown uniform across all talks
-
-
-
 
