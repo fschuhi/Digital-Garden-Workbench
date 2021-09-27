@@ -143,10 +143,8 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
     filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
-        markdownName = basenameWithoutExt(sfnTranscriptMd)
-        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
-            transcript = loadStringFromTextFile(sfnTranscriptMd)
-            if re.search(r'#Transcript', transcript):
+        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName := basenameWithoutExt(sfnTranscriptMd)): 
+            if re.search(r'#Transcript', transcript := loadStringFromTextFile(sfnTranscriptMd)):
                 # it's a regular transcript page - - already indexed
                 pass
             else:
@@ -156,9 +154,8 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 page = TranscriptPage.fromPlainMarkdownLines(sfnTranscriptMd, lines)
 
                 # create backup (if it doesn't exist yet)
-                from shutil import copyfile
-                bak = filenameWithoutExt + '.bak'
-                if not os.path.exists(bak):
+                from shutil import copyfile                
+                if not os.path.exists(bak := filenameWithoutExt + '.bak'):
                     copyfile(sfnTranscriptMd, bak)
 
                 page.saveToFile(sfnTranscriptMd)
@@ -195,9 +192,8 @@ def createNewTranscriptSummariesForRetreat(haf, retreatName):
                 #print(markupName + " - continue")
                 continue
 
-        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
-            transcript = loadStringFromTextFile(sfnTranscriptMd)
-            if re.search(r'#Transcript', transcript):
+        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):            
+            if re.search(r'#Transcript', transcript := loadStringFromTextFile(sfnTranscriptMd)):
                 # we need to deitalize manually
                 talkName = determineTalkname(markdownName)
                 #print(talkName + " - createNew")
@@ -267,11 +263,9 @@ def updateAlphabeticalIndex(haf: HAFEnvironment, transcriptIndex: TranscriptInde
     indexMd = haf.vault.pathnames(r"**/Index.md")[0]
 
     lines = loadLinesFromTextFile(indexMd)
-    for index, line in enumerate(lines):
-        match = re.match(r"#+ (?P<char>[A-Z]) *$", line)
-        if match:
-            char = match.group('char')
-            if char in sortedPagesByFirstChar:
+    for index, line in enumerate(lines):        
+        if (match := re.match(r"#+ (?P<char>[A-Z]) *$", line)):            
+            if (char := match.group('char')) in sortedPagesByFirstChar:
 
                 # contains "Einstein, Albert"
                 pages = sortedPagesByFirstChar[char]
@@ -365,9 +359,8 @@ def showOrphansInRBYaml(haf: HAFEnvironment, network: LinkNetwork, transcriptInd
     notes = list(transcriptIndex.pagesSet - set(transcriptIndex.sections['ignored']))
     for note in sorted(notes):
         noteKey = note.lower()
-        indexMdExists = noteKey in indexEntryNameSet
-        mdExists = noteKey in allNotesSet
-        if mdExists:
+        indexMdExists = noteKey in indexEntryNameSet        
+        if (mdExists := noteKey in allNotesSet):
             hasSameName = network.getActualNoteNameByNote(note) == note
             sfnPage = network.getFilenameByNote(noteKey)
             assert os.path.exists(sfnPage)
@@ -379,13 +372,6 @@ def showOrphansInRBYaml(haf: HAFEnvironment, network: LinkNetwork, transcriptInd
         
         backlinks = network.getBacklinksByNote(noteKey)
         hasBacklinks = len(backlinks) > 0
-        #if noteKey == 'eight worldly conditions':
-        if False:
-            for linkingNote in backlinks:
-                actualLinkingNoteName = network.getActualNoteNameByNote(linkingNote)
-                matches = network.getLinkMatchesByNote(linkingNote, noteKey)
-                for match in matches:
-                    outLines.append(actualLinkingNoteName + ": " + match.group('note'))
 
         if indexMdExists and hasSameName and hasBacklinks:
             pass
@@ -413,9 +399,8 @@ def replaceNoteLink(haf: HAFEnvironment, network: LinkNetwork, args):
         matches = network.getLinkMatchesByNote(linkingNote, oldNote)
         retainShown = linkingNote != 'index'
         markdown.replaceMatches(matches, lambda match: matchedObsidianLinkToString(match, newNote, retainShown))
-        # sfn = os.path.join("tmp", os.path.basename(network.getFilenameByNote(linkingNote)))
-        newText = markdown.text
-        if newText == oldText:
+        # sfn = os.path.join("tmp", os.path.basename(network.getFilenameByNote(linkingNote)))        
+        if (newText := markdown.text) == oldText:
             unchanged += 1
             pass
         else:
@@ -626,9 +611,8 @@ if __name__ == "__main__":
         filenames = filterExt(haf.allFiles(), '.md')
         filenames = [filename for filename in filenames if not re.search(r'Amazon Kindle|\(Kanban\)', filename)]
         for filename in filenames:
-            found = False
-            lines = loadLinesFromTextFile(filename)
-            for line in lines:
+            found = False            
+            for line in (lines := loadLinesFromTextFile(filename)):
                 if re.match(r"^" + '#'*int(level) + ' ', line):
                     if not found:
                         print(filename)
@@ -636,12 +620,10 @@ if __name__ == "__main__":
                     print(line)
 
     elif script == 'addH':
-        transcriptFilenames = haf.collectTranscriptFilenames()
-        for filename in transcriptFilenames:
-            lines = loadLinesFromTextFile(filename)
-            for index, line in enumerate(lines):
-                match = re.search(r" \^(?P<blockid>[0-9]+-[0-9]+)$", line)
-                if match:
+        
+        for filename in (transcriptFilenames := haf.collectTranscriptFilenames()):
+            for index, line in enumerate(lines := loadLinesFromTextFile(filename)):
+                if (match := re.search(r" \^(?P<blockid>[0-9]+-[0-9]+)$", line)):
                     blockid = match.group('blockid')
                     lines[index-1] = '###### ' + blockid
             #sfnSave = os.path.join("tmp/h", os.path.basename(filename))

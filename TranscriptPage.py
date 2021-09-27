@@ -79,6 +79,10 @@ class TranscriptPage(ObsidianNote):
                     paragraphNr += 1
                     paragraphAsIfOnPage  = line + f" ^{pageNr}-{paragraphNr}"
                     textLines.append(paragraphAsIfOnPage)
+
+                    # replace the empty line immediately before the paragraph w/ the target header
+                    assert textLines[-2] == ''
+                    textLines[-2] = f"###### ^{pageNr}-{paragraphNr}"
                 
         # we need "#" new page indicators, otherwise the danger is too high that we wreck a properly blockid-indexed transcript
         assert nPageIndicators != 0

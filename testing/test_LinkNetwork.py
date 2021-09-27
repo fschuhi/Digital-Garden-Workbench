@@ -7,7 +7,7 @@ from HAFEnvironment import HAFEnvironment
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
 from TranscriptPage import TranscriptPage
-from consts import HAF_YAML, HAF_YAML_TESTING, RB_YAML, RB_YAML_TESTING
+from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 import os
 import re
