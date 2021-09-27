@@ -430,6 +430,7 @@ def transferFilesToPublish():
     publishing.copyFile("Rob Burbea/Digital Garden.md", "/")
     publishing.copyFile("Rob Burbea/Gardening.md", "/")
     publishing.copyFile("Rob Burbea/Diacritics.md", "/")
+    publishing.copyFile("Rob Burbea/Rob Burbea.md", "/")
 
     publishing.copyFile("Images/digital-garden-big.png")
     publishing.copyFile("Images/digital-garden-small.png")
