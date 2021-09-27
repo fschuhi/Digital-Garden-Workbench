@@ -417,13 +417,17 @@ def replaceNoteLink(haf: HAFEnvironment, network: LinkNetwork, args):
 # *********************************************
 
 def transferFilesToPublish():
+    #print("0")
     publishing = Publishing()
 
     # each retreat is mirrored, for some subdirs also paying attention to file extensions
+    #print("1")
     publishing.mirrorRetreatFiles()
 
+    #print("2")
     publishing.mirrorIndex()
 
+    #print("3")
     publishing.copyFile("Rob Burbea/Retreats.md", "/")
     publishing.copyFile("Rob Burbea/Index.md", "/")
     publishing.copyFile("Brainstorming/NoteStar.md", "/")
@@ -438,10 +442,11 @@ def transferFilesToPublish():
     publishing.copyFile("Images/link.png")
     
     # we do not touch publish.css
-
+    #print("4")
     # now all files are exact copies of the _Markdown vault
     # need to convert audio links and admonitions
     publishing.convertAllMarkdownFiles()
+    #print("5")
 
 
 def convertAllMarkdownFiles():
@@ -633,7 +638,7 @@ if __name__ == "__main__":
 
 # creating files
 
-    elif script == 'convertPlainMarkupToTranscript':
+    elif script == 'convertPlainMarkdownToTranscript':
         assert talkName
         convertPlainMarkdownToTranscript(haf, talkName)
         print("converted")
