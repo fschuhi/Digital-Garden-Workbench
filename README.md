@@ -28,6 +28,7 @@ Among others, the workbench is used for the following tasks:
 * transcribe certain parts of notes to manage the UX of the Digital Garden
 * manage the main keyword index with its index entry files
 * generate link sections (for transcript pages, for paragraphs, for citations on index entry pages)
+* manage breadcrumbs in summaries
 * paginate new talk transcripts
 * initialize new talk series
 * create skeleton notes for talk summaries

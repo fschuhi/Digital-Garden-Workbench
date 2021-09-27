@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from ObsidianNote import ObsidianNote, ObsidianNoteType
 import re
 import os
 
@@ -15,7 +16,7 @@ from TranscriptPage import TranscriptPage, createTranscriptsDictionary
 from TranscriptSummaryPage import TranscriptSummaryPage, createNewSummaryPage
 from IndexEntryPage import IndexEntryPage
 from util import *
-from HAFEnvironment import HAFEnvironment, determineTalkname
+from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
 
 #import sys
 #import codecs
@@ -413,6 +414,45 @@ def replaceNoteLink(haf: HAFEnvironment, network: LinkNetwork, args):
 
 
 # *********************************************
+# breadcrumbs
+# *********************************************
+
+def updateBreadcrumbsInSummaries():
+    for retreatName in haf.retreatNames:
+        transcripts = haf.collectTranscriptFilenames(retreatName)
+        assert transcripts
+        for index, transcript in enumerate(transcripts):
+            talkname = talknameFromFilename(transcript)
+            summary = haf.getSummaryFilename(talkname)
+            if not summary:
+                continue
+            note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, summary)
+            for markdownLine in note.markdownLines:
+                if re.search(r"[⬅️⬆️➡️🡄🡅🡆]", markdownLine.text):
+                    if len(transcripts) == 1:
+                        pass
+                    else:
+                        if index == 0:
+                            prevSummary = None
+                            nextSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[1])) if len(transcripts) > 1 else None
+                        elif index == len(transcripts)-1:
+                            prevSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[-2])) if len(transcripts) > 1 else None
+                            nextSummary = None
+                        else:
+                            prevSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[index-1]))
+                            nextSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[index+1]))
+                            pass
+
+                        prevLink = f"[[{basenameWithoutExt(prevSummary)}|{basenameWithoutExt(prevSummary)} 🡄]]" if prevSummary else ''
+                        nextLink = f"[[{basenameWithoutExt(nextSummary)}|🡆 {basenameWithoutExt(nextSummary)}]]" if nextSummary else ''
+                        
+                        newline = f"{prevLink} | [[{retreatName}|🡅]] | {nextLink}"
+                        markdownLine.text = newline
+                    
+            note.saveToFile(summary)
+
+
+# *********************************************
 # Publishing
 # *********************************************
 
@@ -651,7 +691,11 @@ if __name__ == "__main__":
     elif script == 'createNewSummaries':
         assert retreatName
         createNewTranscriptSummariesForRetreat(haf, retreatName)
-        print('created')
+        print("created")
+
+    elif script == 'updateBreadcrumbs':
+        updateBreadcrumbsInSummaries()
+        print("updated")
 
 
     
