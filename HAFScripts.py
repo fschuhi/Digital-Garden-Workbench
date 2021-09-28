@@ -492,7 +492,7 @@ def updateParagraphsListPages(haf: HAFEnvironment):
     for sfnSummaryMd in summaries:
         talkname = talknameFromFilename(sfnSummaryMd)        
         note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, sfnSummaryMd)
-        createPage = note.getYamlValue('ParagraphsListPageb')
+        createPage = note.getYamlValue('ParagraphsListPage')
         if (createPage is None) or createPage:
             pageLines = collectParagraphsListPage(talkname)
             sfn = haf.createListFilename(talkname)
@@ -590,8 +590,7 @@ if __name__ == "__main__":
     if script in ['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml', 'replaceNoteLink']:
         network = LinkNetwork(haf)
 
-
-    elif script == 'transferFilesToPublish':
+    if script == 'transferFilesToPublish':
         transferFilesToPublish()
         replaceLinksInAllSummaries()
         replaceLinksInAllRootFilenames()
@@ -601,7 +600,7 @@ if __name__ == "__main__":
 
     # Kanban stuff
 
-    if script == 'addMissingSummaryCards':
+    elif script == 'addMissingSummaryCards':
         assert retreatName
         sfnKanban = r"S:\Dropbox\Papers\_Markdown\Rob Burbea\Talk summaries (Kanban).md"
         addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf, retreatName)
@@ -752,5 +751,8 @@ if __name__ == "__main__":
 
     elif script == 'updateParagraphsLists':
         updateParagraphsListPages(haf)
+
+    else:
+        print("unknown script")
 
     
