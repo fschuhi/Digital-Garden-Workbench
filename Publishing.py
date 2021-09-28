@@ -75,6 +75,7 @@ class Publishing:
         self.mirrorRetreatsDir(lambda r: source.imagesFolder(r), lambda r: target.imagesFolder(r), None)
         self.mirrorRetreatsDir(lambda r: source.transcriptsFolder(r), lambda r: target.transcriptsFolder(r))
         self.mirrorRetreatsDir(lambda r: source.summariesFolder(r), lambda r: target.summariesFolder(r))
+        self.mirrorRetreatsDir(lambda r: source.listsFolder(r), lambda r: target.listsFolder(r))
 
 
     def mirrorIndex(self):

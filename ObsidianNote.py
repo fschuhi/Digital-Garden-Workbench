@@ -62,6 +62,10 @@ class ObsidianNote:
         self.markdownLines = MarkdownLines.fromText(text)
 
 
+    def getYamlValue(self, key: str) -> str:
+        if self.yaml and (key in self.yaml):
+            return self.yaml[key]
+
     def collectTextLines(self) -> list[str]:
         return self.markdownLines.collectTextLines()
     

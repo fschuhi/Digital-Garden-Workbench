@@ -17,6 +17,7 @@ from TranscriptSummaryPage import TranscriptSummaryPage, createNewSummaryPage
 from IndexEntryPage import IndexEntryPage
 from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
+import pyperclip
 
 #import sys
 #import codecs
@@ -453,6 +454,54 @@ def updateBreadcrumbsInSummaries():
 
 
 # *********************************************
+# List folder
+# *********************************************
+
+def collectParagraphsListPage(talkname) -> list[str]:
+    paragraphs = []
+    paragraphs.append("---")
+    paragraphs.append("obsidianUIMode: preview")
+    paragraphs.append("---")
+    paragraphs.append(f"### Paragraphs in [[{talkname}]]")
+    sfnSummaryMd = haf.getSummaryFilename(talkname)
+    summary = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
+    summary.loadSummaryMd()
+    for line in summary.lines:
+        if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", line)):
+            description = match.group("description") # type: str
+            headerLink = re.sub(r"[.,/:?=()]", "", description)
+            level = match.group('level')
+            if len(level) == 5:
+                fullstop = '' if re.search(r"[.?!)]$",description) else '.'
+                link = f"- [[{talkname}#{headerLink}|{description}{fullstop}]]"
+                paragraphs.append(link)
+            elif len(level) >= 3:
+                paragraphs.append(line)
+            else:
+                pass    
+    return paragraphs
+
+
+def collectParagraphsListPageToClipboard(talkname):
+    pageLines = collectParagraphsListPage()
+    pyperclip.copy('\n'.join(pageLines))        
+
+
+def updateParagraphsListPages(haf: HAFEnvironment):
+    summaries = haf.collectSummaryFilenames()
+    for sfnSummaryMd in summaries:
+        talkname = talknameFromFilename(sfnSummaryMd)        
+        note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, sfnSummaryMd)
+        createPage = note.getYamlValue('ParagraphsListPage')
+        if (createPage is None) or createPage:
+            pageLines = collectParagraphsListPage(talkname)
+            sfn = haf.createListFilename(talkname)
+            saveLinesToTextFile(sfn, pageLines)
+        else:
+            print("skipped", talkname)
+
+
+# *********************************************
 # Publishing
 # *********************************************
 
@@ -527,7 +576,7 @@ if __name__ == "__main__":
     #indexEntry = args.indexEntry if args.indexEntry else 'Energy Body'
 
     retreatName = args.retreatName
-    talkName = args.talkName
+    talkname = args.talkName
     indexEntry = args.indexEntry
     level = args.level
 
@@ -570,8 +619,8 @@ if __name__ == "__main__":
         print("reindexed")
 
     elif script == 'updateSummary':
-        if talkName:
-            updateSummary(haf, talkName, transcriptModel)
+        if talkname:
+            updateSummary(haf, talkname, transcriptModel)
             print(f"updated talk summary")
         else:
             if retreatName:
@@ -581,13 +630,13 @@ if __name__ == "__main__":
             else:
                 #talkNames = list(haf.summaryFilenameByTalk.keys())
                 talkNames = haf.collectSummaryTalknames()
-            for talkName in talkNames:
-                updateSummary(haf, talkName, transcriptModel)
+            for talkname in talkNames:
+                updateSummary(haf, talkname, transcriptModel)
             print(f"updated all talk summaries")
 
     elif script == 'unspanSummary':
-        assert talkName
-        sfn = haf.getSummaryFilename(talkName)
+        assert talkname
+        sfn = haf.getSummaryFilename(talkname)
         lines = loadLinesFromTextFile(sfn)
         for index, line in enumerate(lines):
             match = re.match(r"<span class=\"(counts|keywords)\">(?P<inside>[^<]+)</span>", line)
@@ -639,13 +688,13 @@ if __name__ == "__main__":
         print("converted")
 
     elif script == "canonicalize":
-        assert talkName
-        canonicalizeTranscript(haf, talkName)
+        assert talkname
+        canonicalizeTranscript(haf, talkname)
         print("canonicalized")
 
     elif script == "deitalicizeTranscript":
-        assert talkName
-        deitalicizeTranscript(haf, talkName)
+        assert talkname
+        deitalicizeTranscript(haf, talkname)
         print("deitalizised")
 
 
@@ -679,8 +728,8 @@ if __name__ == "__main__":
 # creating files
 
     elif script == 'convertPlainMarkdownToTranscript':
-        assert talkName
-        convertPlainMarkdownToTranscript(haf, talkName)
+        assert talkname
+        convertPlainMarkdownToTranscript(haf, talkname)
         print("converted")
 
     elif script == 'firstIndexingOfRetreatFolder':
@@ -697,5 +746,11 @@ if __name__ == "__main__":
         updateBreadcrumbsInSummaries()
         print("updated")
 
+    elif script == 'collectParagraphs':
+        assert talkname
+        collectParagraphsListPageToClipboard(talkname)
+
+    elif script == 'updateParagraphsLists':
+        updateParagraphsListPages(haf)
 
     

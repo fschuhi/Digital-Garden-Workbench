@@ -68,6 +68,9 @@ class HAFEnvironment():
     def collectSummaryFilenames(self, retreat=None):
         return self.vault.folderNotes(os.path.join(retreat if retreat else '', 'Summaries'))
 
+    def collectListFilenames(self, retreat=None):
+        return self.vault.folderNotes(os.path.join(retreat if retreat else '', 'Lists'))
+
 
     def collectTranscriptTalknames(self, retreat=None):
         return [talknameFromFilename(filename) for filename in self.collectTranscriptFilenames(retreat)]
@@ -90,6 +93,9 @@ class HAFEnvironment():
 
     def summariesFolder(self, retreatName):
         return self.retreatSubfolder(retreatName, 'Summaries')
+
+    def listsFolder(self, retreatName):
+        return self.retreatSubfolder(retreatName, 'Lists')
 
     def audioFolder(self, retreatName):
         return self.retreatSubfolder(retreatName, 'Audio')
@@ -120,26 +126,35 @@ class HAFEnvironment():
     def getSummaryFilename(self, talkname):
         return self.determineFilenameFromTalkname(self.collectSummaryFilenames(), talkname)
 
+    def getListFilename(self, talkname):
+        return self.determineFilenameFromTalkname(self.collectListFilenames(), talkname)
 
-    def createTranscriptFilename(self, talkName):
-        sfnPDF = self.getPDFFilename(talkName)
-        assert sfnPDF is not None, "PROBLEM: " + talkName
+
+    def createTranscriptFilename(self, talkname):
+        sfnPDF = self.getPDFFilename(talkname)
+        assert sfnPDF is not None, "PROBLEM: " + talkname
         
         pdfName = basenameWithoutExt(sfnPDF)
         match = re.match(r'[0-9]+_([0-9]+)', pdfName)
         assert match
         date = match.group(1)
 
-        retreatName = self.retreatNameFromTalkname(talkName)
+        retreatName = self.retreatNameFromTalkname(talkname)
         dirTranscripts = self.transcriptsFolder(retreatName)
         
-        return os.path.join(dirTranscripts, f"{date} {talkName}.md")
+        return os.path.join(dirTranscripts, f"{date} {talkname}.md")
 
 
-    def createSummaryFilename(self, talkName):
-        retreatName = self.retreatNameFromTalkname(talkName)
+    def createSummaryFilename(self, talkname):
+        retreatName = self.retreatNameFromTalkname(talkname)
         dirSummaries = self.summariesFolder(retreatName)
-        return os.path.join(dirSummaries, talkName + '.md')
+        return os.path.join(dirSummaries, talkname + '.md')
+
+    def createListFilename(self, talkname):
+        retreatName = self.retreatNameFromTalkname(talkname)
+        dirSummaries = self.listsFolder(retreatName)
+        return os.path.join(dirSummaries, talkname + ' -.md')
+
 
     def website(self):
         # Obsidian Publish doesn't need the website address in <a href ...
