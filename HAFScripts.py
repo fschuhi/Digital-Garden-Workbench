@@ -492,7 +492,7 @@ def updateParagraphsListPages(haf: HAFEnvironment):
     for sfnSummaryMd in summaries:
         talkname = talknameFromFilename(sfnSummaryMd)        
         note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, sfnSummaryMd)
-        createPage = note.getYamlValue('ParagraphsListPage')
+        createPage = note.getYamlValue('ParagraphsListPageb')
         if (createPage is None) or createPage:
             pageLines = collectParagraphsListPage(talkname)
             sfn = haf.createListFilename(talkname)
@@ -525,10 +525,10 @@ def transferFilesToPublish():
     publishing.copyFile("Rob Burbea/Diacritics.md", "/")
     publishing.copyFile("Rob Burbea/Rob Burbea.md", "/")
 
-    publishing.copyFile("Images/digital-garden-big.png")
-    publishing.copyFile("Images/digital-garden-small.png")
-    publishing.copyFile("Images/Rob Burbea.png")
-    publishing.copyFile("Images/link.png")
+    publishing.copyFile("Images/Digital Garden/digital-garden-big.png", "Images")
+    publishing.copyFile("Images/Digital Garden/digital-garden-small.png", "Images")
+    publishing.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
+    publishing.copyFile("Images/Digital Garden/link.png", "Images")
     
     # we do not touch publish.css
     #print("4")
