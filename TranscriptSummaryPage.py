@@ -197,6 +197,17 @@ class TranscriptSummaryPage:
         return len(pageNrs)
 
 
+    def collectParagraphHeaderTargets(self) -> dict[str,str]:
+        targets = {}
+        parser = SummaryLineParser()
+        for line in self.lines:            
+            if (match := parser.matchLine(line)) == SummaryLineMatch.PARAGRAPH_COUNTS:
+                headerTarget = determineHeaderTarget(parser.headerText)
+                blockid = f"{parser.pageNr}-{parser.paragraphNr}"
+                targets[blockid] = headerTarget
+        return targets
+
+
 # *********************************************
 # factory
 # *********************************************

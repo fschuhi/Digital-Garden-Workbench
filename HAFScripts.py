@@ -469,7 +469,7 @@ def collectParagraphsListPage(talkname) -> list[str]:
     for line in summary.lines:
         if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", line)):
             description = match.group("description") # type: str
-            headerLink = re.sub(r"[.,/:?=()]", "", description)
+            headerLink = determineHeaderTarget(description)
             level = match.group('level')
             if len(level) == 5:
                 fullstop = '' if re.search(r"[.?!)]$",description) else '.'
@@ -529,6 +529,8 @@ def transferFilesToPublish():
     publishing.copyFile("Images/Digital Garden/digital-garden-small.png", "Images")
     publishing.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
     publishing.copyFile("Images/Digital Garden/link.png", "Images")
+
+    modifyFullstops()
     
     # we do not touch publish.css
     #print("4")
@@ -542,6 +544,45 @@ def convertAllMarkdownFiles():
     # standalone conversion for summary files
     publishing = Publishing()
     publishing.convertAllMarkdownFiles()
+
+
+def modifyFullstops():
+    summaryFilenames = haf.collectSummaryFilenames()
+    for summaryFilename in summaryFilenames:
+        summary = TranscriptSummaryPage.fromSummaryFilename(summaryFilename)
+        summary.loadSummaryMd()
+        headerTargets = summary.collectParagraphHeaderTargets()
+        talkname = talknameFromFilename(summaryFilename)
+
+        # intentionally from the publish 
+        transcriptFilename = haf_publish.getTranscriptFilename(talkname)
+        assert transcriptFilename
+
+        transcript = TranscriptPage.fromTranscriptFilename(transcriptFilename)
+        for markdownLine in transcript.markdownLines: # type: MarkdownLine
+            blockid = markdownLine.getBlockId()
+            if not blockid:
+                # transcript has not only paragraphs
+                pass
+            else:
+                if markdownLine.text.startswith('#'):
+                    # make sure we don't accidently capture the header (which also has the block id, excluding leading ^, though)
+                    pass
+                else:
+                    if blockid not in headerTargets:
+                        # we might have left out this particular paragraph from the summary
+                        pass
+                    else:
+                        headerTarget = headerTargets[blockid]
+                        if not headerTarget:
+                            # probably ... (yet-missing paragraph description)
+                            pass
+                        else:
+                            match = re.match(r'(.+)([.?!"]) \^' + blockid + "$", markdownLine.text)
+                            if match:
+                                linkToSummary = f"[[{talkname}#{headerTarget}|{match.group(2)}]]"  # ∘∙⦿꘎᙮
+                                markdownLine.text = f"{match.group(1)}{linkToSummary} ^{blockid}"
+        transcript.saveToFile(transcriptFilename)
 
 
 # *********************************************
@@ -560,6 +601,7 @@ def get_arguments():
     parser.add_argument('--old')
     parser.add_argument('--new')
     parser.add_argument('--level')
+    parser.add_argument('--scripts', action="store_true")
 
     # sortRBYaml
     parser.add_argument("--sectionsort", action='store_true')
@@ -570,7 +612,29 @@ def get_arguments():
 if __name__ == "__main__":
     args = get_arguments()
 
+    if args.scripts:
+        lines = loadLinesFromTextFile("HAFScripts.py")
+        lastcomment = ''
+        first = True
+        for line in lines:
+            match = re.match(r"    # (.+)", line)
+            if match:
+                lastcomment = match.group(1)
+            match = re.match(r"    elif script == '(.+)'", line)
+            if match:
+                if lastcomment != '':
+                    print(('' if first else '\n') + '# ' + lastcomment)
+                    lastcomment = ''
+                    first = False
+                script = match.group(1)
+                print('  ' + script)
+        exit()
+
+
     haf = HAFEnvironment(HAF_YAML)
+
+    haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
+
     #retreatName = args.retreatName if args.retreatName else '2007 Lovingkindness and Compassion As a Path to Awakening'
     #talkName = args.talkName if args.talkName else 'From Insight to Love'
     #indexEntry = args.indexEntry if args.indexEntry else 'Energy Body'
@@ -590,6 +654,9 @@ if __name__ == "__main__":
     if script in ['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml', 'replaceNoteLink']:
         network = LinkNetwork(haf)
 
+
+    # publish
+
     if script == 'transferFilesToPublish':
         transferFilesToPublish()
         replaceLinksInAllSummaries()
@@ -602,7 +669,7 @@ if __name__ == "__main__":
 
     elif script == 'addMissingSummaryCards':
         assert retreatName
-        sfnKanban = r"S:\Dropbox\Papers\_Markdown\Rob Burbea\Talk summaries (Kanban).md"
+        sfnKanban = haf.vault.findFile('Talk summaries (Kanban).md')
         addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf, retreatName)
         print('done')
 
@@ -724,7 +791,7 @@ if __name__ == "__main__":
             sfnSave = filename
             saveLinesToTextFile(sfnSave, lines)
 
-# creating files
+    # creating files
 
     elif script == 'convertPlainMarkdownToTranscript':
         assert talkname
@@ -752,7 +819,29 @@ if __name__ == "__main__":
     elif script == 'updateParagraphsLists':
         updateParagraphsListPages(haf)
 
+
+    # journal
+
+    elif script == 'changeJournalBreadcrumbsStyle':
+        for sfn in haf.vault.folderFiles("Journal", "md"):
+            lines = loadLinesFromTextFile(sfn)
+            for index, line in enumerate(lines):
+                match = re.match(r"<< \[\[(?P<prevdate>.+)\|(?P<prevday>.+)\]\] \| \[\[(?P<nextdate>.+)\|(?P<nextday>.+)\]\]", line)
+                if match:
+                    prevdate = match.group('prevdate')
+                    prevday = match.group('prevday')
+                    nextdate = match.group('nextdate')
+                    nextday = match.group('nextday')
+                    newline = f"[[{prevdate}|{prevday} 🡄]] | [[{nextdate}|🡆 {nextday}]]"
+                    lines[index] = newline
+            saveLinesToTextFile(sfn, lines)
+
+    elif script == 'modifyFullstops':
+        modifyFullstops()
+        print("fullstops replaced")
+
     else:
         print("unknown script")
+
 
     

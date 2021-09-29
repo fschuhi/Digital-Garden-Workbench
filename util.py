@@ -346,3 +346,13 @@ def parseParagraph(paragraphOnPage: str):
     pageNr = int(match.group(2))
     paragraphNr = int(match.group(3))
     return pageNr, paragraphNr, paragraphText
+
+
+def determineHeaderTarget(header):
+    # IMPORTANT: the "..." for yet-missing paragraph description will be ''
+    return re.sub(r"[.,/:?=()]", "", header)
+
+
+def parseBlockId(blockId) -> Tuple[int,int]:
+    match = re.match(r"([0-9]+)-([0-9]+)")
+    return (int(match.group(1)), int(match.group(2))) if match else None

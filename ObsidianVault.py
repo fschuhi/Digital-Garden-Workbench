@@ -25,6 +25,9 @@ class ObsidianVault:
     def allNotes(self):
         return self.pathnames('**/*.md')
 
+    def findFile(self, sfn):
+        return files[0] if (files := self.pathnames('**/' + sfn)) else None
+
     def folderFiles(self, folder, ext):
         if not ext.startswith('*.'):
             ext = '*.' + ext

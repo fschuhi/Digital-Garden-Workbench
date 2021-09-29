@@ -4,7 +4,7 @@ import os
 import spacy
 from TranscriptModel import TranscriptModel
 from util import *
-from typing import Tuple
+from typing import Iterable, Tuple
 import re
 
 # *********************************************
@@ -254,11 +254,18 @@ class MarkdownLine:
         return [match.group('tag') for match in self.collectTagMatches()]
 
 
+# blockid
+
+    def getBlockId(self):
+        match = re.search(r" \^([0-9]+-[0-9]+)$", self.text)
+        return match.group(1) if match else None
+        
+
 # *********************************************
 # class MarkdownLines
 # *********************************************
 
-class MarkdownLines:
+class MarkdownLines(Iterable[MarkdownLine]):
     def __init__(self, textLines: list[str]):
         self.markdownLines = [MarkdownLine(textLine) for textLine in textLines] # type: list[MarkdownLine]
 
@@ -277,6 +284,9 @@ class MarkdownLines:
         textLines = text.splitlines()
         return cls(textLines)
 
+    def __iter__(self):
+        for markdownLine in self.markdownLines:
+            yield markdownLine
 
     def __getitem__(self, key):
         return self.markdownLines[key]
@@ -308,5 +318,4 @@ class MarkdownLines:
             if toIndex:
                 return (fromIndex, toIndex, fromMatch, toMatch)
         return (None, None, None, None)
-        
-    
+            
