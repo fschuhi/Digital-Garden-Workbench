@@ -36,8 +36,7 @@ def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban,
     for sfnSummaryMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnSummaryMd)                
         # load the summary page
-        summary = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
-        summary.loadSummaryMd()
+        summary = TranscriptSummaryPage(sfnSummaryMd)
         talkName = basenameWithoutExt(sfnSummaryMd)
 
         # talks can contain brackets, which we need to "escape" for regex searching
@@ -76,9 +75,9 @@ def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName,
             if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
                 transcript = loadStringFromTextFile(sfnTranscriptMd)
                 if re.search(r'#Transcript', transcript):
-                    page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
+                    page = TranscriptPage(sfnTranscriptMd)
                     page.applySpacy(transcriptModel)
-                    page.saveToFile(sfnTranscriptMd)
+                    page.save(sfnTranscriptMd)
 
 
 def replaceLinks(haf_publish, filenames, replaceIndex):
@@ -135,8 +134,9 @@ def replaceLinksInSpecialFiles():
 
 def convertPlainMarkdownToTranscript(haf: HAFEnvironment, talkName):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
-    page = TranscriptPage.fromPlainMarkdownFile(sfnTranscriptMd)
-    page.saveToFile(sfnTranscriptMd)
+    lines = loadLinesFromTextFile(sfnTranscriptMd)
+    page = TranscriptPage.fromPlainMarkdownLines(lines)
+    page.save(sfnTranscriptMd)
 
 
 def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
@@ -153,14 +153,14 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 # we need to deitalize manually
                 transcript = deitalicizeTermsWithDiacritics(transcript)
                 lines = transcript.splitlines()
-                page = TranscriptPage.fromPlainMarkdownLines(sfnTranscriptMd, lines)
+                page = TranscriptPage.fromPlainMarkdownLines(lines)
 
                 # create backup (if it doesn't exist yet)
                 from shutil import copyfile                
                 if not os.path.exists(bak := filenameWithoutExt + '.bak'):
                     copyfile(sfnTranscriptMd, bak)
 
-                page.saveToFile(sfnTranscriptMd)
+                page.save(sfnTranscriptMd)
 
 
 def deitalicizeTranscript(haf: HAFEnvironment, talkName):
@@ -207,15 +207,14 @@ def createNewTranscriptSummariesForRetreat(haf, retreatName):
 
 def updateSummary(haf, talkName, transcriptModel, sfn=None):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
-    transcriptPage = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
+    transcriptPage = TranscriptPage(sfnTranscriptMd)
     transcriptPage.applySpacy(transcriptModel)
 
     sfnSummaryMd = haf.getSummaryFilename(talkName)
-    summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
-    summaryPage.loadSummaryMd()
+    summaryPage = TranscriptSummaryPage(sfnSummaryMd)
     summaryPage.update(transcriptPage, targetType='#^')
     
-    summaryPage.save(sfn)
+    summaryPage.save(sfn, sfnSummaryMd)
 
 
 # *********************************************
@@ -427,7 +426,7 @@ def updateBreadcrumbsInSummaries():
             summary = haf.getSummaryFilename(talkname)
             if not summary:
                 continue
-            note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, summary)
+            note = ObsidianNote(ObsidianNoteType.SUMMARY, summary)
             for markdownLine in note.markdownLines:
                 if re.search(r"[⬅️⬆️➡️🡄🡅🡆]", markdownLine.text):
                     if len(transcripts) == 1:
@@ -450,7 +449,7 @@ def updateBreadcrumbsInSummaries():
                         newline = f"{prevLink} | [[{retreatName}|🡅]] | {nextLink}"
                         markdownLine.text = newline
                     
-            note.saveToFile(summary)
+            note.save(summary)
 
 
 # *********************************************
@@ -464,8 +463,7 @@ def collectParagraphsListPage(talkname) -> list[str]:
     paragraphs.append("---")
     paragraphs.append(f"### Paragraphs in [[{talkname}]]")
     sfnSummaryMd = haf.getSummaryFilename(talkname)
-    summary = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
-    summary.loadSummaryMd()
+    summary = TranscriptSummaryPage(sfnSummaryMd)
     for line in summary.lines:
         if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", line)):
             description = match.group("description") # type: str
@@ -491,7 +489,7 @@ def updateParagraphsListPages(haf: HAFEnvironment):
     summaries = haf.collectSummaryFilenames()
     for sfnSummaryMd in summaries:
         talkname = talknameFromFilename(sfnSummaryMd)        
-        note = ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, sfnSummaryMd)
+        note = ObsidianNote(ObsidianNoteType.SUMMARY, sfnSummaryMd)
         createPage = note.getYamlValue('ParagraphsListPage')
         if (createPage is None) or createPage:
             pageLines = collectParagraphsListPage(talkname)
@@ -549,8 +547,7 @@ def convertAllMarkdownFiles():
 def modifyFullstops():
     summaryFilenames = haf.collectSummaryFilenames()
     for summaryFilename in summaryFilenames:
-        summary = TranscriptSummaryPage.fromSummaryFilename(summaryFilename)
-        summary.loadSummaryMd()
+        summary = TranscriptSummaryPage(summaryFilename)
         headerTargets = summary.collectParagraphHeaderTargets()
         talkname = talknameFromFilename(summaryFilename)
 
@@ -558,7 +555,7 @@ def modifyFullstops():
         transcriptFilename = haf_publish.getTranscriptFilename(talkname)
         assert transcriptFilename
 
-        transcript = TranscriptPage.fromTranscriptFilename(transcriptFilename)
+        transcript = TranscriptPage(transcriptFilename)
         for markdownLine in transcript.markdownLines: # type: MarkdownLine
             blockid = markdownLine.getBlockId()
             if not blockid:
@@ -582,7 +579,7 @@ def modifyFullstops():
                             if match:
                                 linkToSummary = f"[[{talkname}#{headerTarget}|{match.group(2)}]]"  # ∘∙⦿꘎᙮
                                 markdownLine.text = f"{match.group(1)}{linkToSummary} ^{blockid}"
-        transcript.saveToFile(transcriptFilename)
+        transcript.save(transcriptFilename)
 
 
 # *********************************************

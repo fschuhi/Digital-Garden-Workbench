@@ -1,9 +1,9 @@
 tmp/
-deprecated/
-__pycache__/
 .vscode/
 .VSCodeCounter/
+__pycache__/
 
 *.bat
 ~$*
 *.pyc
+*.bak

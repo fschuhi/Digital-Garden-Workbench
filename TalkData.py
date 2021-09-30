@@ -35,11 +35,10 @@ class TalkData():
 
     def loadTranscriptPage(self):
         assert os.path.exists(self.sfnTranscript)
-        self.transcriptPage = TranscriptPage.fromTranscriptFilename(self.sfnTranscript)
+        self.transcriptPage = TranscriptPage(self.sfnTranscript)
 
     def loadSummaryPage(self):
         assert os.path.exists(self.sfnSummary)
-        self.summaryPage = TranscriptSummaryPage.fromSummaryFilename(self.sfnSummary)
-        self.summaryPage.loadSummaryMd()
+        self.summaryPage = TranscriptSummaryPage(self.sfnSummary)
 
 

@@ -19,34 +19,15 @@ from typing import Tuple
 # *********************************************
 
 class TranscriptPage(ObsidianNote):
-    def __init__(self, sfnTranscriptMd: str, textLines: list[str]) -> None:
-        # even a new transcript page is never empty, e.g. has #Transcript tag at the beginning etc.
-        assert textLines
+    def __init__(self, path: str) -> None:
+        super().__init__(ObsidianNoteType.TRANSCRIPT, path)
 
-        # ObsidianNote generates a MarkdownLines object from the passed list[str]
-        self.markdownLines = None # type: MarkdownLines
-        self.yaml = None # type: dict[str,str]
-        super().__init__(ObsidianNoteType.TRANSCRIPT, textLines)
-        assert self.markdownLines
-
-        self.sfnTranscriptMd = sfnTranscriptMd
-        self.transcriptName = os.path.splitext(os.path.basename(sfnTranscriptMd))[0]
+        self._bufferParagraphs = False
+        self.bufferedParagraphs = None
 
 
     @classmethod
-    def fromTranscriptFilename(cls, sfnTranscriptMd)  :
-        assert os.path.exists(sfnTranscriptMd), "cannot find " + sfnTranscriptMd
-        textLines = loadLinesFromTextFile(sfnTranscriptMd)
-        return cls(sfnTranscriptMd, textLines)
-
-    
-    @classmethod
-    def fromPlainMarkdownFile(cls, sfnPlainMd):
-        lines = loadLinesFromTextFile(sfnPlainMd)
-        return cls.fromPlainMarkdownLines(sfnPlainMd, lines)
-    
-    @classmethod
-    def fromPlainMarkdownLines(cls, sfnPlainMd, lines: list[str]):
+    def fromPlainMarkdownLines(cls, lines: list[str]):
         # IMPORTANT: passed sfnPlainMd is a sfnTranscriptMd, but contains only raw markdown
         # we generate trailing blockids for the paragraphs in this method
 
@@ -87,13 +68,36 @@ class TranscriptPage(ObsidianNote):
         # we need "#" new page indicators, otherwise the danger is too high that we wreck a properly blockid-indexed transcript
         assert nPageIndicators != 0
 
-        return cls(sfnPlainMd, textLines)
+        tmp = CreateTempfile()
+        saveLinesToTextFile(tmp.name, textLines)
+        return cls(tmp.name)
+        
+
+    @property 
+    def retreatname(self):
+        return os.path.normpath(self.path).split(os.path.sep)[-3]
+
+    @property
+    def talkname(self):
+        return re.match(r"^([0-9]+ )?(.+)", self.filename).group(2)
 
 
-    def collectParagraphs(self):
-        # https://realpython.com/python-walrus-operator/        
-        return [(v[0], v[1], markdownLine) for markdownLine in self.markdownLines if (v := parseParagraph(markdownLine.text)) != (None, None, None)]
+    @property
+    def bufferParagraphs(self):
+        return self._bufferParagraphs
 
+    @bufferParagraphs.setter
+    def bufferParagraphs(self, value):
+        if value and not self._bufferParagraphs:
+            self.bufferedParagraphs = self.collectParagraphs(force=True)
+        else:
+            self.bufferedParagraphs = None
+        self._bufferParagraphs = value
+
+    def collectParagraphs(self, force=False):
+        if force or not self.bufferedParagraphs:
+            paragraphs =[(v[0], v[1], markdownLine) for markdownLine in self.markdownLines if (v := parseParagraph(markdownLine.text)) != (None, None, None)]
+        return self.bufferedParagraphs if self.bufferedParagraphs else paragraphs;
 
     def findParagraph(self, thePageNr, theParagraphNr) -> MarkdownLine:
         for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
@@ -120,7 +124,7 @@ class TranscriptPage(ObsidianNote):
         links = []
         for pageNr, paragraphNr, count in counts:
             blockId = f"{pageNr}-{paragraphNr}"
-            linkTarget = f"{self.transcriptName}{targetType}{blockId}"
+            linkTarget = f"{self.filename}{targetType}{blockId}"
             link = f"[[{linkTarget}|{blockId}]]"
             if boldLinkTargets and linkTarget in boldLinkTargets:
                 link = '**' + link + '**'
@@ -128,14 +132,6 @@ class TranscriptPage(ObsidianNote):
                 link += f" ({count})"
             links.append(link)
         return " · ".join(links)        
-
-    # ist das was für HAFEnvironment?
-
-    def determineRetreat(self) -> str:
-        return os.path.normpath(self.sfnTranscriptMd).split(os.path.sep)[-3]
-
-    def determineTalkName(self) -> str:
-        return re.match(r"^([0-9]+ )?(.+)", self.transcriptName).group(2)
 
 
 # *********************************************
@@ -145,8 +141,8 @@ class TranscriptPage(ObsidianNote):
 def createTranscriptsDictionary(filenames: list[str], transcriptModel: TranscriptModel) -> dict[str,TranscriptPage]:
     transcripts = {}
     for filename in filenames:
-        transcriptPage = TranscriptPage.fromTranscriptFilename(filename)
+        transcriptPage = TranscriptPage(filename)
         transcriptPage.applySpacy(transcriptModel)
-        transcripts[transcriptPage.transcriptName] = transcriptPage
+        transcripts[transcriptPage.filename] = transcriptPage
     return transcripts
 

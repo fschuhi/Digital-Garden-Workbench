@@ -31,7 +31,7 @@ def copyIndexEntryCitationsToClipboard(gui = True):
             else:
                 sfnTranscriptMd = haf.getTranscriptFilename(transcriptName)
 
-                page = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
+                page = TranscriptPage(sfnTranscriptMd)
 
                 markdownLine = page.findParagraph(pageNr, paragraphNr)
                 (_, _, text) = parseParagraph(markdownLine.text)

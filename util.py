@@ -356,3 +356,9 @@ def determineHeaderTarget(header):
 def parseBlockId(blockId) -> Tuple[int,int]:
     match = re.match(r"([0-9]+)-([0-9]+)")
     return (int(match.group(1)), int(match.group(2))) if match else None
+
+def CreateTempfile():
+    import tempfile
+    tmp = tempfile.TemporaryFile('w+t')
+    tmp.close()
+    return tmp

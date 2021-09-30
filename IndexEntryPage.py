@@ -225,16 +225,14 @@ class IndexEntryPage:
 
                 include = True
                 for excludeString in excludeStrings:
-                    if excludeString in transcriptPage.sfnTranscriptMd:
+                    if excludeString in transcriptPage.path:
                         include = False
                         break
 
                 if include:
                     occurrences = transcriptPage.collectTermLinks(self.indexEntry, self.citationLinkTargets)
                     if occurrences:
-                        retreat = transcriptPage.determineRetreat()
-                        talkName = transcriptPage.determineTalkName()
-                        headerLine = canonicalHeaderLineFromParams(None, f"{retreat}: {talkName}", transcriptName, None, None, None)
+                        headerLine = canonicalHeaderLineFromParams(None, f"{ transcriptPage.retreatname}: {transcriptPage.talkname}", transcriptName, None, None, None)
                         linesToAppend.append('')
                         linesToAppend.append(headerLine)
                         linesToAppend.append(f"_occurrences: {occurrences}_")

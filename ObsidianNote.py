@@ -14,7 +14,7 @@ from enum import Enum
 class ObsidianNoteType(Enum):
     UNKNOWN = 0
     TRANSCRIPT = 1
-    SUMMMARY = 2
+    SUMMARY = 2
     INDEX_ENTRY = 3
     INDEX = 4
 
@@ -24,8 +24,14 @@ class ObsidianNoteType(Enum):
 # *********************************************
 
 class ObsidianNote:
-    def __init__(self, type: ObsidianNoteType, textLines: list[str]):
+    def __init__(self, type: ObsidianNoteType, path):
         self.type = type # type: ObsidianNoteType
+
+        self.path = path
+        self.filename = os.path.splitext(os.path.basename(path))[0]
+
+        textLines = loadLinesFromTextFile(path)
+
         self.markdownLines = None # type: list[MarkdownLine]
 
         # IMPORTANT: frontmatter is *not* markdown
@@ -35,22 +41,6 @@ class ObsidianNote:
             textLines = [line for index, line in enumerate(textLines) if index >= skipAtBeginning]
 
         self.assignTextLines(textLines)
-
-
-    @classmethod
-    def fromTextLines(cls, type: ObsidianNoteType, textLines: list[str]):
-        return cls(type, textLines)
-
-    @classmethod
-    def fromFile(cls, type: ObsidianNoteType, sfn: str):
-        assert os.path.exists(sfn)
-        textLines = loadLinesFromTextFile(sfn)
-        return cls(type, textLines)
-
-    @classmethod
-    def fromText(cls, type: ObsidianNoteType, text: str):
-        textLines = text.splitlines()
-        return cls(type, textLines)
 
 
     @property
@@ -80,7 +70,8 @@ class ObsidianNote:
         self.text = markdownLines.asText()
 
 
-    def saveToFile(self, sfn):
+    def save(self, path=None):
+        if path is None: path = self.path
         out = []
         if self.yaml:
             out.append("---")
@@ -89,7 +80,7 @@ class ObsidianNote:
 
         markdownTextLines = self.markdownLines.collectTextLines()
         out.extend(markdownTextLines)
-        saveLinesToTextFile(sfn, out)
+        saveLinesToTextFile(path, out)
 
 
 if __name__ == "__main__":

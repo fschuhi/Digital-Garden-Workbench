@@ -123,12 +123,11 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
 
     def test_updateWithOldTargetType(self):
         sfnTranscriptMd = self.haf.getTranscriptFilename(self.transcriptName)
-        transcriptPage = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
+        transcriptPage = TranscriptPage(sfnTranscriptMd)
         transcriptPage.applySpacy(self.transcriptModel)
     
         sfnSummaryMd = self.haf.getSummaryFilename(self.transcriptName)
-        summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
-        summaryPage.loadSummaryMd()
+        summaryPage = TranscriptSummaryPage(sfnSummaryMd)
     
         summaryPage.update(transcriptPage, targetType='#^')
         summaryPage.save("tmp/tmp.md")
@@ -138,12 +137,11 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
 
     def test_updateWithNewTargetType(self):
         sfnTranscriptMd = self.haf.getTranscriptFilename(self.transcriptName)
-        transcriptPage = TranscriptPage.fromTranscriptFilename(sfnTranscriptMd)
+        transcriptPage = TranscriptPage(sfnTranscriptMd)
         transcriptPage.applySpacy(self.transcriptModel)
     
         sfnSummaryMd = self.haf.getSummaryFilename(self.transcriptName)
-        summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
-        summaryPage.loadSummaryMd()
+        summaryPage = TranscriptSummaryPage(sfnSummaryMd)
     
         summaryPage.update(transcriptPage, targetType='#')
         summaryPage.save("tmp/tmp.md")
@@ -160,8 +158,7 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
     def test_collectMissingParagraphHeaderTexts(self):
         talkName = "From Insight to Love"
         sfnSummaryMd = self.haf.getSummaryFilename(talkName)
-        summaryPage = TranscriptSummaryPage.fromSummaryFilename(sfnSummaryMd)
-        summaryPage.loadSummaryMd()
+        summaryPage = TranscriptSummaryPage(sfnSummaryMd)
         self.assertEqual(summaryPage.collectMissingParagraphHeaderTexts(), 2)
 
 

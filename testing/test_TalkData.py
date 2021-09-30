@@ -28,7 +28,7 @@ class Test_TalkData(unittest.TestCase):
         self.assertEqual(os.path.basename(td.sfnSummary), "Preliminaries Regarding Voice, Movement, and Gesture - Part 1.md")
 
         td.loadTranscriptPage()
-        self.assertEqual(td.transcriptPage.transcriptName, td.transcriptName)
+        self.assertEqual(td.transcriptPage.filename, td.transcriptName)
 
 
 if __name__ == "__main__":

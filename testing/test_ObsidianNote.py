@@ -15,7 +15,7 @@ class Test_ObsidianNote(unittest.TestCase):
 
     def createNote(self, talkName):
         md = self.haf.getSummaryFilename(talkName)
-        return ObsidianNote.fromFile(ObsidianNoteType.SUMMMARY, md)
+        return ObsidianNote(ObsidianNoteType.SUMMARY, md)
 
 
     def test_yaml(self):

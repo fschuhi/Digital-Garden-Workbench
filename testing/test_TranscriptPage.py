@@ -27,7 +27,7 @@ class Test_TranscriptPage(unittest.TestCase):
 
     def test_walrus(self):
         # https://realpython.com/python-walrus-operator/
-        page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
+        page = TranscriptPage(self.sfnTranscriptMd1)
         paragraphs = page.collectParagraphs()
         self.assertTrue(paragraphs[0][0] == 1 and paragraphs[0][1] == 1)
         self.assertTrue(paragraphs[1][0] == 1 and paragraphs[1][1] == 2)
@@ -35,29 +35,29 @@ class Test_TranscriptPage(unittest.TestCase):
 
 
     def test_hasCorrectNumberOfParagraphs(self):
-        page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
+        page = TranscriptPage(self.sfnTranscriptMd1)
         paragraphs = [markdownLine for markdownLine in page.markdownLines if parseParagraph(markdownLine.text) != (None, None, None)]
         self.assertEqual(len(paragraphs), 85)
 
 
     def test_applySpacyToParagraphs(self):
-        page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
+        page = TranscriptPage(self.sfnTranscriptMd1)
         page.applySpacy(self.transcriptModel)
         #applySpacyToParagraphs(self.transcriptModel, page.paragraphs)
-        page.saveToFile("tmp/tmp.md")
+        page.save("tmp/tmp.md")
         import filecmp
         self.assertTrue(filecmp.cmp("tmp/tmp.md", self.sfnTranscriptMd1))
         self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptPage.test_transcript_1.md"))
 
     
     def test_findParagraph(self):
-        page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
+        page = TranscriptPage(self.sfnTranscriptMd1)
         markdownLine = page.findParagraph(4,4)
         self.assertTrue(markdownLine.text.startswith('**(1)**'))
 
 
     def test_collectTermLinks(self):
-        page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
+        page = TranscriptPage(self.sfnTranscriptMd1)
         page.applySpacy(self.transcriptModel)
 
         markdownLine = page.findParagraph(1,3)
@@ -76,11 +76,11 @@ class Test_TranscriptPage(unittest.TestCase):
 
 
     def test_saveToObsidian(self):
-        page = TranscriptPage.fromTranscriptFilename(self.sfnTranscriptMd1)
+        page = TranscriptPage(self.sfnTranscriptMd1)
         page.applySpacy(self.transcriptModel)
 
         # check that TranscriptPage is "idempotent", i.e. exactly the same if saved w/o any changes from the version we loaded
-        page.saveToFile("tmp/tmp.md")
+        page.save("tmp/tmp.md")
         self.assertTrue(filecmp.cmp("tmp/tmp.md", self.sfnTranscriptMd1))
 
 
@@ -91,8 +91,8 @@ class Test_TranscriptPage(unittest.TestCase):
         sfnPlainMdCompare = "testing/data/Test_TranscriptPage.test_fromPlainMarkdownLines.compare.md"
 
         lines = loadLinesFromTextFile(sfnPlainMdInput)
-        page = TranscriptPage.fromPlainMarkdownLines(sfnPlainMdCompare, lines)
-        page.saveToFile("tmp/tmp.md")        
+        page = TranscriptPage.fromPlainMarkdownLines(lines)
+        page.save("tmp/tmp.md")        
         self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnPlainMdCompare))
 
 
