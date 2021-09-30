@@ -1,24 +1,13 @@
 #!/usr/bin/env python3
 
 from MarkdownLine import MarkdownLine
+from ObsidianNote import ObsidianNote, ObsidianNoteType
 from TranscriptModel import TranscriptModel
 from genericpath import exists
 
-from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage
-import os
 import re
 from util import *
-
-
-def canonicalHeaderLineFromParams0(level, headerText1, transcriptName, linkText, headerText2, trailingBlockId) -> str:
-    if linkText:
-        linkText += ' '
-    return ("#"*level if level else "######") \
-        + (" " + headerText1 if headerText1 else "") \
-        + f" [[{transcriptName}|{linkText}(Transcript)]]" \
-        + (" " + headerText2 if headerText2 else "") \
-        + (f" ^{trailingBlockId}" if trailingBlockId else "")
 
 
 def canonicalHeaderLineFromParams(level, headerText1, transcriptName, linkText, headerText2, trailingBlockId) -> str:
@@ -109,56 +98,49 @@ class CitationParagraphParser:
 # class IndexEntryPage
 # *********************************************
 
-class IndexEntryPage:
-    def __init__(self, dirIndexEntries: str, indexEntry: str) -> None:
-        self.dirIndexEntries = dirIndexEntries
-        self.indexEntry = indexEntry
-        self.sfnIndexEntryMd = os.path.join(dirIndexEntries, indexEntry + '.md')
+class IndexEntryPage(ObsidianNote):
+    def __init__(self, path: str) -> None:
+        super().__init__(ObsidianNoteType.INDEX_ENTRY, path)
 
-        # do not autoload
-        self.lines = None # type: list[str]
-        self.citationLinkTargets = None # type: set[str]
-
-
-    def loadIndexEntryMd(self) -> None:        
-        assert os.path.exists(self.sfnIndexEntryMd), self.sfnIndexEntryMd
-        self.lines = loadLinesFromTextFile(self.sfnIndexEntryMd)
-        assert self.lines
-        self.citationLinkTargets = set()
+        self.citationLinkTargets = set() # type: set[str]
         citationParagraphParser = CitationParagraphParser()
-        for line in self.lines:
-            if citationParagraphParser.matchCitationParagraph(line):
+        for ml in self.markdownLines:
+            if citationParagraphParser.matchCitationParagraph(ml.text):
                 self.citationLinkTargets.add(citationParagraphParser.linkTarget)
 
 
+    def determineYamlSection(self) -> str:
+        for index, tag in enumerate(tags := self.determineTags()):
+            # tag immediately after the IndexEntry entry tag signifies the section, see ((XMWFBBI))
+            if tag == 'IndexEntry':
+                return tags[index+1]
+
+
     def updateCitations(self, transcriptModel: TranscriptModel) -> None:        
-        assert self.lines
         citationParagraphParser = CitationParagraphParser()
-        for index, line in enumerate(self.lines):            
-            if (match := citationParagraphParser.matchCitationParagraph(line)):
+        for index, ml in enumerate(self.markdownLines):
+            if (match := citationParagraphParser.matchCitationParagraph(ml.text)):
                 oldCitation = match.group('citation')
                 markdown = MarkdownLine(oldCitation)
                 markdown.applySpacy(transcriptModel)
                 citationParagraphParser.citation = markdown.text
-                self.lines[index] = citationParagraphParser.canonicalCitationParagraph()
+                self.markdownLines[index].text = citationParagraphParser.canonicalCitationParagraph()
 
 
     def updateHeadersAndOccurrences(self, transcripts: dict[str, TranscriptPage]) -> None:
         # IMPORTANT: we replace lines (header, occurrences), but number of lines remains unchanged
-        assert self.lines
-
         self.transcriptsSet = set()
     
         headerParser = IndexEntryPageHeaderParser()
 
         waitingForCounts = False
         currentTranscriptName = None
-        for index, line in enumerate(self.lines):
+        for index, ml in enumerate(self.markdownLines):
 
-            if headerParser.matchHeaderLine(line):
+            if headerParser.matchHeaderLine(ml.text):
                 currentTranscriptName = headerParser.transcriptName
                 self.transcriptsSet.add(currentTranscriptName)
-                self.lines[index] = headerParser.canonicalHeaderLine()
+                self.markdownLines[index].text = headerParser.canonicalHeaderLine()
                 waitingForCounts = True
                 continue
 
@@ -178,46 +160,24 @@ class IndexEntryPage:
                     #tail = tail.replace('_', '')
 
                     transcriptPage = transcripts[currentTranscriptName]
-                    newCounts = transcriptPage.collectTermLinks(self.indexEntry, self.citationLinkTargets)
+                    newCounts = transcriptPage.collectTermLinks(self.notename, self.citationLinkTargets)
                     if spanStart:
-                        self.lines[index] = head + newCounts + tail
+                        self.markdownLines[index].text = head + newCounts + tail
                     else:
-                        self.lines[index] = "<span class=\"counts\">" + head + newCounts + tail + "</span>"
+                        self.markdownLines[index].text = "<span class=\"counts\">" + head + newCounts + tail + "</span>"
 
                     #print(self.lines[index])
                     waitingForCounts = False
                     continue
 
 
-    def determineTags(self) -> list[str]:        
-        assert self.lines
-        tags = []
-        for line in self.lines:
-            if re.match("^ *#[A-Za-z]+", line):
-                tagsInLine = [x.strip(' ') for x in line[1:].split('#')]
-                tags.extend(tagsInLine)
-        return tags
-
-
-    def determineYamlSection(self) -> str:
-        tags = self.determineTags()
-        for index, tag in enumerate(tags):
-            # tag immediately after the IndexEntry entry tag signifies the section, see ((XMWFBBI))
-            if tag == 'IndexEntry':
-                return tags[index+1]
-
-    def extractYaml(self) -> dict[str,str]:
-        return extractYaml(self.lines)
-
-
-    def addMissingTranscripts(self, transcriptIndex: TranscriptIndex, transcripts: dict[str, TranscriptPage]) -> None:
+    def addMissingTranscripts(self, transcripts: dict[str, TranscriptPage]) -> None:
         self.updateHeadersAndOccurrences(transcripts)
         
-        linesToAppend = []
+        textLinesToAppend = []
 
         # there's not necessarily a yaml section on the page
-        yamlDict = self.extractYaml()
-        excludeStrings = yamlDict['ignore-transcript-for-crossref'] if (yamlDict and 'ignore-transcript-for-crossref' in yamlDict) else []
+        excludeStrings = value if (value := self.getYamlValue('ignore-transcript-for-crossref')) else []
 
         for transcriptName in transcripts.keys():
             if not transcriptName in self.transcriptsSet:
@@ -230,24 +190,14 @@ class IndexEntryPage:
                         break
 
                 if include:
-                    occurrences = transcriptPage.collectTermLinks(self.indexEntry, self.citationLinkTargets)
+                    occurrences = transcriptPage.collectTermLinks(self.notename, self.citationLinkTargets)
                     if occurrences:
                         headerLine = canonicalHeaderLineFromParams(None, f"{ transcriptPage.retreatname}: {transcriptPage.talkname}", transcriptName, None, None, None)
-                        linesToAppend.append('')
-                        linesToAppend.append(headerLine)
-                        linesToAppend.append(f"_occurrences: {occurrences}_")
+                        textLinesToAppend.append('')
+                        textLinesToAppend.append(headerLine)
+                        textLinesToAppend.append(f"_occurrences: {occurrences}_")
 
-        if linesToAppend:
+        if textLinesToAppend:
             from datetime import datetime
-            self.lines.append("\n#### added " + datetime.now().strftime("%d.%m.%y %H:%M:%S"))
-            self.lines.extend(linesToAppend)
-
-
-    def save(self, sfnIndexEntryMd = None):
-        assert self.lines, "missing lines to save to index entry page"
-        if not sfnIndexEntryMd:
-            sfnIndexEntryMd = self.sfnIndexEntryMd
-        # TODO: might not be necessary to write anything
-        saveLinesToTextFile(sfnIndexEntryMd, self.lines)
-
-
+            self.markdownLines.append("\n#### added " + datetime.now().strftime("%d.%m.%y %H:%M:%S"))
+            self.markdownLines.extend(textLinesToAppend)

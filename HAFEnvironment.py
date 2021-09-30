@@ -129,6 +129,10 @@ class HAFEnvironment():
     def getListFilename(self, talkname):
         return self.determineFilenameFromTalkname(self.collectListFilenames(), talkname)
 
+    def getIndexEntryFilename(self, indexEntryName: str):
+        if indexEntryName.endswith('.md'): indexEntryName = basenameWithoutExt(indexEntryName)
+        return os.path.join(self.dirIndex, indexEntryName + '.md')
+
 
     def createTranscriptFilename(self, talkname):
         sfnPDF = self.getPDFFilename(talkname)

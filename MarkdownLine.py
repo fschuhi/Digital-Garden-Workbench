@@ -294,6 +294,15 @@ class MarkdownLines(Iterable[MarkdownLine]):
     def __len__(self):
         return len(self.markdownLines)
 
+    def append(self, text) -> MarkdownLine:
+        mlNew = MarkdownLine(text)
+        self.markdownLines.append(mlNew)
+        return mlNew
+
+    def extend(self, lines: list[str]):
+        for line in lines:
+            self.append(line)
+
 
     def asText(self) -> str:
         return '\n'.join( [markdownLine.text for markdownLine in self.markdownLines] ) + '\n'

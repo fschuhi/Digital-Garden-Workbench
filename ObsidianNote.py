@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
-from consts import HAF_YAML
-from HAFEnvironment import HAFEnvironment
 import os
 import yaml
 from util import *
 from MarkdownLine import MarkdownLine, MarkdownLines
-from typing import Tuple
 from util import *
 
 
@@ -29,6 +26,7 @@ class ObsidianNote:
 
         self.path = path
         self.filename = os.path.splitext(os.path.basename(path))[0]
+        self.notename = basenameWithoutExt(self.filename)
 
         textLines = loadLinesFromTextFile(path)
 
@@ -68,6 +66,15 @@ class ObsidianNote:
 
     def assignMarkdownLines(self, markdownLines: MarkdownLines):
         self.text = markdownLines.asText()
+
+
+    def determineTags(self) -> list[str]:        
+        tags = []
+        for ml in self.markdownLines:
+            if re.match("^ *#[A-Za-z]+", ml.text):
+                tagsInLine = [x.strip(' ') for x in ml.text[1:].split('#')]
+                tags.extend(tagsInLine)
+        return tags
 
 
     def save(self, path=None):

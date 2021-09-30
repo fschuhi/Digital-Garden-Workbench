@@ -223,16 +223,15 @@ def updateSummary(haf, talkName, transcriptModel, sfn=None):
 
 def addMissingCitations(haf: HAFEnvironment, indexEntry, transcriptIndex, transcriptModel):
     # ACHTUNG: index entry is case sensitive!
-    indexEntryPage = IndexEntryPage(haf.dirIndex, indexEntry)
-    indexEntryPage.loadIndexEntryMd()
+    indexEntryPage = IndexEntryPage(haf.getIndexEntryFilename(indexEntry))
 
     #filenames = haf.collectTranscriptFilenamesForRetreat('Vajra Music')
     filenames = haf.collectTranscriptFilenames()
-    transcripts = createTranscriptsDictionary(filenames, transcriptModel)
 
     indexEntryPage.updateCitations(transcriptModel)
 
-    indexEntryPage.addMissingTranscripts(transcriptIndex, transcripts)
+    transcripts = createTranscriptsDictionary(filenames, transcriptModel)
+    indexEntryPage.addMissingTranscripts(transcripts)
     indexEntryPage.save()
 
 

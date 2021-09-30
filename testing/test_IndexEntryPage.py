@@ -4,7 +4,6 @@ import unittest
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 
 from TranscriptIndex import TranscriptIndex
-from TranscriptModel import TranscriptModel
 from IndexEntryPage import IndexEntryPage, IndexEntryPageHeaderParser, CitationParagraphParser, canonicalHeaderLineFromParams
 from HAFEnvironment import HAFEnvironment
 
@@ -95,24 +94,20 @@ class Test_IndexEntryPage(unittest.TestCase):
 
 
     def test_determineTags(self):
-        indexEntryPage = IndexEntryPage(self.haf.dirIndex, 'Inertia')
-        indexEntryPage.loadIndexEntryMd()
+        indexEntryPage = IndexEntryPage(self.haf.getIndexEntryFilename('Inertia'))
         tags = indexEntryPage.determineTags()
         self.assertListEqual(tags, ['IndexEntry', 'Robology'])
 
 
     def test_determineYamlSection(self):
-        indexEntryPage = IndexEntryPage(self.haf.dirIndex, 'Inertia')
-        indexEntryPage.loadIndexEntryMd()
+        indexEntryPage = IndexEntryPage(self.haf.getIndexEntryFilename('Inertia'))
         self.assertEqual(indexEntryPage.determineYamlSection(), 'Robology')
 
 
     def test_extractYaml(self):
-        indexEntryPage = IndexEntryPage(self.haf.dirIndex, 'Energy Body')
-        indexEntryPage.loadIndexEntryMd()
-        yamlDict = indexEntryPage.extractYaml()
-        self.assertTrue('ignore-transcript-for-crossref' in yamlDict)
-        ignored = yamlDict['ignore-transcript-for-crossref']
+        indexEntryPage = IndexEntryPage(self.haf.getIndexEntryFilename('Energy Body'))
+        self.assertTrue('ignore-transcript-for-crossref' in indexEntryPage.yaml)
+        ignored = indexEntryPage.getYamlValue('ignore-transcript-for-crossref')
         self.assertListEqual(ignored, ['The Way of Non-Clinging', 'Preliminaries Regarding Voice, Movement, and Gesture - Part 5', '0126 Eros Unfettered Part 4'])
 
 

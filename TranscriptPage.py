@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 
 from ObsidianNote import ObsidianNote, ObsidianNoteType
-from MarkdownLine import MarkdownLine, MarkdownLines
-from genericpath import exists
+from MarkdownLine import MarkdownLine
 from util import *
 
 import os
 import re
 
 from TranscriptModel import TranscriptModel
-
-from typing import Tuple
-
-# ErosUnfetteredPath = 's:/Dropbox/Papers/_Markdown/Eros Unfettered/'
 
 # *********************************************
 # class TranscriptPage
@@ -24,6 +19,15 @@ class TranscriptPage(ObsidianNote):
 
         self._bufferParagraphs = False
         self.bufferedParagraphs = None
+
+
+    @property 
+    def retreatname(self):
+        return os.path.normpath(self.path).split(os.path.sep)[-3]
+
+    @property
+    def talkname(self):
+        return re.match(r"^([0-9]+ )?(.+)", self.filename).group(2)
 
 
     @classmethod
@@ -71,15 +75,6 @@ class TranscriptPage(ObsidianNote):
         tmp = CreateTempfile()
         saveLinesToTextFile(tmp.name, textLines)
         return cls(tmp.name)
-        
-
-    @property 
-    def retreatname(self):
-        return os.path.normpath(self.path).split(os.path.sep)[-3]
-
-    @property
-    def talkname(self):
-        return re.match(r"^([0-9]+ )?(.+)", self.filename).group(2)
 
 
     @property
