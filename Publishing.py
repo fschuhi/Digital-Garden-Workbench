@@ -84,6 +84,12 @@ class Publishing:
         self.mirrorDir(source.dirIndex, target.dirIndex)
 
 
+    def mirrorHelp(self):
+        source = self.hafWork
+        target = self.hafPublish
+        self.mirrorDir(source.dirHelp, target.dirHelp)
+
+
     def copyFile(self, source, target=None):
         if not target:
             # only call w/ 1 param to indicate that the file should be copied to the same position in the publish tree

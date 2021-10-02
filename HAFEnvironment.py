@@ -36,6 +36,7 @@ class HAFEnvironment():
         self.vault = ObsidianVault(self.root)
         self.retreatNames = self.yaml['Retreats']
         self.dirIndex = os.path.join(self.root, 'Index')
+        self.dirHelp = os.path.join(self.root, 'Help')
 
 
     def allFiles(self):

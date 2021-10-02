@@ -513,12 +513,12 @@ def transferFilesToPublish():
 
     #print("2")
     publishing.mirrorIndex()
+    publishing.mirrorHelp()
 
     #print("3")
     publishing.copyFile("Rob Burbea/Retreats.md", "/")
     publishing.copyFile("Rob Burbea/Index.md", "/")
     publishing.copyFile("Brainstorming/NoteStar.md", "/")
-    publishing.copyFile("Rob Burbea/Digital Garden.md", "/")
     publishing.copyFile("Rob Burbea/Gardening.md", "/")
     publishing.copyFile("Rob Burbea/Diacritics.md", "/")
     publishing.copyFile("Rob Burbea/Rob Burbea.md", "/")
@@ -529,7 +529,7 @@ def transferFilesToPublish():
     publishing.copyFile("Images/Digital Garden/link.png", "Images")
 
     modifyFullstops()
-    
+
     # we do not touch publish.css
     #print("4")
     # now all files are exact copies of the _Markdown vault
@@ -645,7 +645,7 @@ if __name__ == "__main__":
 
     transcriptIndex = TranscriptIndex(RB_YAML)
 
-    if script in ['reindexTranscripts', 'updateSummary', 'addMissingCitations']:
+    if script in ['reindexTranscripts', 'updateSummary', 'addMissingCitations', 'transferFilesToPublish']:
         transcriptModel = TranscriptModel(transcriptIndex)
 
     if script in ['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml', 'replaceNoteLink']:
@@ -655,11 +655,24 @@ if __name__ == "__main__":
     # publish
 
     if script == 'transferFilesToPublish':
+        # in principle that's a good idea: make sure that the main vault is in a finalised shape
+        # but this may take time, especially when we work on a particular retreats or talk - - no need to update everything
+
+        # for retreatName in haf.retreatNames:
+        #     applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel)
+        # print("reindexed")
+        
+        # talkNames = haf.collectSummaryTalknames()
+        # for talkname in talkNames:
+        #     updateSummary(haf, talkname, transcriptModel)
+        # print("summaries updated")
+
+        updateParagraphsListPages(haf)
         transferFilesToPublish()
         replaceLinksInAllSummaries()
         replaceLinksInAllRootFilenames()
         replaceLinksInSpecialFiles()
-        print("transferred")
+        print("files transferred to publish vault")
 
 
     # Kanban stuff
