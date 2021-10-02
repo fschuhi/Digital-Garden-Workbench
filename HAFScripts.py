@@ -528,6 +528,11 @@ def transferFilesToPublish():
     publishing.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
     publishing.copyFile("Images/Digital Garden/link.png", "Images")
 
+    publishing.copyFile("Images/Digital Garden/help1.png", "Images")
+    publishing.copyFile("Images/Digital Garden/help2.png", "Images")
+    publishing.copyFile("Images/Digital Garden/help3.png", "Images")
+    publishing.copyFile("Images/Digital Garden/help4.png", "Images")
+
     modifyFullstops()
 
     # we do not touch publish.css
