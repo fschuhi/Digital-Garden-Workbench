@@ -4,6 +4,7 @@ from MarkdownLine import MarkdownLine
 from ObsidianNote import ObsidianNote, ObsidianNoteType
 from TranscriptIndex import TranscriptIndex
 from genericpath import exists
+from TranscriptModel import TranscriptModel
 from util import *
 
 from HAFEnvironment import HAFEnvironment, determineTalkname
@@ -173,7 +174,7 @@ class TranscriptSummaryPage(ObsidianNote):
 # factory
 # *********************************************
 
-def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptIndex, sfn: str = None):
+def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn: str = None):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)    
     transcriptPage = TranscriptPage(sfnTranscriptMd)
     transcriptPage.applySpacy(model)
@@ -182,17 +183,32 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptIndex, 
 
     pdfName = basenameWithoutExt(sfnPdf)
     transcriptName = basenameWithoutExt(sfnTranscriptMd)
+    retreatName = transcriptPage.retreatname
     markdownLines = transcriptPage.markdownLines
     
     newLines = []
     newLines.extend([ \
-        "#TranscriptSummary\n", \
-        f"## {talkName}\n", \
-        f"Transcript note: [[{transcriptName}]]", \
+        "---", \
+        "obsidianUIMode: preview", \
+        "ParagraphsListPage: false", \
+        "---", \
+        "#TranscriptSummary", \
+        "", \
+        f"[[prev|prev 🡄]] | [[{retreatName}|🡅]] | [[next|🡆 next]]", \
+        "", \
+        f"Series: {retreatName}\n", \
+        f"Transcript: [[{transcriptName}]]", \
         f"Transcript PDF: [[{pdfName}.pdf]]", \
+        "", \
+        "![[audio goes here.mp3]]"
+        "", \
+        "## Index", \
+        "<span class=\"counts\">_[[some keyword]] (99)_</span>"
         "<br/>\n", \
-        "### Paragraphs\n", \
+        "### Paragraphs", \
+        "", \
         ])
+        
     for markdownLine  in markdownLines:
         (pageNr, paragraphNr, _) = parseParagraph(markdownLine.text)
         if pageNr:

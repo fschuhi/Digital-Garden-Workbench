@@ -1,10 +1,19 @@
+---
+obsidianUIMode: preview
+ParagraphsListPage: false
+---
 #TranscriptSummary
 
-## Preliminaries Regarding Voice, Movement, and Gesture - Part 1
+[[prev|prev 🡄]] | [[2020 Vajra Music|🡅]] | [[next|🡆 next]]
 
-Transcript note: [[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1]]
+Series: 2020 Vajra Music
+
+Transcript: [[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1]]
 Transcript PDF: [[2020_0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1.pdf]]
-<br/>
+
+![[audio goes here.mp3]]
+## Index
+<span class="counts">_[[some keyword]] (99)_</span><br/>
 
 ### Paragraphs
 

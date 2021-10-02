@@ -94,6 +94,7 @@ class TranscriptPage(ObsidianNote):
             paragraphs =[(v[0], v[1], markdownLine) for markdownLine in self.markdownLines if (v := parseParagraph(markdownLine.text)) != (None, None, None)]
         return self.bufferedParagraphs if self.bufferedParagraphs else paragraphs;
 
+
     def findParagraph(self, thePageNr, theParagraphNr) -> MarkdownLine:
         for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
             if (pageNr == thePageNr) and (paragraphNr == theParagraphNr):

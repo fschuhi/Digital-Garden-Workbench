@@ -73,7 +73,10 @@ Persons:
       - /Gandhi, Mahatma
       - Gandhi
   - Mary
-  - Mother Theresa
+  - Mother Teresa:
+      - Mother Theresa
+  - David Beckham:
+      - /Beckham, David
   - Naomi Shihab Nye:
       - /Nye, Naomi Shibab
   - Payutto
@@ -783,6 +786,8 @@ Robology:
       - sense of the energy body
       - energy body sense
       - energy body awareness
+      - subtle body
+      - subtle body sense
   - Eros:
       - erotic love
       - cosmic eros
@@ -886,7 +891,8 @@ Robology:
       - elements of the imaginal
       - intrapsychic imaginal figure
       - constellation of the imaginal
-  - Immeasurability
+  - Immeasurability:
+      - immeasurable
   - Inertia
   - Infinity:
       - the infinite
@@ -923,6 +929,7 @@ Robology:
       - calling
       - vocation
   - Perception:
+      - perceptions
       - appearance
       - appearances
       - appearing
@@ -934,6 +941,8 @@ Robology:
       - pleasant quality
       - well-being
       - okayness
+  - Juiciness:
+      - juicy
   - Poetry:
       - psychology without poetry
   - Preliminaries:
@@ -1020,7 +1029,8 @@ Robology:
       - eros psyche logos dynamic
       - eros-psyche-logos
       - eros psyche logos
-  - Spaciousness
+  - Spaciousness:
+      - spacious
   - Spiritual circles
   - Spirituality
   - Steadiness:
@@ -1098,6 +1108,7 @@ Robology:
       - wonders
       - wonder in being
       - cultivating wonder
+  - Future thinking
 
 Retreats:
   - Eros Unfettered

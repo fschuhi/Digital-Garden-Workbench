@@ -214,7 +214,8 @@ def updateSummary(haf, talkName, transcriptModel, sfn=None):
     summaryPage = TranscriptSummaryPage(sfnSummaryMd)
     summaryPage.update(transcriptPage, targetType='#^')
     
-    summaryPage.save(sfn, sfnSummaryMd)
+    if not sfn: sfn = sfnSummaryMd
+    summaryPage.save(sfn)
 
 
 # *********************************************
@@ -463,8 +464,8 @@ def collectParagraphsListPage(talkname) -> list[str]:
     paragraphs.append(f"### Paragraphs in [[{talkname}]]")
     sfnSummaryMd = haf.getSummaryFilename(talkname)
     summary = TranscriptSummaryPage(sfnSummaryMd)
-    for line in summary.lines:
-        if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", line)):
+    for ml in summary.markdownLines:
+        if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", ml.text)):
             description = match.group("description") # type: str
             headerLink = determineHeaderTarget(description)
             level = match.group('level')
@@ -473,7 +474,7 @@ def collectParagraphsListPage(talkname) -> list[str]:
                 link = f"- [[{talkname}#{headerLink}|{description}{fullstop}]]"
                 paragraphs.append(link)
             elif len(level) >= 3:
-                paragraphs.append(line)
+                paragraphs.append(ml.text)
             else:
                 pass    
     return paragraphs
@@ -803,6 +804,9 @@ if __name__ == "__main__":
         assert retreatName
         createNewTranscriptSummariesForRetreat(haf, retreatName)
         print("created")
+
+
+    # modifiying summaries
 
     elif script == 'updateBreadcrumbs':
         updateBreadcrumbsInSummaries()

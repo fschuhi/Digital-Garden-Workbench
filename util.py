@@ -57,10 +57,16 @@ def deitalicizeTermsWithDiacritics(text: str) -> str:
 # save/load text files
 # *********************************************
 
+trick = {} # type: dict[str,str]
+
 def loadStringFromTextFile(sfn) -> str:
-    with open(sfn, 'r', encoding='utf-8') as f:
-        text = f.read()
-        f.close
+    if sfn in trick:
+        text = trick[sfn]
+    else:
+        with open(sfn, 'r', encoding='utf-8') as f:
+            text = f.read()
+            f.close
+        trick[sfn] = text
     return text
 
 
@@ -69,12 +75,16 @@ def loadLinesFromTextFile(sfn) -> list[str]:
 
 
 def saveStringToTextFile(sfn, text: str):
+    trick[sfn] = text
     with open(sfn, 'w', encoding='utf-8', newline='\n') as f:
         print(text, file=f, end='')
         f.close()
 
 
 def saveLinesToTextFile(sfn, lines: list[str]):
+    #text = '\n'.join(lines)[:-2]
+    #saveStringToTextFile(sfn, text)
+    #return
     with open(sfn, 'w', encoding='utf-8', newline='\n') as f:
         #f.writelines(lines)
         for line in lines:
