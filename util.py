@@ -82,15 +82,8 @@ def saveStringToTextFile(sfn, text: str):
 
 
 def saveLinesToTextFile(sfn, lines: list[str]):
-    #text = '\n'.join(lines)[:-2]
-    #saveStringToTextFile(sfn, text)
-    #return
-    with open(sfn, 'w', encoding='utf-8', newline='\n') as f:
-        #f.writelines(lines)
-        for line in lines:
-            print(line, file=f)
-        f.close()
-
+    text = '\n'.join(lines) + '\n'
+    saveStringToTextFile(sfn, text)
 
 
 # *********************************************
