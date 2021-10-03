@@ -19,10 +19,6 @@ from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
 import pyperclip
 
-#import sys
-#import codecs
-# sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-
 # *********************************************
 # Talk summaries (Kanban)
 # *********************************************
@@ -78,54 +74,6 @@ def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName,
                     page = TranscriptPage(sfnTranscriptMd)
                     page.applySpacy(transcriptModel)
                     page.save(sfnTranscriptMd)
-
-
-def replaceLinks(haf_publish, filenames, replaceIndex):
-    website = haf_publish.website()
-    
-    indexEntryNameSet = haf_publish.collectIndexEntryNameSet()
-    transcriptNameSet = haf_publish.collectTranscriptNameSet()
-
-    def filterLinks(match):
-        note = match.group('note')
-        assert note
-        target = match.group('target')
-        
-        # convert links on summary to transcript
-        if target and target.startswith('#^') and note in transcriptNameSet:
-            return True
-
-        # convert any index entry
-        if replaceIndex and (note in indexEntryNameSet):
-            return True
-
-        return False
-
-    for filename in filenames:
-        # print(baseNameWithoutExt(sfnSummaryMd))
-        text = loadStringFromTextFile(filename)
-        markdown = MarkdownLine(text)
-        markdown.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filterLinks)}")
-        saveStringToTextFile(filename, markdown.text)
-
-
-def replaceLinksInAllSummaries():
-    haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
-    #filenames = list(haf_publish.summaryFilenameByTalk.values())
-    filenames = haf_publish.collectSummaryFilenames()
-    replaceLinks(haf_publish, filenames, True)
-
-def replaceLinksInAllRootFilenames():
-    haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
-    #filenames = list(haf_publish.rootFilenameByTalk.values())
-    filenames = haf_publish.collectNotesInRetreatsFolders()
-    replaceLinks(haf_publish, filenames, False)
-
-def replaceLinksInSpecialFiles():
-    haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
-    index = os.path.join(haf_publish.root, 'Index.md')
-    assert os.path.exists(index)
-    replaceLinks(haf_publish, [index], True)
 
 
 # *********************************************
@@ -204,6 +152,92 @@ def createNewTranscriptSummariesForRetreat(haf: HAFEnvironment, retreatName):
             else:
                 # it's a transcript page in the making - - not indexed yet, thus we can't do a summary on it yet
                 pass
+
+
+def addAudioLinksToSummaryWithDecoratedTranscript(path):
+    summary = TranscriptSummaryPage(path)
+    talkname = talknameFromFilename(path)
+    transcriptFilename = haf.getTranscriptFilename(talkname)
+    transcript = TranscriptPage(transcriptFilename)
+
+    summaryLineParser = SummaryLineParser()
+
+    index = 0
+    timestampTranscript = None
+    audioDate = audioMiddle = audioId = None
+    foundFirstAudio = False
+    changed = False
+    mlTranscriptHeader = None
+    while True:
+        if index >= len(summary.markdownLines):
+            break
+        ml = summary.markdownLines[index]
+
+        # assumption: first audio link in the summary points to the audio for this talk
+        if not foundFirstAudio:
+            if (matchAudio := parseAudioLink(ml.text)):
+                foundFirstAudio = True
+                audioDate = matchAudio.group('date')
+                audioMiddle = matchAudio.group('middle')
+                audioId = matchAudio.group('audioid')
+
+        if timestampTranscript:
+            assert foundFirstAudio
+            if ml.text:
+                audioLink = createAudioLink(audioDate, audioMiddle, audioId, timestampTranscript)
+
+                matchAudio = parseAudioLink(ml.text)
+                if matchAudio and matchAudio.group('audioid') == audioId:
+                    oldTimestampSummary = canonicalTimestamp(matchAudio.group('timestamp'))
+                    if oldTimestampSummary == timestampTranscript:
+                        ml.text = audioLink
+                    else:
+                        print(f"retained {oldTimestampSummary} (transcript: {timestampTranscript})")
+                else:
+                    summary.markdownLines.insert(index, audioLink)
+                    summary.markdownLines.insert(index+1, "")
+                    index += 2
+                timestampTranscript = None
+
+        # other matchers which manipulate timestampTranscript go here
+
+        if summaryLineParser.match(ml) == SummaryLineMatch.HEADER:
+            # collect for ((WMZAZUR)) below
+            mlTranscriptHeader = ml
+
+        if summaryLineParser.match(ml) == SummaryLineMatch.PARAGRAPH_COUNTS:
+            # pull the timestamp from the beginning of the transcript paragraph
+            mlTranscript = transcript.findParagraph(summaryLineParser.pageNr, summaryLineParser.paragraphNr)
+            assert mlTranscript
+            match = re.match(r"\[((?P<timestamp>[0-9:]+)|(?P<header>[A-Za-z][^]]+)) *\]", mlTranscript.text)
+            if match:
+                timestampTranscript = match.group('timestamp') if match else None
+                headerTranscript = match.group('header') if match else None
+                if headerTranscript:
+                    assert not timestampTranscript
+
+                    # ((WMZAZUR)) make sure that we have (the right) header as object
+                    assert mlTranscriptHeader
+                    assert summaryLineParser.headerLine == mlTranscriptHeader.text
+
+                    # we only overwrite ... headers (i.e. not yet entered)                                
+                    if summaryLineParser.headerText == '...':
+                        # go back up and change the header
+                        mlTranscriptHeader.text = f"{summaryLineParser.level * '#'} {headerTranscript}"
+                    else:
+                        print(f"retained header for {summaryLineParser.blockId}")
+                    mlTranscriptHeader = None
+
+                # regardless of the type of match (timestamp or header), remove the paragraph decoration from the transcript
+                (_, end) = match.span()
+                mlTranscript.text = mlTranscript.text[end+1:]
+                changed = True
+
+        index += 1
+
+    if changed:
+        summary.save()
+        transcript.save()
 
 
 def updateSummary(haf, talkName, transcriptModel, sfn=None):
@@ -501,180 +535,6 @@ def updateParagraphsListPages(haf: HAFEnvironment):
 
 
 # *********************************************
-# Publishing
-# *********************************************
-
-def transferFilesToPublish():
-    #print("0")
-    publishing = Publishing()
-
-    # each retreat is mirrored, for some subdirs also paying attention to file extensions
-    #print("1")
-    publishing.mirrorRetreatFiles()
-
-    #print("2")
-    publishing.mirrorIndex()
-    publishing.mirrorHelp()
-
-    #print("3")
-    publishing.copyFile("Rob Burbea/Retreats.md", "/")
-    publishing.copyFile("Rob Burbea/Index.md", "/")
-    publishing.copyFile("Brainstorming/NoteStar.md", "/")
-    publishing.copyFile("Rob Burbea/Gardening.md", "/")
-    publishing.copyFile("Rob Burbea/Diacritics.md", "/")
-    publishing.copyFile("Rob Burbea/Rob Burbea.md", "/")
-
-    publishing.copyFile("Images/Digital Garden/digital-garden-big.png", "Images")
-    publishing.copyFile("Images/Digital Garden/digital-garden-small.png", "Images")
-    publishing.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
-    publishing.copyFile("Images/Digital Garden/link.png", "Images")
-
-    publishing.copyFile("Images/Digital Garden/help1.png", "Images")
-    publishing.copyFile("Images/Digital Garden/help2.png", "Images")
-    publishing.copyFile("Images/Digital Garden/help3.png", "Images")
-    publishing.copyFile("Images/Digital Garden/help4.png", "Images")
-
-    modifyFullstops()
-
-    # we do not touch publish.css
-    #print("4")
-    # now all files are exact copies of the _Markdown vault
-    # need to convert audio links and admonitions
-    publishing.convertAllMarkdownFiles()
-    #print("5")
-
-
-def convertAllMarkdownFiles():
-    # standalone conversion for summary files
-    publishing = Publishing()
-    publishing.convertAllMarkdownFiles()
-
-
-def modifyFullstops():
-    summaryFilenames = haf.collectSummaryFilenames()
-    for summaryFilename in summaryFilenames:
-        summary = TranscriptSummaryPage(summaryFilename)
-        headerTargets = summary.collectParagraphHeaderTargets()
-        talkname = talknameFromFilename(summaryFilename)
-
-        # intentionally from the publish 
-        transcriptFilename = haf_publish.getTranscriptFilename(talkname)
-        assert transcriptFilename
-
-        transcript = TranscriptPage(transcriptFilename)
-        for markdownLine in transcript.markdownLines: # type: MarkdownLine
-            blockid = markdownLine.getBlockId()
-            if not blockid:
-                # transcript has not only paragraphs
-                pass
-            else:
-                if markdownLine.text.startswith('#'):
-                    # make sure we don't accidently capture the header (which also has the block id, excluding leading ^, though)
-                    pass
-                else:
-                    if blockid not in headerTargets:
-                        # we might have left out this particular paragraph from the summary
-                        pass
-                    else:
-                        headerTarget = headerTargets[blockid]
-                        if not headerTarget:
-                            # probably ... (yet-missing paragraph description)
-                            pass
-                        else:
-                            match = re.match(r'(.+)([.?!"]) \^' + blockid + "$", markdownLine.text)
-                            if match:
-                                linkToSummary = f"[[{talkname}#{headerTarget}|{match.group(2)}]]"  # ∘∙⦿꘎᙮
-                                markdownLine.text = f"{match.group(1)}{linkToSummary} ^{blockid}"
-        transcript.save(transcriptFilename)
-
-
-def addAudioLinksToSummaryWithDecoratedTranscript(path):
-    summary = TranscriptSummaryPage(path)
-    talkname = talknameFromFilename(path)
-    transcriptFilename = haf.getTranscriptFilename(talkname)
-    transcript = TranscriptPage(transcriptFilename)
-
-    summaryLineParser = SummaryLineParser()
-
-    index = 0
-    timestampTranscript = None
-    audioDate = audioMiddle = audioId = None
-    foundFirstAudio = False
-    changed = False
-    mlTranscriptHeader = None
-    while True:
-        if index >= len(summary.markdownLines):
-            break
-        ml = summary.markdownLines[index]
-
-        # assumption: first audio link in the summary points to the audio for this talk
-        if not foundFirstAudio:
-            if (matchAudio := parseAudioLink(ml.text)):
-                foundFirstAudio = True
-                audioDate = matchAudio.group('date')
-                audioMiddle = matchAudio.group('middle')
-                audioId = matchAudio.group('audioid')
-
-        if timestampTranscript:
-            assert foundFirstAudio
-            if ml.text:
-                audioLink = createAudioLink(audioDate, audioMiddle, audioId, timestampTranscript)
-
-                matchAudio = parseAudioLink(ml.text)
-                if matchAudio and matchAudio.group('audioid') == audioId:
-                    oldTimestampSummary = canonicalTimestamp(matchAudio.group('timestamp'))
-                    if oldTimestampSummary == timestampTranscript:
-                        ml.text = audioLink
-                    else:
-                        print(f"retained {oldTimestampSummary} (transcript: {timestampTranscript})")
-                else:
-                    summary.markdownLines.insert(index, audioLink)
-                    summary.markdownLines.insert(index+1, "")
-                    index += 2
-                timestampTranscript = None
-
-        # other matchers which manipulate timestampTranscript go here
-
-        if summaryLineParser.match(ml) == SummaryLineMatch.HEADER:
-            # collect for ((WMZAZUR)) below
-            mlTranscriptHeader = ml
-
-        if summaryLineParser.match(ml) == SummaryLineMatch.PARAGRAPH_COUNTS:
-            # pull the timestamp from the beginning of the transcript paragraph
-            mlTranscript = transcript.findParagraph(summaryLineParser.pageNr, summaryLineParser.paragraphNr)
-            assert mlTranscript
-            match = re.match(r"\[((?P<timestamp>[0-9:]+)|(?P<header>[A-Za-z][^]]+)) *\]", mlTranscript.text)
-            if match:
-                timestampTranscript = match.group('timestamp') if match else None
-                headerTranscript = match.group('header') if match else None
-                if headerTranscript:
-                    assert not timestampTranscript
-
-                    # ((WMZAZUR)) make sure that we have (the right) header as object
-                    assert mlTranscriptHeader
-                    assert summaryLineParser.headerLine == mlTranscriptHeader.text
-
-                    # we only overwrite ... headers (i.e. not yet entered)                                
-                    if summaryLineParser.headerText == '...':
-                        # go back up and change the header
-                        mlTranscriptHeader.text = f"{summaryLineParser.level * '#'} {headerTranscript}"
-                    else:
-                        print(f"retained header for {summaryLineParser.blockId}")
-                    mlTranscriptHeader = None
-
-                # regardless of the type of match (timestamp or header), remove the paragraph decoration from the transcript
-                (_, end) = match.span()
-                mlTranscript.text = mlTranscript.text[end+1:]
-                changed = True
-
-        index += 1
-
-    if changed:
-        summary.save()
-        transcript.save()
-
-
-# *********************************************
 # main
 # *********************************************
 
@@ -767,10 +627,12 @@ if __name__ == "__main__":
         # print("summaries updated")
 
         updateParagraphsListPages(haf)
-        transferFilesToPublish()
-        replaceLinksInAllSummaries()
-        replaceLinksInAllRootFilenames()
-        replaceLinksInSpecialFiles()
+
+        publishing = Publishing()
+        publishing.transferFilesToPublish()
+        publishing.replaceLinksInAllSummaries()
+        publishing.replaceLinksInAllRootFilenames()
+        publishing.replaceLinksInSpecialFiles()
         print("files transferred to publish vault")
 
 
@@ -859,7 +721,8 @@ if __name__ == "__main__":
     # conversion helpers
 
     elif isScript('convertAllMarkdownFiles'):
-        convertAllMarkdownFiles()
+        publishing = Publishing()
+        publishing.convertAllMarkdownFiles()
         print("converted")
 
     elif isScript("canonicalize"):
@@ -948,11 +811,6 @@ if __name__ == "__main__":
                     newline = f"[[{prevdate}|{prevday} 🡄]] | [[{nextdate}|🡆 {nextday}]]"
                     lines[index] = newline
             saveLinesToTextFile(sfn, lines)
-
-    elif isScript('modifyFullstops'):
-        modifyFullstops()
-        print("fullstops replaced")
-
 
     elif isScript('addAudioLinks'):
         assert talkname

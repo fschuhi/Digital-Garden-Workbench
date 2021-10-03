@@ -2,6 +2,7 @@
 
 import os
 import re
+import shutil
 import yaml
 
 # *********************************************
@@ -90,13 +91,6 @@ def saveLinesToTextFile(sfn, lines: list[str]):
 # file system
 # *********************************************
 
-def createTempfile():
-    import tempfile
-    tmp = tempfile.TemporaryFile('w+t')
-    tmp.close()
-    return tmp
-
-
 def basenameWithoutExt(sfn):
     return os.path.splitext(os.path.basename(sfn))[0]
 
@@ -142,6 +136,36 @@ def splitall(path):
             path = parts[0]
             allparts.insert(0, parts[1])
     return allparts
+
+
+def createTempfile():
+    import tempfile
+    tmp = tempfile.TemporaryFile('w+t')
+    tmp.close()
+    return tmp
+
+
+def mirrorDir(source, target, ext='.md'):
+    if not (os.path.isdir(target) and os.path.isdir(source)):
+        return
+
+    nAdded = 0
+
+    filenamesToDelete = [f for f in collectFilenames(target) if os.path.isfile(f)]
+    for filename in filenamesToDelete:
+        os.remove(filename)
+
+    filenames = collectFilenames(source)
+    if ext:
+        filenames = filterExt(filenames, ext)
+    for filename in filenames:
+        # copy2 because want to copy all metadata, otherwise no automatic pickup by the Obsidian display frontend
+        # would also work w/ copy and copyfile, though
+        #print(filename, target)
+        shutil.copy(filename, target)
+        nAdded += 1
+
+    return nAdded
 
 
 # *********************************************

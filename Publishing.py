@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
+from MarkdownLine import MarkdownLine
+from TranscriptPage import TranscriptPage
+from TranscriptSummaryPage import TranscriptSummaryPage
 from util import *
-from HAFEnvironment import HAFEnvironment
+from HAFEnvironment import HAFEnvironment, talknameFromFilename
 from consts import HAF_PUBLISH_YAML, HAF_YAML
 
 import os
@@ -19,66 +22,76 @@ class Publishing:
         self.hafPublish = HAFEnvironment(HAF_PUBLISH_YAML)
 
 
-    def mirrorDir(self, source, target, ext='.md'):
-        if not (os.path.isdir(target) and os.path.isdir(source)):
-            return
+# mirroring
 
-        nAdded = 0
+    def transferFilesToPublish(self):
+        self.mirrorRetreatFiles()
 
-        filenamesToDelete = [f for f in collectFilenames(target) if os.path.isfile(f)]
-        for filename in filenamesToDelete:
-            os.remove(filename)
+        #print("2")
+        self.mirrorIndex()
+        self.mirrorHelp()
 
-        filenames = collectFilenames(source)
-        if ext:
-            filenames = filterExt(filenames, ext)
-        for filename in filenames:
-            # copy2 because want to copy all metadata, otherwise no automatic pickup by the Obsidian display frontend
-            # would also work w/ copy and copyfile, though
-            #print(filename, target)
-            shutil.copy(filename, target)
-            nAdded += 1
+        #print("3")
+        self.copyFile("Rob Burbea/Retreats.md", "/")
+        self.copyFile("Rob Burbea/Index.md", "/")
+        self.copyFile("Brainstorming/NoteStar.md", "/")
+        self.copyFile("Rob Burbea/Gardening.md", "/")
+        self.copyFile("Rob Burbea/Diacritics.md", "/")
+        self.copyFile("Rob Burbea/Rob Burbea.md", "/")
 
-        return nAdded
+        self.copyFile("Images/Digital Garden/digital-garden-big.png", "Images")
+        self.copyFile("Images/Digital Garden/digital-garden-small.png", "Images")
+        self.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
+        self.copyFile("Images/Digital Garden/link.png", "Images")
 
+        self.copyFile("Images/Digital Garden/help1.png", "Images")
+        self.copyFile("Images/Digital Garden/help2.png", "Images")
+        self.copyFile("Images/Digital Garden/help3.png", "Images")
+        self.copyFile("Images/Digital Garden/help4.png", "Images")
 
-    def mirrorRetreatsDir(self, funcSource, funcTarget, ext='.md'):
-        nAdded = 0
+        self.modifyFullstops()
 
-        for retreatName in self.hafWork.retreatNames:            
-            source = funcSource(retreatName)
-            if not os.path.isdir(source):
-                continue
-
-            target = funcTarget(retreatName)
-            assert os.path.isdir(target)
-            nAdded += self.mirrorDir(source, target, ext)
-
-        return nAdded
+        # we do not touch publish.css
+        #print("4")
+        # now all files are exact copies of the _Markdown vault
+        # need to convert audio links and admonitions
+        self.convertAllMarkdownFiles()
 
 
     def mirrorRetreatFiles(self):
+
+        def mirrorRetreatsDir(funcSource, funcTarget, ext='.md'):
+            nAdded = 0
+            for retreatName in self.hafWork.retreatNames:            
+                source = funcSource(retreatName)
+                if not os.path.isdir(source):
+                    continue
+                target = funcTarget(retreatName)
+                assert os.path.isdir(target)
+                nAdded += mirrorDir(source, target, ext)
+            return nAdded
+
         source = self.hafWork
         target = self.hafPublish
         # we intentionally disregard Audio
-        self.mirrorRetreatsDir(lambda r: source.retreatFolder(r), lambda r: target.retreatFolder(r))
-        self.mirrorRetreatsDir(lambda r: source.pdfFolder(r), lambda r: target.pdfFolder(r), '.pdf')
-        self.mirrorRetreatsDir(lambda r: source.imagesFolder(r), lambda r: target.imagesFolder(r), None)
-        self.mirrorRetreatsDir(lambda r: source.transcriptsFolder(r), lambda r: target.transcriptsFolder(r))
-        self.mirrorRetreatsDir(lambda r: source.summariesFolder(r), lambda r: target.summariesFolder(r))
-        self.mirrorRetreatsDir(lambda r: source.listsFolder(r), lambda r: target.listsFolder(r))
+        mirrorRetreatsDir(lambda r: source.retreatFolder(r), lambda r: target.retreatFolder(r))
+        mirrorRetreatsDir(lambda r: source.pdfFolder(r), lambda r: target.pdfFolder(r), '.pdf')
+        mirrorRetreatsDir(lambda r: source.imagesFolder(r), lambda r: target.imagesFolder(r), None)
+        mirrorRetreatsDir(lambda r: source.transcriptsFolder(r), lambda r: target.transcriptsFolder(r))
+        mirrorRetreatsDir(lambda r: source.summariesFolder(r), lambda r: target.summariesFolder(r))
+        mirrorRetreatsDir(lambda r: source.listsFolder(r), lambda r: target.listsFolder(r))
 
 
     def mirrorIndex(self):
         source = self.hafWork
         target = self.hafPublish
-        self.mirrorDir(source.dirIndex, target.dirIndex)
+        mirrorDir(source.dirIndex, target.dirIndex)
 
 
     def mirrorHelp(self):
         source = self.hafWork
         target = self.hafPublish
-        self.mirrorDir(source.dirHelp, target.dirHelp)
+        mirrorDir(source.dirHelp, target.dirHelp)
 
 
     def copyFile(self, source, target=None):
@@ -96,9 +109,12 @@ class Publishing:
         if os.path.isdir(target):
             target = os.path.join(target, os.path.basename(source))
 
+        #shutil.copy2(source, target)
         shutil.copy2(source, target)
 
     
+# audio, admonitions
+
     def convertAllMarkdownFiles(self):
         filenames = filterExt(self.hafPublish.allFiles(), '.md')
         for filename in filenames:
@@ -160,4 +176,90 @@ class Publishing:
             
             newLines.append(line)
         return newLines
+
+
+# fullstops in transcripts
+
+    def modifyFullstops(self):
+        summaryFilenames = self.hafWork.collectSummaryFilenames()
+        for summaryFilename in summaryFilenames:
+            summary = TranscriptSummaryPage(summaryFilename)
+            headerTargets = summary.collectParagraphHeaderTargets()
+            talkname = talknameFromFilename(summaryFilename)
+
+            # intentionally from the publish 
+            transcriptFilename = self.hafPublish.getTranscriptFilename(talkname)
+            assert transcriptFilename
+
+            transcript = TranscriptPage(transcriptFilename)
+            for markdownLine in transcript.markdownLines: # type: MarkdownLine
+                blockid = markdownLine.getBlockId()
+                if not blockid:
+                    # transcript has not only paragraphs
+                    pass
+                else:
+                    if markdownLine.text.startswith('#'):
+                        # make sure we don't accidently capture the header (which also has the block id, excluding leading ^, though)
+                        pass
+                    else:
+                        if blockid not in headerTargets:
+                            # we might have left out this particular paragraph from the summary
+                            pass
+                        else:
+                            headerTarget = headerTargets[blockid]
+                            if not headerTarget:
+                                # probably ... (yet-missing paragraph description)
+                                pass
+                            else:
+                                match = re.match(r'(.+)([.?!"]) \^' + blockid + "$", markdownLine.text)
+                                if match:
+                                    linkToSummary = f"[[{talkname}#{headerTarget}|{match.group(2)}]]"  # ∘∙⦿꘎᙮
+                                    markdownLine.text = f"{match.group(1)}{linkToSummary} ^{blockid}"
+            transcript.save(transcriptFilename)
+
+
+# cut off internal links by converting them to html
+
+    def __replaceLinks(self, filenames, replaceIndex):
+        website = self.hafPublish.website()
+        
+        indexEntryNameSet = self.hafPublish.collectIndexEntryNameSet()
+        transcriptNameSet = self.hafPublish.collectTranscriptNameSet()
+
+        def filterLinks(match):
+            note = match.group('note')
+            assert note
+            target = match.group('target')
+            
+            # convert links on summary to transcript
+            if target and target.startswith('#^') and note in transcriptNameSet:
+                return True
+
+            # convert any index entry
+            if replaceIndex and (note in indexEntryNameSet):
+                return True
+
+            return False
+
+        for filename in filenames:
+            # print(baseNameWithoutExt(sfnSummaryMd))
+            text = loadStringFromTextFile(filename)
+            markdown = MarkdownLine(text)
+            markdown.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filterLinks)}")
+            saveStringToTextFile(filename, markdown.text)
+
+
+    def replaceLinksInAllSummaries(self):
+        filenames = self.hafPublish.collectSummaryFilenames()
+        self.__replaceLinks(filenames, True)
+
+    def replaceLinksInAllRootFilenames(self):
+        filenames = self.hafPublish.collectNotesInRetreatsFolders()
+        self.__replaceLinks(filenames, False)
+
+    def replaceLinksInSpecialFiles(self):
+        index = os.path.join(self.hafPublish.root, 'Index.md')
+        assert os.path.exists(index)
+        self.__replaceLinks([index], True)
+
 
