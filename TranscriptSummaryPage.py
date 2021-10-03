@@ -206,7 +206,7 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, 
         "", \
         f"[[prev|prev 🡄]] | [[{retreatName}|🡅]] | [[next|🡆 next]]", \
         "", \
-        f"Series: {retreatName}", \
+        f"Series: [[{retreatName}]]", \
         f"Transcript: [[{transcriptName}]]", \
         f"Transcript PDF: [[{pdfName}.pdf]]", \
         "", \
