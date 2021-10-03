@@ -206,11 +206,11 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, 
         "", \
         f"[[prev|prev 🡄]] | [[{retreatName}|🡅]] | [[next|🡆 next]]", \
         "", \
-        f"Series: {retreatName}\n", \
+        f"Series: {retreatName}", \
         f"Transcript: [[{transcriptName}]]", \
         f"Transcript PDF: [[{pdfName}.pdf]]", \
         "", \
-        "![[audio goes here.mp3]]"
+        "![[audio goes here.mp3]]", \
         "", \
         "## Index", \
         "<span class=\"counts\">_[[some keyword]] (99)_</span>"
@@ -225,7 +225,7 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, 
             blockId = f"{pageNr}-{paragraphNr}"
             counts = f": _{markdownLine.collectShownLinks()}_" if markdownLine.shownLinks else ""
             newLines.extend([ \
-                "###### ...", \
+                "##### ...", \
                 f"**[[{transcriptName}#^{blockId}|{blockId}]]**{counts}\n", \
                 "---", \
                 ])

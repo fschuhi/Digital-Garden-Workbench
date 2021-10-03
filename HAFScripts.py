@@ -182,24 +182,25 @@ def canonicalizeTranscript(haf: HAFEnvironment, talkName):
 # Summaries
 # *********************************************
 
-def createNewTranscriptSummariesForRetreat(haf, retreatName):
-    filenames = filterExt(haf.retreatTranscriptFilenameLookup[retreatName], '.md')
+def createNewTranscriptSummariesForRetreat(haf: HAFEnvironment, retreatName):
+    filenames = haf.collectTranscriptFilenames(retreatName)
     for sfnTranscriptMd in filenames:
-        (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
         markdownName = basenameWithoutExt(sfnTranscriptMd)
         sfnSummaryMd = haf.getSummaryFilename(markdownName)
-        if os.path.exists(sfnSummaryMd):
+        if sfnSummaryMd is not None:
             summary = loadStringFromTextFile(sfnSummaryMd)
             if re.search(r'#TranscriptSummary', summary):
                 #print(markupName + " - continue")
                 continue
+
+        sfnSummaryMd = haf.createSummaryFilename(markdownName)
 
         if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):            
             if re.search(r'#Transcript', transcript := loadStringFromTextFile(sfnTranscriptMd)):
                 # we need to deitalize manually
                 talkName = determineTalkname(markdownName)
                 #print(talkName + " - createNew")
-                createNewSummaryPage(talkName, haf, transcriptModel)
+                createNewSummaryPage(talkName, haf, transcriptModel, sfnSummaryMd)
             else:
                 # it's a transcript page in the making - - not indexed yet, thus we can't do a summary on it yet
                 pass
@@ -600,6 +601,7 @@ def addAudioLinksToSummaryWithDecoratedTranscript(path):
     audioDate = audioMiddle = audioId = None
     foundFirstAudio = False
     changed = False
+    mlTranscriptHeader = None
     while True:
         if index >= len(summary.markdownLines):
             break
@@ -633,13 +635,34 @@ def addAudioLinksToSummaryWithDecoratedTranscript(path):
 
         # other matchers which manipulate timestampTranscript go here
 
+        if summaryLineParser.match(ml) == SummaryLineMatch.HEADER:
+            # collect for ((WMZAZUR)) below
+            mlTranscriptHeader = ml
+
         if summaryLineParser.match(ml) == SummaryLineMatch.PARAGRAPH_COUNTS:
             # pull the timestamp from the beginning of the transcript paragraph
             mlTranscript = transcript.findParagraph(summaryLineParser.pageNr, summaryLineParser.paragraphNr)
             assert mlTranscript
-            match = re.match(r"\[(?P<timestamp>[0-9:]+) *\]", mlTranscript.text)
-            timestampTranscript = match.group('timestamp') if match else None
+            match = re.match(r"\[((?P<timestamp>[0-9:]+)|(?P<header>[A-Za-z][^]]+)) *\]", mlTranscript.text)
             if match:
+                timestampTranscript = match.group('timestamp') if match else None
+                headerTranscript = match.group('header') if match else None
+                if headerTranscript:
+                    assert not timestampTranscript
+
+                    # ((WMZAZUR)) make sure that we have (the right) header as object
+                    assert mlTranscriptHeader
+                    assert summaryLineParser.headerLine == mlTranscriptHeader.text
+
+                    # we only overwrite ... headers (i.e. not yet entered)                                
+                    if summaryLineParser.headerText == '...':
+                        # go back up and change the header
+                        mlTranscriptHeader.text = f"{summaryLineParser.level * '#'} {headerTranscript}"
+                    else:
+                        print(f"retained header for {summaryLineParser.blockId}")
+                    mlTranscriptHeader = None
+
+                # regardless of the type of match (timestamp or header), remove the paragraph decoration from the transcript
                 (_, end) = match.span()
                 mlTranscript.text = mlTranscript.text[end+1:]
                 changed = True
@@ -721,7 +744,7 @@ if __name__ == "__main__":
 
     transcriptIndex = TranscriptIndex(RB_YAML)
 
-    if isScript(['reindexTranscripts', 'updateSummary', 'addMissingCitations', 'transferFilesToPublish']):
+    if isScript(['reindexTranscripts', 'updateSummary', 'addMissingCitations', 'transferFilesToPublish', 'createNewSummaries']):
         transcriptModel = TranscriptModel(transcriptIndex)
 
     if isScript(['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml', 'replaceNoteLink']):
@@ -892,6 +915,7 @@ if __name__ == "__main__":
     elif isScript('createNewSummaries'):
         assert retreatName
         createNewTranscriptSummariesForRetreat(haf, retreatName)
+        updateBreadcrumbsInSummaries()
         print("created")
 
 
