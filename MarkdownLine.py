@@ -303,6 +303,11 @@ class MarkdownLines(Iterable[MarkdownLine]):
         for line in lines:
             self.append(line)
 
+    def insert(self, index:int, text: str) -> MarkdownLine:
+        mlNew = MarkdownLine(text)
+        self.markdownLines.insert(index, mlNew)
+        return mlNew
+
 
     def asText(self) -> str:
         return '\n'.join( [markdownLine.text for markdownLine in self.markdownLines] ) + '\n'

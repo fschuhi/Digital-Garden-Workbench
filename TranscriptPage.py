@@ -72,7 +72,7 @@ class TranscriptPage(ObsidianNote):
         # we need "#" new page indicators, otherwise the danger is too high that we wreck a properly blockid-indexed transcript
         assert nPageIndicators != 0
 
-        tmp = CreateTempfile()
+        tmp = createTempfile()
         saveLinesToTextFile(tmp.name, textLines)
         return cls(tmp.name)
 

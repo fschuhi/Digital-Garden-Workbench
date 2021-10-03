@@ -8,15 +8,6 @@ import os
 import re
 import shutil
 
-def canonicalTimestamp(timestamp: str):
-    if not timestamp: 
-        return None
-    else:
-        parts = timestamp.split(':')
-        canonicalParts = [part.rjust(2, '0') for part in parts]
-        return ':'.join(canonicalParts)
-
-
 # *********************************************
 # class Publishing
 # *********************************************
@@ -122,16 +113,17 @@ class Publishing:
         admonitionLines = []
         for line in lines:
             # ![[20200301-Rob_Burbea-GAIA-preliminaries_regarding_voice_movement_and_gesture_part_1-62452.mp3#t=13:09]]
-            match = re.search(r"!\[\[(?P<date>[0-9]+)-(?P<middle>.+)-(?P<audioid>[0-9]+).mp3(#t=(?P<timestamp>[0-9:]+))?\]\]", line)
+            match = parseAudioLink(line)
             if match:
                 date = match.group('date')
                 middle = match.group('middle')
                 audioid = match.group('audioid')
                 timestamp = canonicalTimestamp(match.group('timestamp'))
 
-                # <audio controls style=" width:300px;" controlslist="nodownload"><source src="https://dharmaseed.org/talks/62452/20200301-Rob_Burbea-GAIA-preliminaries_regarding_voice_movement_and_gesture_part_1-62452.mp3#t=00:13:09" type="audio/mpeg">???</audio>
+                # https://stackoverflow.com/questions/13242877/stop-audio-buffering-in-the-audio-tag
+                # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio
                 source = f"https://dharmaseed.org/talks/{audioid}/{date}-{middle}-{audioid}.mp3" + (f"#t={timestamp}" if timestamp else "")
-                html5 = f'<audio controls style=" width:300px;" controlslist="nodownload"><source src="{source}" type="audio/mpeg">???</audio>'
+                html5 = f'<audio controls preload=metadata style=" width:300px;" controlslist="nodownload"><source src="{source}" type="audio/mpeg">???</audio>'
 
                 (start, end) = match.span()
                 newLine = line[:start] + html5 + line[end:]

@@ -159,6 +159,16 @@ class TranscriptSummaryPage(ObsidianNote):
         return len(pageNrs)
 
 
+    def collectParagraphHeaderTexts(self) -> list[Tuple[int, int, str]]:
+        targets = {}
+        parser = SummaryLineParser()
+        for ml in self.markdownLines:
+            if (match := parser.match(ml)) == SummaryLineMatch.PARAGRAPH_COUNTS:
+                header = determineHeaderTarget(parser.headerText)
+                blockid = f"{parser.pageNr}-{parser.paragraphNr}"
+                targets[blockid] = header
+        return targets
+
     def collectParagraphHeaderTargets(self) -> dict[str,str]:
         targets = {}
         parser = SummaryLineParser()

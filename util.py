@@ -90,6 +90,13 @@ def saveLinesToTextFile(sfn, lines: list[str]):
 # file system
 # *********************************************
 
+def createTempfile():
+    import tempfile
+    tmp = tempfile.TemporaryFile('w+t')
+    tmp.close()
+    return tmp
+
+
 def basenameWithoutExt(sfn):
     return os.path.splitext(os.path.basename(sfn))[0]
 
@@ -360,8 +367,18 @@ def parseBlockId(blockId) -> Tuple[int,int]:
     match = re.match(r"([0-9]+)-([0-9]+)")
     return (int(match.group(1)), int(match.group(2))) if match else None
 
-def CreateTempfile():
-    import tempfile
-    tmp = tempfile.TemporaryFile('w+t')
-    tmp.close()
-    return tmp
+
+def parseAudioLink(text) -> re.Match:
+    return re.search(r"!\[\[(?P<date>[0-9]+)-(?P<middle>.+)-(?P<audioid>[0-9]+).mp3(#t=(?P<timestamp>[0-9:]+))?\]\]", text)
+
+def canonicalTimestamp(timestamp: str):
+    if not timestamp: 
+        return None
+    else:
+        parts = timestamp.split(':')
+        canonicalParts = [part.rjust(2, '0') for part in parts]
+        return ':'.join(canonicalParts)
+
+def createAudioLink(date, middle, audioid, timestamp):
+    return f"![[{date}-{middle}-{audioid}.mp3#t={timestamp}]]"
+

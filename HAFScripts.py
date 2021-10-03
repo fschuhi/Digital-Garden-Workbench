@@ -13,7 +13,7 @@ from consts import HAF_PUBLISH_YAML, HAF_YAML, RB_YAML
 from KanbanNote import KanbanNote
 from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage, createTranscriptsDictionary
-from TranscriptSummaryPage import TranscriptSummaryPage, createNewSummaryPage
+from TranscriptSummaryPage import SummaryLineMatch, SummaryLineParser, TranscriptSummaryPage, createNewSummaryPage
 from IndexEntryPage import IndexEntryPage
 from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
@@ -587,6 +587,70 @@ def modifyFullstops():
         transcript.save(transcriptFilename)
 
 
+def addAudioLinksToSummaryWithDecoratedTranscript(path):
+    summary = TranscriptSummaryPage(path)
+    talkname = talknameFromFilename(path)
+    transcriptFilename = haf.getTranscriptFilename(talkname)
+    transcript = TranscriptPage(transcriptFilename)
+
+    summaryLineParser = SummaryLineParser()
+
+    index = 0
+    timestampTranscript = None
+    audioDate = audioMiddle = audioId = None
+    foundFirstAudio = False
+    changed = False
+    while True:
+        if index >= len(summary.markdownLines):
+            break
+        ml = summary.markdownLines[index]
+
+        # assumption: first audio link in the summary points to the audio for this talk
+        if not foundFirstAudio:
+            if (matchAudio := parseAudioLink(ml.text)):
+                foundFirstAudio = True
+                audioDate = matchAudio.group('date')
+                audioMiddle = matchAudio.group('middle')
+                audioId = matchAudio.group('audioid')
+
+        if timestampTranscript:
+            assert foundFirstAudio
+            if ml.text:
+                audioLink = createAudioLink(audioDate, audioMiddle, audioId, timestampTranscript)
+
+                matchAudio = parseAudioLink(ml.text)
+                if matchAudio and matchAudio.group('audioid') == audioId:
+                    oldTimestampSummary = canonicalTimestamp(matchAudio.group('timestamp'))
+                    if oldTimestampSummary == timestampTranscript:
+                        ml.text = audioLink
+                    else:
+                        print(f"retained {oldTimestampSummary} (transcript: {timestampTranscript})")
+                else:
+                    summary.markdownLines.insert(index, audioLink)
+                    summary.markdownLines.insert(index+1, "")
+                    index += 2
+                timestampTranscript = None
+
+        # other matchers which manipulate timestampTranscript go here
+
+        if summaryLineParser.match(ml) == SummaryLineMatch.PARAGRAPH_COUNTS:
+            # pull the timestamp from the beginning of the transcript paragraph
+            mlTranscript = transcript.findParagraph(summaryLineParser.pageNr, summaryLineParser.paragraphNr)
+            assert mlTranscript
+            match = re.match(r"\[(?P<timestamp>[0-9:]+) *\]", mlTranscript.text)
+            timestampTranscript = match.group('timestamp') if match else None
+            if match:
+                (_, end) = match.span()
+                mlTranscript.text = mlTranscript.text[end+1:]
+                changed = True
+
+        index += 1
+
+    if changed:
+        summary.save()
+        transcript.save()
+
+
 # *********************************************
 # main
 # *********************************************
@@ -609,6 +673,13 @@ def get_arguments():
     parser.add_argument("--sectionsort", action='store_true')
 
     return parser.parse_args()
+
+def isScript(check):
+    if isinstance(check, list):
+        lower = [s.lower() for s in check]
+        return args.script.lower() in lower
+    else:
+        return args.script.lower() == check.lower()
 
 
 if __name__ == "__main__":
@@ -650,16 +721,16 @@ if __name__ == "__main__":
 
     transcriptIndex = TranscriptIndex(RB_YAML)
 
-    if script in ['reindexTranscripts', 'updateSummary', 'addMissingCitations', 'transferFilesToPublish']:
+    if isScript(['reindexTranscripts', 'updateSummary', 'addMissingCitations', 'transferFilesToPublish']):
         transcriptModel = TranscriptModel(transcriptIndex)
 
-    if script in ['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml', 'replaceNoteLink']:
+    if isScript(['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml', 'replaceNoteLink']):
         network = LinkNetwork(haf)
 
 
     # publish
 
-    if script == 'transferFilesToPublish':
+    if isScript('transferFilesToPublish'):
         # in principle that's a good idea: make sure that the main vault is in a finalised shape
         # but this may take time, especially when we work on a particular retreats or talk - - no need to update everything
 
@@ -682,7 +753,7 @@ if __name__ == "__main__":
 
     # Kanban stuff
 
-    elif script == 'addMissingSummaryCards':
+    elif isScript('addMissingSummaryCards'):
         assert retreatName
         sfnKanban = haf.vault.findFile('Talk summaries (Kanban).md')
         addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf, retreatName)
@@ -691,7 +762,7 @@ if __name__ == "__main__":
 
     # reindexing, updating
 
-    elif script == 'reindexTranscripts':
+    elif isScript('reindexTranscripts'):
         if retreatName:
             applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel)
         else:
@@ -699,7 +770,7 @@ if __name__ == "__main__":
                 applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel)
         print("reindexed")
 
-    elif script == 'updateSummary':
+    elif isScript('updateSummary'):
         if talkname:
             updateSummary(haf, talkname, transcriptModel)
             print(f"updated talk summary")
@@ -715,7 +786,7 @@ if __name__ == "__main__":
                 updateSummary(haf, talkname, transcriptModel)
             print(f"updated all talk summaries")
 
-    elif script == 'unspanSummary':
+    elif isScript('unspanSummary'):
         assert talkname
         sfn = haf.getSummaryFilename(talkname)
         lines = loadLinesFromTextFile(sfn)
@@ -729,31 +800,31 @@ if __name__ == "__main__":
 
     # index stuff
 
-    elif script == 'addMissingCitations':
+    elif isScript('addMissingCitations'):
         assert indexEntry
         addMissingCitations(haf, indexEntry, transcriptIndex, transcriptModel)
         print(f"added citations to '{indexEntry}'")
 
-    elif script == 'updateAlphabeticalIndex':
+    elif isScript('updateAlphabeticalIndex'):
         updateAlphabeticalIndex(haf, transcriptIndex)
         print("updated")
 
-    elif script == 'sortRBYaml':
+    elif isScript('sortRBYaml'):
         sortRBYaml(transcriptIndex, args)
         print("sorted and saved")
 
-    elif script == 'createIndexEntryFiles':
+    elif isScript('createIndexEntryFiles'):
         transcriptIndex.createObsidianIndexEntryFiles(haf.dirIndex)
     
-    elif script == 'showOrphansInIndexFolder':
+    elif isScript('showOrphansInIndexFolder'):
         showOrphansInIndexFolder(haf, network, transcriptIndex, haf.dirIndex)
         print("copied to clipboard")
 
-    elif script == 'showOrphansInRBYaml':
+    elif isScript('showOrphansInRBYaml'):
         showOrphansInRBYaml(haf, network, transcriptIndex, haf.dirIndex)
         print("copied to clipboard")
 
-    elif script == 'replaceNoteLink':        
+    elif isScript('replaceNoteLink'): 
         # needs args "old", "new"
         (found, changed, unchanged) = replaceNoteLink(haf, network, args)
         if not found:
@@ -764,16 +835,16 @@ if __name__ == "__main__":
 
     # conversion helpers
 
-    elif script == 'convertAllMarkdownFiles':
+    elif isScript('convertAllMarkdownFiles'):
         convertAllMarkdownFiles()
         print("converted")
 
-    elif script == "canonicalize":
+    elif isScript("canonicalize"):
         assert talkname
         canonicalizeTranscript(haf, talkname)
         print("canonicalized")
 
-    elif script == "deitalicizeTranscript":
+    elif isScript("deitalicizeTranscript"):
         assert talkname
         deitalicizeTranscript(haf, talkname)
         print("deitalizised")
@@ -781,7 +852,7 @@ if __name__ == "__main__":
 
     # temporary stuff
 
-    elif script == 'showH':
+    elif isScript('showH'):
         assert level
         
         filenames = filterExt(haf.allFiles(), '.md')
@@ -795,7 +866,7 @@ if __name__ == "__main__":
                         found = True
                     print(line)
 
-    elif script == 'addH':
+    elif isScript('addH'):
         
         for filename in (transcriptFilenames := haf.collectTranscriptFilenames()):
             for index, line in enumerate(lines := loadLinesFromTextFile(filename)):
@@ -808,17 +879,17 @@ if __name__ == "__main__":
 
     # creating files
 
-    elif script == 'convertPlainMarkdownToTranscript':
+    elif isScript('convertPlainMarkdownToTranscript'):
         assert talkname
         convertPlainMarkdownToTranscript(haf, talkname)
         print("converted")
 
-    elif script == 'firstIndexingOfRetreatFolder':
+    elif isScript('firstIndexingOfRetreatFolder'):
         assert retreatName
         firstIndexingOfRetreatFolder(haf, retreatName)
         print("first reindexing done")
 
-    elif script == 'createNewSummaries':
+    elif isScript('createNewSummaries'):
         assert retreatName
         createNewTranscriptSummariesForRetreat(haf, retreatName)
         print("created")
@@ -826,21 +897,21 @@ if __name__ == "__main__":
 
     # modifiying summaries
 
-    elif script == 'updateBreadcrumbs':
+    elif isScript('updateBreadcrumbs'):
         updateBreadcrumbsInSummaries()
         print("updated")
 
-    elif script == 'collectParagraphs':
+    elif isScript('collectParagraphs'):
         assert talkname
         collectParagraphsListPageToClipboard(talkname)
 
-    elif script == 'updateParagraphsLists':
+    elif isScript('updateParagraphsLists'):
         updateParagraphsListPages(haf)
 
 
     # journal
 
-    elif script == 'changeJournalBreadcrumbsStyle':
+    elif isScript('changeJournalBreadcrumbsStyle'):
         for sfn in haf.vault.folderFiles("Journal", "md"):
             lines = loadLinesFromTextFile(sfn)
             for index, line in enumerate(lines):
@@ -854,9 +925,16 @@ if __name__ == "__main__":
                     lines[index] = newline
             saveLinesToTextFile(sfn, lines)
 
-    elif script == 'modifyFullstops':
+    elif isScript('modifyFullstops'):
         modifyFullstops()
         print("fullstops replaced")
+
+
+    elif isScript('addAudioLinks'):
+        assert talkname
+        path = haf.getSummaryFilename(talkname)
+        addAudioLinksToSummaryWithDecoratedTranscript(path)
+
 
     else:
         print("unknown script")
