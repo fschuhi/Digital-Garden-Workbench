@@ -785,6 +785,11 @@ if __name__ == "__main__":
     elif isScript('updateParagraphsLists'):
         updateParagraphsListPages(haf)
 
+    elif isScript('addAudioLinks'):
+        assert talkname
+        path = haf.getSummaryFilename(talkname)
+        addAudioLinksToSummaryWithDecoratedTranscript(path)
+
 
     # journal
 
@@ -802,11 +807,41 @@ if __name__ == "__main__":
                     lines[index] = newline
             saveLinesToTextFile(sfn, lines)
 
-    elif isScript('addAudioLinks'):
-        assert talkname
-        path = haf.getSummaryFilename(talkname)
-        addAudioLinksToSummaryWithDecoratedTranscript(path)
 
+    # misc
+
+    elif isScript('bla'):
+        path = haf.getTranscriptFilename('What is Insight')
+        transcript = TranscriptPage(path)
+        ml = transcript.findParagraph(7,2)
+
+        commands = [] # type: list[Tuple[str,str]]
+
+        removeMatches = True
+        removeLinks = True
+
+        print(ml.text)
+        print('')
+        while True:
+            match = re.search(r"\{ *(?P<command>quote|warning|info) +(?P<text>[^}]+)}", ml.text, re.IGNORECASE) 
+            if not match:
+                break
+
+            command = match.group('command').lower()
+            text = match.group('text')
+            if removeLinks:
+                text = removeObsidianLinksFromText(text)
+            commands.append( (command, text) )
+
+            if removeMatches:
+                (start, end) = match.span()
+                ml.text = ml.text[:start] + (text if command == 'quote' else '') + ml.text[end:]
+
+        if removeMatches:
+            ml.text = re.sub('  +', ' ', ml.text)
+                
+        print(ml.text)
+        print(commands)
 
     else:
         print("unknown script")

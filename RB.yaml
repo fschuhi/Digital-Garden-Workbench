@@ -108,6 +108,8 @@ Persons:
       - /Blake, William
 
 Buddhology:
+  - Commentaries:
+      - commentarial
   - Aksayamati Sutra:
       - Akṣayamati Sūtra
   - Anatta:
@@ -214,6 +216,7 @@ Buddhology:
       - death and dying
       - death threat
       - death threats
+      - reflection on death
   - Dependent Origination:
       - dependently originated
       - dependent arising
@@ -245,6 +248,8 @@ Buddhology:
       - dis-ease
       - dissatisfaction
       - second characteristic
+      - dukkha/unsatisfactoriness
+      - unsatisfactoriness
   - Dzogchen
   - Eight worldly conditions
   - Emptiness:
@@ -279,6 +284,8 @@ Buddhology:
       - true peace
       - freedom from suffering
       - end of suffering
+      - feeling into freedom
+      - opening up into freedom
   - Guhyasamaja Tantra:
       - Guhyasamāja Tantra
   - Heaven
@@ -308,6 +315,8 @@ Buddhology:
       - arise and pass
       - rise and fall
       - first characteristic
+      - impermanence contemplation
+      - contemplate impermanence
   - Insight:
       - insights
       - understanding
@@ -317,6 +326,15 @@ Buddhology:
       - panna
       - pañña
       - mystical insight
+      - personal insight
+      - personal insights
+      - universal insight
+      - universal insights
+      - personal truth
+      - personal truths
+      - universal truth
+      - universal truths
+      - unshakeable knowing
   - Jhanas:
       - jhānas
       - jhāna
@@ -393,6 +411,7 @@ Buddhology:
   - Pali Canon:
       - Pāli Canon
   - Papanca:
+      - papañca
       - proliferation
       - non-proliferation
       - non-papanca
@@ -421,7 +440,9 @@ Buddhology:
       - samādhi
       - concentration
       - collectedness
+      - collectedness of mind
       - unification
+      - unawakened mind
   - Samatha:
       - Śamatha
   - Sangha:
@@ -773,6 +794,7 @@ Robology:
       - sense of balance
       - world of our body
       - body sensations
+      - body
   - Emotions
   - Empathy
   - Energy Body:
@@ -833,7 +855,8 @@ Robology:
       - mythological stories
       - mythos of the bodhisattva
       - mythic creature
-  - Feelings
+  - Feelings:
+      - world of our feelings
   - Fullness of Intention:
       - one\'s fullness of intention
   - Gaia House
@@ -843,6 +866,9 @@ Robology:
   - Guinness Book of Records
   - Habit:
       - habits
+      - tendencies
+      - particular pattern
+      - particular patterns
   - Happiness:
       - joy
       - buoyancy
@@ -902,10 +928,13 @@ Robology:
   - Manifestations
   - Meaningfulness:
       - imaginal meaningfulness
-  - Measuring mind
   - Mind state:
       - mind states
       - present mind state
+  - Mind:
+      - world of our mind
+      - measuring mind
+      - comparing mind
   - Mode of mind:
       - modes of mind
   - Music:
@@ -960,7 +989,8 @@ Robology:
   - Reactivity:
       - reactivity to experience
   - Reconditioning
-  - Relationships
+  - Relationships:
+      - world of our relationships
   - Romantic love
   - Seeing That Frees
   - Sexuality
@@ -1044,6 +1074,7 @@ Robology:
       - our journey
       - the story we tell
       - narrative
+      - a certain story
   - Telos:
       - one\'s telos
   - Temenos
@@ -1104,6 +1135,7 @@ Robology:
       - ways of looking
       - ways of knowing
       - some kind of knowing
+      - modes of seeing
   - Wonder:
       - wonders
       - wonder in being

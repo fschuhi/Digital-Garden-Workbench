@@ -261,8 +261,12 @@ def canonicalizeText(text) -> str:
     text = re.sub("([^.])\.\.([^. ])", "\\1... \\2", text)
     text = re.sub("([^.])\.\. ", "\\1... ", text)
     text = re.sub("([^ ]) ,([^ ])", "\\1, \\2", text)
-    text = re.sub("^[0-9]+ ", "", text)
-    text = re.sub(" [0-9]+ ", "", text)
+    text = re.sub("…", "...", text)
+
+    # 04.10.21 no idea why the following; it removes normal figures
+    # text = re.sub("^[0-9]+ ", "", text)
+    # text = re.sub(" [0-9]+ ", "", text)
+
     return text
 
 
@@ -289,6 +293,22 @@ def forceLFOnly(dir):
 # *********************************************
 # Obsidian links
 # *********************************************
+
+def removeObsidianLinksFromText(text):
+    while True:            
+        if not (matchLink := re.search(r"\[\[.+?\]\]", text)):
+            break
+
+        link = matchLink[0]        
+        matchLinkParts = re.search(r"\[\[([^|]+)(\|(.+))?\]\]", link)
+        linkReference = matchLinkParts[1]
+        linkDisplayText = matchLinkParts[3] if matchLinkParts[3] else linkReference
+
+        start = matchLink.start()
+        end = matchLink.end()
+        text = text[:start] + linkDisplayText + text[end:]
+    return text
+
 
 # complete: link w/o [[ and ]]
 #    link: note or note+target
