@@ -127,8 +127,67 @@ class TranscriptSummaryPage(ObsidianNote):
         sectionSpans = self.collectSectionSpans()
         for start, end in sectionSpans:
             sourceLines = self.markdownLines[start:end]
-            sections.append(sourceLines)
+            sections.append(sourceLines, start, end)
         return sections
+
+
+    def getAudioFilename(self):
+        for mlSummary in self.markdownLines:
+            if (matchAudio := parseAudioLink(mlSummary.text)):
+                return matchAudio.group('filename')
+
+
+    def handleTranscriptDecorations(self, transcript: TranscriptPage):
+        fnAudio = self.getAudioFilename()
+
+        # get the current sections
+        # the sections will be expanded by additional lines, determined from the decorations of the associated transcript paragraph
+        sections = self.collectSections()
+
+        # sections are modified in the original object
+        # section start and end index into self.markdownLines will change incrementally => track total delta
+        delta = 0
+
+        for section in sections:
+            # each section has an associated transcript paragraph, determined from the counts line
+            mlTranscript = transcript.findParagraph(section.pageNr, section.paragraphNr)
+
+            # handle prepended timestamp and/or header
+            while True:
+                match = re.match(r"\[((?P<timestamp>(0?1:)?[0-9][0-9]:[0-9][0-9])|(?P<header>[^]]+)) *\]", mlTranscript.text)
+                if not match:
+                    break
+                if (header := match.group('header')):
+                    section.changeHeader(header)
+                if (timestamp := match.group('timestamp')):
+                    section.setAudioLink(fnAudio, timestamp)
+                (_, end) = match.span()
+                mlTranscript.text = mlTranscript.text[end:].strip()
+
+            # handle admonitions
+            while True:
+                match = re.search(r"\{ *(?P<command>quote|warning|info|note|danger) +(?P<text>[^}]+)}", mlTranscript.text, re.IGNORECASE) 
+                if not match:
+                    break
+
+                admonitionType = match.group('command').lower()
+                text = removeObsidianLinksFromText(match.group('text'))
+
+                section.addAdmonition(admonitionType, [text])
+
+                (start, end) = match.span()
+                mlTranscript.text = mlTranscript.text[:start] + (text if admonitionType == 'quote' else '') + mlTranscript.text[end:]
+
+            # decorations might be separated by spaces => remove duplicate spaces
+            mlTranscript.text = re.sub('  +', ' ', mlTranscript.text)
+
+            # replace section in this summary
+            deleted = section.end - section.start
+            self.markdownLines.delete(section.start+delta, section.end+delta)
+            insertedTextLines = section.markdownLines.collectTextLines()
+            inserted = len(insertedTextLines)
+            self.markdownLines.insert(section.start+delta, insertedTextLines)
+            delta += inserted - deleted
 
 
 # *********************************************
@@ -167,7 +226,7 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, 
         "## Index", \
         "<span class=\"counts\">_[[some keyword]] (99)_</span>"
         "<br/>\n", \
-        "### Paragraphs", \
+        "## Paragraphs", \
         "", \
         ])
         

@@ -16,7 +16,7 @@ Transcript PDF: [[2020_0301 Preliminaries Regarding Voice, Movement, and Gesture
 ## Index
 <span class="counts">_[[some keyword]] (99)_</span><br/>
 
-### Paragraphs
+## Paragraphs
 
 ##### ...
 **[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-1|1-1]]**

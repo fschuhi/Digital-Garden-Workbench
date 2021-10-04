@@ -13,11 +13,14 @@ from typing import Iterable
 
 class SummarySection():
 
-    def __init__(self, sourceLines: MarkdownLines):
+    def __init__(self, sourceLines: MarkdownLines, start, end):
         # create a copy of the passed MarkdownLines
         textLines = []
         for sourceLine in sourceLines:
             textLines.append(sourceLine.text)
+        self.start = start
+        self.end = end
+        assert end-start == len(sourceLines)
 
         # make sure we conform to a section: header and counts
         parser = SummaryLineParser()        
@@ -97,8 +100,8 @@ class SummarySections(Iterable[SummarySection]):
     def __len__(self):
         return len(self.sections)
 
-    def append(self, sourceLines: MarkdownLines) -> SummarySection:
-        newSection = SummarySection(sourceLines)
+    def append(self, sourceLines: MarkdownLines, start, end) -> SummarySection:
+        newSection = SummarySection(sourceLines, start, end)
         self.sections.append(newSection)
         return newSection
 

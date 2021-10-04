@@ -30,7 +30,7 @@ class ObsidianNote:
 
         textLines = loadLinesFromTextFile(path)
 
-        self.markdownLines = None # type: list[MarkdownLine]
+        self.markdownLines = None # type: MarkdownLines
 
         # IMPORTANT: frontmatter is *not* markdown
         self.yaml = extractYaml(textLines)

@@ -784,14 +784,22 @@ if __name__ == "__main__":
     elif isScript('updateParagraphsLists'):
         updateParagraphsListPages(haf)
 
-    elif isScript('addAudioLinks'):
+    elif isScript('handleDecorations'):
         assert talkname
-        path = haf.getSummaryFilename(talkname)
-        summary = TranscriptSummaryPage(path)
-        talkname = talknameFromFilename(path)
-        transcriptFilename = haf.getTranscriptFilename(talkname)
-        transcript = TranscriptPage(transcriptFilename)
-        addAudioLinksToSummaryWithDecoratedTranscript(summary, transcript)
+        transcript = TranscriptPage(haf.getTranscriptFilename(talkname))
+        summary = TranscriptSummaryPage(haf.getSummaryFilename(talkname))
+        summary.handleTranscriptDecorations(transcript)
+        summary.save()
+        transcript.save()
+
+    # elif isScript('addAudioLinks'):
+    #     assert talkname
+    #     path = haf.getSummaryFilename(talkname)
+    #     summary = TranscriptSummaryPage(path)
+    #     talkname = talknameFromFilename(path)
+    #     transcriptFilename = haf.getTranscriptFilename(talkname)
+    #     transcript = TranscriptPage(transcriptFilename)
+    #     addAudioLinksToSummaryWithDecoratedTranscript(summary, transcript)
 
 
     # journal
@@ -812,45 +820,6 @@ if __name__ == "__main__":
 
 
     # misc
-
-    elif isScript('bla'):
-        pTranscript = r"s:\work\Python\HAF\tmp\1229 What is Insight.md"
-        pSummary = r"s:\work\Python\HAF\tmp\What is Insight.md"
-
-        summary = TranscriptSummaryPage(pSummary)
-        transcript = TranscriptPage(pTranscript)
-        addAudioLinksToSummaryWithDecoratedTranscript(summary, transcript)
-
-        transcript = TranscriptPage(pTranscript)
-        ml = transcript.findParagraph(7,2)
-
-        commands = [] # type: list[Tuple[str,str]]
-
-        removeMatches = True
-        removeLinks = True
-
-        print(ml.text)
-        print('')
-        while True:
-            match = re.search(r"\{ *(?P<command>quote|warning|info) +(?P<text>[^}]+)}", ml.text, re.IGNORECASE) 
-            if not match:
-                break
-
-            command = match.group('command').lower()
-            text = match.group('text')
-            if removeLinks:
-                text = removeObsidianLinksFromText(text)
-            commands.append( (command, text) )
-
-            if removeMatches:
-                (start, end) = match.span()
-                ml.text = ml.text[:start] + (text if command == 'quote' else '') + ml.text[end:]
-
-        if removeMatches:
-            ml.text = re.sub('  +', ' ', ml.text)
-                
-        print(ml.text)
-        print(commands)
 
     else:
         print("unknown script")

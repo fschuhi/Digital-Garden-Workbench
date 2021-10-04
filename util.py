@@ -413,7 +413,7 @@ def parseBlockId(blockId) -> Tuple[int,int]:
 
 
 def parseAudioLink(text) -> re.Match:
-    return re.search(r"!\[\[(?P<date>[0-9]+)-(?P<middle>.+)-(?P<audioid>[0-9]+).mp3(#t=(?P<timestamp>[0-9:]+))?\]\]", text)
+    return re.search(r"!\[\[(?P<filename>(?P<date>[0-9]+)-(?P<middle>.+)-(?P<audioid>[0-9]+).mp3)(#t=(?P<timestamp>[0-9:]+))?\]\]", text)
 
 def canonicalTimestamp(timestamp: str):
     if not timestamp: 
