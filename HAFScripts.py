@@ -25,23 +25,19 @@ import pyperclip
 
 def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf: HAFEnvironment, retreatName):
     kb = KanbanNote(sfnKanban)
-    # look at factory methods to collect all summary pages
-    # filenames = filterExt(haf.summaryFilenamesByRetreat[retreatName], '.md')
-    # filenames = filterExt(haf.retreatSummaries(retreatName), '.md')
     filenames = filterExt(haf.collectSummaryFilenames(retreatName), '.md')
     for sfnSummaryMd in filenames:
-        (filenameWithoutExt, ext) = os.path.splitext(sfnSummaryMd)                
         # load the summary page
         summary = TranscriptSummaryPage(sfnSummaryMd)
         talkName = basenameWithoutExt(sfnSummaryMd)
 
         # talks can contain brackets, which we need to "escape" for regex searching
-        talkName = re.sub("[()]", ".", talkName)
+        safeTalkname = re.sub("[()]", ".", talkName)
 
         # collect number of missing paragraph header texts
         missing = summary.collectMissingParagraphHeaderTexts()
         newCard = f"[[{talkName}]] ({missing if missing else 'ok'})"
-        searchFunc = lambda ln, c: re.match(r"\[\[" + talkName + r"\]\] \([0-9ok]+\)", c)
+        searchFunc = lambda ln, c: re.match(r"\[\[" + safeTalkname + r"\]\] \([0-9ok]+\)", c)
         foundCards = kb.findCards(searchFunc)
         # print(r"\[\[" + talkName + r"\]\] \([0-9ok]+\)")
         if missing:
@@ -61,19 +57,15 @@ def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban,
 # *********************************************
 
 def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName, transcriptModel: TranscriptModel):
-    # filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
-    # filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
     filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
     for sfnTranscriptMd in filenames:
-        (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
-        if ext == '.md':
-            markdownName = basenameWithoutExt(sfnTranscriptMd)
-            if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
-                transcript = loadStringFromTextFile(sfnTranscriptMd)
-                if re.search(r'#Transcript', transcript):
-                    page = TranscriptPage(sfnTranscriptMd)
-                    page.applySpacy(transcriptModel)
-                    page.save(sfnTranscriptMd)
+        markdownName = basenameWithoutExt(sfnTranscriptMd)
+        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
+            transcript = loadStringFromTextFile(sfnTranscriptMd)
+            if re.search(r'#Transcript', transcript):
+                page = TranscriptPage(sfnTranscriptMd)
+                page.applySpacy(transcriptModel)
+                page.save(sfnTranscriptMd)
 
 
 # *********************************************
@@ -88,8 +80,6 @@ def convertPlainMarkdownToTranscript(haf: HAFEnvironment, talkName):
 
 
 def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
-    # filenames = filterExt(haf.transcriptFilenamesByRetreat[retreatName], '.md')
-    #filenames = filterExt(haf.retreatTranscripts(retreatName), '.md')
     filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
     for sfnTranscriptMd in filenames:
         (filenameWithoutExt, ext) = os.path.splitext(sfnTranscriptMd)                
@@ -132,26 +122,26 @@ def canonicalizeTranscript(haf: HAFEnvironment, talkName):
 
 def createNewTranscriptSummariesForRetreat(haf: HAFEnvironment, retreatName):
     filenames = haf.collectTranscriptFilenames(retreatName)
-    for sfnTranscriptMd in filenames:
-        markdownName = basenameWithoutExt(sfnTranscriptMd)
-        sfnSummaryMd = haf.getSummaryFilename(markdownName)
+    for sfnTranscriptMd in filenames:        
+        talkname = talknameFromFilename(sfnTranscriptMd)
+        sfnSummaryMd = haf.getSummaryFilename(talkname)
         if sfnSummaryMd is not None:
             summary = loadStringFromTextFile(sfnSummaryMd)
             if re.search(r'#TranscriptSummary', summary):
                 #print(markupName + " - continue")
                 continue
 
-        sfnSummaryMd = haf.createSummaryFilename(markdownName)
+        sfnSummaryMd = haf.createSummaryFilename(talkname)
+        print("creating " + sfnSummaryMd)
 
-        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):            
-            if re.search(r'#Transcript', transcript := loadStringFromTextFile(sfnTranscriptMd)):
-                # we need to deitalize manually
-                talkName = determineTalkname(markdownName)
-                #print(talkName + " - createNew")
-                createNewSummaryPage(talkName, haf, transcriptModel, sfnSummaryMd)
-            else:
-                # it's a transcript page in the making - - not indexed yet, thus we can't do a summary on it yet
-                pass
+        if re.search(r'#Transcript', transcript := loadStringFromTextFile(sfnTranscriptMd)):
+            # we need to deitalize manually
+            talkName = determineTalkname(talkname)
+            #print(talkName + " - createNew")
+            createNewSummaryPage(talkName, haf, transcriptModel, sfnSummaryMd)
+        else:
+            # it's a transcript page in the making - - not indexed yet, thus we can't do a summary on it yet
+            pass
 
 
 def addAudioLinksToSummaryWithDecoratedTranscript(path):

@@ -201,6 +201,7 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, 
         "---", \
         "obsidianUIMode: preview", \
         "ParagraphsListPage: false", \
+        f"Series: {retreatName}", \
         "---", \
         "#TranscriptSummary", \
         "", \
@@ -229,6 +230,7 @@ def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, 
                 f"**[[{transcriptName}#^{blockId}|{blockId}]]**{counts}\n", \
                 "---", \
                 ])
+
     saveLinesToTextFile(sfn, newLines)
 
 

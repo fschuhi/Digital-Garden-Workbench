@@ -3,7 +3,7 @@
 import unittest
 from HAFEnvironment import HAFEnvironment
 from ObsidianNote import ObsidianNoteType, ObsidianNote
-from consts import HAF_YAML
+from consts import HAF_YAML, HAF_YAML_TESTING
 
 # *********************************************
 # Publishing
@@ -11,22 +11,22 @@ from consts import HAF_YAML
 
 class Test_ObsidianNote(unittest.TestCase):
 
-    haf = HAFEnvironment(HAF_YAML)
-
-    def createNote(self, talkName):
-        md = self.haf.getSummaryFilename(talkName)
+    def getNote(self, haf, talkName):
+        md = haf.getSummaryFilename(talkName)
         return ObsidianNote(ObsidianNoteType.SUMMARY, md)
 
 
     def test_yaml(self):
-        note = self.createNote("Samadhi in Metta Practice")        
+        haf = HAFEnvironment(HAF_YAML_TESTING)
+        note = self.getNote(haf, "Samadhi in Metta Practice")        
         self.assertDictEqual(note.yaml, {'obsidianUIMode': 'preview'})
         note.yaml['bla'] = 'heul'
         self.assertDictEqual(note.yaml, {'bla': 'heul', 'obsidianUIMode': 'preview'})
 
 
     def test_changeLine(self):
-        note = self.createNote("Samadhi in Metta Practice")
+        haf = HAFEnvironment(HAF_YAML_TESTING)
+        note = self.getNote(haf, "Samadhi in Metta Practice")
 
         lines = note.collectTextLines()
         lines[4] = "asdfasdf"
@@ -37,7 +37,8 @@ class Test_ObsidianNote(unittest.TestCase):
 
 
     def test_markdownSnippets(self):
-        note = self.createNote("Samadhi in Metta Practice")
+        haf = HAFEnvironment(HAF_YAML)
+        note = self.getNote(haf, "Samadhi in Metta Practice")
 
         snippets = note.collectMarkdownLines()
 
