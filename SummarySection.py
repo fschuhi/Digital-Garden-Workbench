@@ -76,6 +76,7 @@ class SummarySection():
             textLines.insert(0, f"```ad-{type}")
         if textLines[-1] != "```":
             textLines.append("```")
+        textLines.append("")
         self.markdownLines.insert(len(self.markdownLines)-1, textLines)
         
 
