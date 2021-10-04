@@ -144,12 +144,7 @@ def createNewTranscriptSummariesForRetreat(haf: HAFEnvironment, retreatName):
             pass
 
 
-def addAudioLinksToSummaryWithDecoratedTranscript(path):
-    summary = TranscriptSummaryPage(path)
-    talkname = talknameFromFilename(path)
-    transcriptFilename = haf.getTranscriptFilename(talkname)
-    transcript = TranscriptPage(transcriptFilename)
-
+def addAudioLinksToSummaryWithDecoratedTranscript(summary: TranscriptSummaryPage, transcript: TranscriptPage):
     summaryLineParser = SummaryLineParser()
 
     index = 0
@@ -199,12 +194,16 @@ def addAudioLinksToSummaryWithDecoratedTranscript(path):
             # pull the timestamp from the beginning of the transcript paragraph
             mlTranscript = transcript.findParagraph(summaryLineParser.pageNr, summaryLineParser.paragraphNr)
             assert mlTranscript
-            match = re.match(r"\[((?P<timestamp>[0-9:]+)|(?P<header>[A-Za-z][^]]+)) *\]", mlTranscript.text)
-            if match:
-                timestampTranscript = match.group('timestamp') if match else None
+            while True:
+                match = re.match(r"\[((?P<timestamp>(0?1:)?[0-9][0-9]:[0-9][0-9])|(?P<header>[^]]+)) *\]", mlTranscript.text)
+                if not match:
+                    break
+
+                if not timestampTranscript:
+                    timestampTranscript = match.group('timestamp') if match else None
                 headerTranscript = match.group('header') if match else None
                 if headerTranscript:
-                    assert not timestampTranscript
+                    # assert not timestampTranscript
 
                     # ((WMZAZUR)) make sure that we have (the right) header as object
                     assert mlTranscriptHeader
@@ -220,7 +219,7 @@ def addAudioLinksToSummaryWithDecoratedTranscript(path):
 
                 # regardless of the type of match (timestamp or header), remove the paragraph decoration from the transcript
                 (_, end) = match.span()
-                mlTranscript.text = mlTranscript.text[end+1:]
+                mlTranscript.text = mlTranscript.text[end:].strip()
                 changed = True
 
         index += 1
@@ -788,7 +787,11 @@ if __name__ == "__main__":
     elif isScript('addAudioLinks'):
         assert talkname
         path = haf.getSummaryFilename(talkname)
-        addAudioLinksToSummaryWithDecoratedTranscript(path)
+        summary = TranscriptSummaryPage(path)
+        talkname = talknameFromFilename(path)
+        transcriptFilename = haf.getTranscriptFilename(talkname)
+        transcript = TranscriptPage(transcriptFilename)
+        addAudioLinksToSummaryWithDecoratedTranscript(summary, transcript)
 
 
     # journal
@@ -811,8 +814,14 @@ if __name__ == "__main__":
     # misc
 
     elif isScript('bla'):
-        path = haf.getTranscriptFilename('What is Insight')
-        transcript = TranscriptPage(path)
+        pTranscript = r"s:\work\Python\HAF\tmp\1229 What is Insight.md"
+        pSummary = r"s:\work\Python\HAF\tmp\What is Insight.md"
+
+        summary = TranscriptSummaryPage(pSummary)
+        transcript = TranscriptPage(pTranscript)
+        addAudioLinksToSummaryWithDecoratedTranscript(summary, transcript)
+
+        transcript = TranscriptPage(pTranscript)
         ml = transcript.findParagraph(7,2)
 
         commands = [] # type: list[Tuple[str,str]]
