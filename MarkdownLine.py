@@ -303,10 +303,15 @@ class MarkdownLines(Iterable[MarkdownLine]):
         for line in lines:
             self.append(line)
 
-    def insert(self, index:int, text: str) -> MarkdownLine:
-        mlNew = MarkdownLine(text)
-        self.markdownLines.insert(index, mlNew)
-        return mlNew
+    def insert(self, index:int, text):
+        if isinstance(text, str):
+            mlNew = MarkdownLine(text)
+            self.markdownLines.insert(index, mlNew)
+        else:
+            assert isinstance(text, list)
+            for line in text:
+                self.insert(index, line)
+                index += 1
 
 
     def asText(self) -> str:

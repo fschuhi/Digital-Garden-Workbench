@@ -9,7 +9,7 @@ from util import *
 
 from HAFEnvironment import HAFEnvironment, determineTalkname
 from TranscriptPage import TranscriptPage
-from SummarySection import SummarySection
+from SummarySection import SummarySection, SummarySections
 from SummaryLineParser import SummaryLineParser
 from SummaryLineParser import SummaryLineMatch
 import os
@@ -100,27 +100,34 @@ class TranscriptSummaryPage(ObsidianNote):
         return targets
 
 
-    def collectSections(self) -> list[SummarySection]:
+    def collectSectionSpans(self) -> list[Tuple[int,int]]:
         parser = SummaryLineParser()
-        sections = []
-
-        def addSection(start, end):
-            sourceLines = self.markdownLines[start:end]
-            sections.append( SummarySection(sourceLines))
-
+        sectionsSpans = []
         start = None
         for index, ml in enumerate(self.markdownLines):
             if parser.match(ml) == SummaryLineMatch.HEADER:
+                # close the previous section and start new one
                 if start:
                     #print(ml.text)
-                    addSection(start, index-1)
+                    sectionsSpans.append((start, index))
                 start = index
             elif ml.text.startswith('#'):
+                # close the not-yet-closed section
                 if start:
-                    addSection(start, index-1)
+                    sectionsSpans.append((start, index))
                     start = None
         if start:
-            addSection(start, index)
+            # including very last line
+            sectionsSpans.append((start, index+1))
+        return sectionsSpans
+
+
+    def collectSections(self) -> SummarySections:
+        sections = SummarySections()
+        sectionSpans = self.collectSectionSpans()
+        for start, end in sectionSpans:
+            sourceLines = self.markdownLines[start:end]
+            sections.append(sourceLines)
         return sections
 
 
