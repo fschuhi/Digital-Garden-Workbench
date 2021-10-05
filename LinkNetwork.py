@@ -94,9 +94,9 @@ class LinkNetwork:
 
     def collectReferencedNoteMatches(self, referencedNote) -> list[Tuple[str, re.Match]]:
         matches = [] # type: Tuple[str, re.Match]
-        for note in self.allNotes:
-            for match in self.getLinkMatchesByNote(note):
+        for notename in self.allNotes:
+            for match in self.getLinkMatchesByNote(notename):
                 noteInLink = match.group('note')
                 if noteInLink.lower() == referencedNote.lower():
-                    matches.append( (note, match) )
+                    matches.append( (notename, match) )
         return matches

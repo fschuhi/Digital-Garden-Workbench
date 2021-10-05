@@ -63,9 +63,11 @@ _[[Insight]] (87) · [[Dukkha]] (54) · [[Impermanence]] (30) · [[Experience]] 
 ```ad-quote
 So any seeing or understanding that brings just an ease, some easing or completely dissolving of dukkha - that's what we call "insight." Now, that can happen intellectually, but if it's just intellectual understanding, and it doesn't lead to this easing, this lessening of suffering, it doesn't actually count or qualify as an insight.
 ```
+
 ```ad-quote
 Any situation, any experience, you can apply insight to, insight is relevant.
 ```
+
 ---
 ##### Example: talking to someone in an accusing way
 **[[1229 What is Insight#^2-1|2-1]]**: _[[Dukkha]] (2) · [[Insight]]_
@@ -105,6 +107,7 @@ Any situation, any experience, you can apply insight to, insight is relevant.
 ```ad-quote
 Just to know, what's the weakness, what's the strength, what needs some work? What's a strength? Do we know, do we acknowledge and appreciate our strengths?
 ```
+
 ---
 ##### Are the personal stories we tell ourselves helpful or unhelpful?
 **[[1229 What is Insight#^3-3|3-3]]**: _[[Stories]] (7) · [[Fantasy]] · [[Insight]] (2)_
@@ -120,6 +123,7 @@ Just to know, what's the weakness, what's the strength, what needs some work? Wh
 ```ad-quote
 Is the story helpful? And if so, how? And is it not helpful? And if so, how? And is it possible to actually tell myself a different story, to rewrite my story? And actually, yes, that is possible.
 ```
+
 ---
 ##### No story can ever be the whole truth
 **[[1229 What is Insight#^4-2|4-2]]**: _[[Freedom]] · [[Stories]] · [[Insight]]_
@@ -129,6 +133,7 @@ Is the story helpful? And if so, how? And is it not helpful? And if so, how? And
 ```ad-quote
 Any story we have of ourselves can never, even if it's very beautiful, even if it's very compelling, even if it seems completely obvious, it can never be the whole truth. There's no way. Truth as such is bigger than anything you can fit it into.
 ```
+
 ---
 ##### (2) Universal insights, for all beings and all things
 **[[1229 What is Insight#^4-3|4-3]]**: _[[Ultimate Truth]] · [[Impermanence]]_
@@ -138,9 +143,11 @@ Any story we have of ourselves can never, even if it's very beautiful, even if i
 ```ad-quote
 So most obvious example would be impermanence. It's just true for everyone and all things.
 ```
+
 ```ad-warning
 "universal insights" <> "ultimate insights", i.e. index entry is wrong
 ```
+
 ---
 ##### Personal and universal truths help us to respond well to conventional reality
 **[[1229 What is Insight#^4-4|4-4]]**: _[[Ultimate Truth]] (5) · [[Insight]] (3) · [[Embodiment]] · [[Feelings]] · [[Relationships]] (3) · [[Conventional reality]] (2)_
@@ -150,6 +157,7 @@ So most obvious example would be impermanence. It's just true for everyone and a
 ```ad-warning
 add more "world of" index entries
 ```
+
 ---
 ##### (3) Ultimate truth is beyond words, transcends any of the other
 **[[1229 What is Insight#^5-1|5-1]]**: _[[Ultimate Truth]] · [[Buddha]] · [[Awakening]] · [[Insight]]_
@@ -177,6 +185,7 @@ add more "world of" index entries
 ```ad-quote
 This is an insight, to really care what I put out into the world, the vibrations that I'm putting out there, what's reverberating in my wake.
 ```
+
 ---
 ##### What qualities do I need to cultivate that actually lead to a lessening of suffering
 **[[1229 What is Insight#^5-5|5-5]]**: _[[Ethics]] (2) · [[Generosity]] (2) · [[Metta]] · [[Insight]] (3) · [[Happiness]] · [[Pleasantness]] · [[Cultivation]] · [[Dukkha]] · [[Ultimate Truth]]_
@@ -186,9 +195,11 @@ This is an insight, to really care what I put out into the world, the vibrations
 ```ad-quote
 universal insights, they're not one-off insights.
 ```
+
 ```ad-quote
 Actually we need to see this over and over and over and over and over, until finally the coin drops, and seeing it over and over, and practicing it, it deepens. The insight deepens and becomes unshakeable, becomes unshakeable.
 ```
+
 ---
 ##### Unshakeable knowing is pretty rate
 **[[1229 What is Insight#^6-1|6-1]]**: _[[Personhood]] · [[Insight]] (3) · [[Devotion]] · [[Generosity]] · [[Meditation]]_
@@ -216,6 +227,7 @@ Actually we need to see this over and over and over and over and over, until fin
 ```ad-quote
 Usually, though, it takes some acting on. You actually need to consolidate it.
 ```
+
 ---
 ##### To consolidate the insight needs us to act on it
 **[[1229 What is Insight#^7-1|7-1]]**: _[[Retreat]] · [[Insight]] (4) · [[Perception]] (2) · [[Love]] · [[Impermanence]] · [[Devotion]]_
@@ -231,9 +243,11 @@ Usually, though, it takes some acting on. You actually need to consolidate it.
 ```ad-quote
 Insight is a bit like a muscle. If we don't use it, it will atrophy. We need to kind of keep it alive, to consolidate it.
 ```
+
 ```ad-info
 check out some thing, or the other.
 ```
+
 ---
 ##### Another way to consolidate the insight is to use it as a mode of seeing
 **[[1229 What is Insight#^7-3|7-3]]**: _[[Insight]] (3) · [[Mindfulness]] (2) · [[Conceptual Framework]] · [[Impermanence]] (3) · [[Experience]] (2) · [[Ways of Looking]] (2) · [[Retreat]]_
@@ -243,6 +257,7 @@ check out some thing, or the other.
 ```ad-quote
 Put that on as a lens, a way of seeing, as a practice. So this is moving beyond what we might call "simple mindfulness" or "simple presence or being," and actually deliberately taking up a certain mode of seeing, a certain way of looking at experience, for a period of time
 ```
+
 ---
 ##### Insight as result vs insight as a process
 **[[1229 What is Insight#^7-4|7-4]]**: _[[Insight]] (5) · [[Personality types]]_
@@ -252,6 +267,7 @@ Put that on as a lens, a way of seeing, as a practice. So this is moving beyond 
 ```ad-quote
 So some people always want to just "be," and just let things arise, and some people are always kind of probing and trying to look differently, or a tendency either way. Both are important, and I would say, maybe not just one way.
 ```
+
 ---
 ##### Looking at things through certain modes of seeing as insight calms the being
 **[[1229 What is Insight#^8-1|8-1]]**: _[[Impermanence]] · [[Mindfulness]] · [[Breath]] (2) · [[Emotions]] · [[Insight]] · [[Steadiness]] · [[Samadhi]]_
@@ -303,6 +319,7 @@ So some people always want to just "be," and just let things arise, and some peo
 ```ad-quote
 Something very beautiful, very precious, and extremely important about just giving attention, just coming back, just being here, just being mindful, devoting oneself to that - a preciousness and beauty in that way of being, way of practicing, and trusting that out of that, the insights will come.
 ```
+
 ---
 ##### Using impermance as a lense
 **[[1229 What is Insight#^10-1|10-1]]**: _[[Impermanence]] (8) · [[Insight]] · [[Mindfulness]] (2)_
@@ -318,6 +335,7 @@ Something very beautiful, very precious, and extremely important about just givi
 ```ad-quote
 Just going through and just focusing on impermanence so that the fact of impermanence begins to impress itself deeply, deeply on the consciousness. And we begin more and more to be able to live that way.
 ```
+
 ---
 ##### You contemplate impermance in the right way, it brings joy
 **[[1229 What is Insight#^10-3|10-3]]**: _[[Letting go]] · [[Freedom]] (3) · [[Happiness]] (2) · [[Impermanence]] · [[Ways of Looking]] (2)_
@@ -327,6 +345,7 @@ Just going through and just focusing on impermanence so that the fact of imperma
 ```ad-quote
 So you're actually using it in the moment as a way of feeling into freedom, of opening up into freedom. It's a way of seeing, a way of looking.
 ```
+
 ---
 ##### Reflection on death
 **[[1229 What is Insight#^10-4|10-4]]**: _[[Death]] (2) · [[Freedom]] · [[Happiness]] · [[Love]]_
@@ -342,6 +361,7 @@ So you're actually using it in the moment as a way of feeling into freedom, of o
 ```ad-quote
 So I'm talking about modes of seeing that we can pick up and use, that lead to a sense of freedom. If they lead to a sense of agitation or confusion, existentially or all the rest of it, torment - wrong! Put it away! Do something else.
 ```
+
 ---
 ##### (2) Dukkha
 **[[1229 What is Insight#^11-1|11-1]]**: _[[Dukkha]] · [[Freedom]] (2) · [[Happiness]] · [[Impermanence]] · [[Consciousness]] · [[Experience]] · [[Aversion]] · [[Letting go]] (2)_
@@ -351,6 +371,7 @@ So I'm talking about modes of seeing that we can pick up and use, that lead to a
 ```ad-quote
 What if I saw everything as unsatisfactory? Just things come into consciousness, any experience, anything at all - just regard it as unsatisfactory. It's not a loathing or an aversion. Just saying, "Ah! It can't satisfy me." What happens is there's a letting go.
 ```
+
 ---
 ##### Learn to relax the push and the pull
 **[[1229 What is Insight#^11-2|11-2]]**: _[[Dukkha]] · [[Insight]] · [[Aversion]] (4) · [[Craving]] · [[Experience]]_
@@ -372,6 +393,7 @@ What if I saw everything as unsatisfactory? Just things come into consciousness,
 ```ad-quote
 It's "not me, not mine." And in that, there's a letting go, a very beautiful letting go. It's not at all about disconnection, dissociation, or numbing out, or anything like that. It's practicing a mode of seeing, a certain lens.
 ```
+
 ---
 ##### Just letting go of the aversion in the heart, the heart opens
 **[[1229 What is Insight#^12-1|12-1]]**: _[[Pain]] (3) · [[Craving]] · [[Consciousness]] · [[Aversion]] (6) · [[Love]] (3) · [[Metta]] (3) · [[Letting go]] · [[Three characteristics]] · [[Dukkha]] (2)_
@@ -403,6 +425,7 @@ It's "not me, not mine." And in that, there's a letting go, a very beautiful let
 ```ad-quote
 There's a kind of radiance that begins to come into one's experience, the more that we're able to meet it in a very direct, very simple, bare way
 ```
+
 ---
 ##### Letting go makes the now sparkle
 **[[1229 What is Insight#^13-1|13-1]]**: _[[Mindfulness]] (2) · [[Letting go]] (3) · [[Beauty]] (2) · [[Dharma]] · [[Experience]] · [[Papanca]]_
@@ -418,9 +441,11 @@ There's a kind of radiance that begins to come into one's experience, the more t
 ```ad-quote
 Suchness is just the way it exactly is in this moment, without my layers of papañca and preconception - that's not actually what it quite means.
 ```
+
 ```ad-note
 so what _does_ suchness mean?
 ```
+
 ---
 ##### When you don't stop there, experience begins to fade
 **[[1229 What is Insight#^13-3|13-3]]**: _[[Letting go]] (3) · [[Dharma]] · [[Ways of Looking]] · [[Experience]] (2) · [[Emptiness]] (2) · [[Consciousness]]_
@@ -430,6 +455,7 @@ so what _does_ suchness mean?
 ```ad-quote
 I was just being there, and the experience was getting more and more bright, more and more there, more and more present, more and more radiant. But if I keep letting go, it actually begins to fade. Experience itself begins to blur and dissolve and fade and become less prominent in consciousness.
 ```
+
 ---
 ##### Moving towards the Unfabracticated
 **[[1229 What is Insight#^13-4|13-4]]**: _[[Buddha]] (2) · [[Skandhas]] (2) · [[Emotions]] · [[Consciousness]] · [[Experience]] · [[Emptiness]] (3) · [[Unfabricated]] (2) · [[Phenomenon]] (3)_
@@ -451,6 +477,7 @@ I was just being there, and the experience was getting more and more bright, mor
 ```ad-quote
 It's pointing to seeing this: the more I cling in any way, the more prominent experience is in consciousness. I begin to understand _how_ things arise and _how_ they fade.
 ```
+
 ---
 ##### The more entanglement with experience, the more prominent it is
 **[[1229 What is Insight#^14-3|14-3]]**: _[[Craving]] · [[Experience]] (5) · [[Consciousness]] · [[Pain]] · [[Letting go]] (2) · [[Dukkha]] · [[Emptiness]] · [[Clinging]]_
@@ -472,6 +499,7 @@ It's pointing to seeing this: the more I cling in any way, the more prominent ex
 ```ad-quote
 absolutely everything that we take for granted, is actually built and fabricated by my relationship to it, by the way I'm looking at it. Not to understand that, the Buddha called that the fundamental delusion, the fundamental ignorance that human beings have, or that consciousnesses have.
 ```
+
 ---
 ##### Kaccayana and Dependent Origination
 **[[1229 What is Insight#^15-2|15-2]]**: _[[Kaccayana]] (2) · [[Buddha]] (3) · [[Avijja]] (2) · [[Ways of Looking]] · [[Clinging]] (2) · [[Dukkha]] (4) · [[Insight]] · [[Phenomenon]] · [[Dependent Origination]]_
@@ -481,6 +509,7 @@ absolutely everything that we take for granted, is actually built and fabricated
 ```ad-quote
 "That things exist, O Kaccāyana, is one extreme. That they do not exist is another. But I accept neither 'is' nor 'is not,' and I declare the truth from the middle position."
 ```
+
 ---
 ##### This far from being nihilistic, quite the opposite
 **[[1229 What is Insight#^15-3|15-3]]**: _[[Nihilism]] (2) · [[Freedom]] · [[Happiness]] · [[Love]] · [[Compassion]]_
@@ -490,6 +519,7 @@ absolutely everything that we take for granted, is actually built and fabricated
 ```ad-quote
 The deeper we go into this - and it's a very gradual thing, it's a very gradual process - the deeper we go into it, the more freedom is liberated, the more joy, the more peace, the more love and compassion are liberated.
 ```
+
 ---
 ##### This is the map, some possibilities of the map
 [[1229 What is Insight#^15-4|15-4]]

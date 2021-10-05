@@ -504,11 +504,6 @@ def collectParagraphsListPage(talkname) -> list[str]:
     return paragraphs
 
 
-def collectParagraphsListPageToClipboard(talkname):
-    pageLines = collectParagraphsListPage()
-    pyperclip.copy('\n'.join(pageLines))        
-
-
 def updateParagraphsListPages(haf: HAFEnvironment):
     summaries = haf.collectSummaryFilenames()
     for sfnSummaryMd in summaries:
@@ -752,6 +747,7 @@ if __name__ == "__main__":
             sfnSave = filename
             saveLinesToTextFile(sfnSave, lines)
 
+
     # creating files
 
     elif isScript('convertPlainMarkdownToTranscript'):
@@ -777,10 +773,6 @@ if __name__ == "__main__":
         updateBreadcrumbsInSummaries()
         print("updated")
 
-    elif isScript('collectParagraphs'):
-        assert talkname
-        collectParagraphsListPageToClipboard(talkname)
-
     elif isScript('updateParagraphsLists'):
         updateParagraphsListPages(haf)
 
@@ -792,34 +784,62 @@ if __name__ == "__main__":
         summary.save()
         transcript.save()
 
-    # elif isScript('addAudioLinks'):
-    #     assert talkname
-    #     path = haf.getSummaryFilename(talkname)
-    #     summary = TranscriptSummaryPage(path)
-    #     talkname = talknameFromFilename(path)
-    #     transcriptFilename = haf.getTranscriptFilename(talkname)
-    #     transcript = TranscriptPage(transcriptFilename)
-    #     addAudioLinksToSummaryWithDecoratedTranscript(summary, transcript)
+
+    # search & replace
+
+    elif isScript('replace'):
+        old = args.old
+        new = args.new
+        assert old and new
+        print("old", old)
+        print("new", new)
+
+        newlines = []
+        for md in haf.vault.allNotes():
+            text = loadStringFromTextFile(md)
+            before = text
+            text = re.sub(old, new, text)
+            if text != before:
+                print(basenameWithoutExt(md))
+                saveStringToTextFile(md, text)
 
 
-    # journal
+    elif isScript('search'):
+        old = args.old
+        assert old
+        print("old", old)
 
-    elif isScript('changeJournalBreadcrumbsStyle'):
-        for sfn in haf.vault.folderFiles("Journal", "md"):
-            lines = loadLinesFromTextFile(sfn)
-            for index, line in enumerate(lines):
-                match = re.match(r"<< \[\[(?P<prevdate>.+)\|(?P<prevday>.+)\]\] \| \[\[(?P<nextdate>.+)\|(?P<nextday>.+)\]\]", line)
-                if match:
-                    prevdate = match.group('prevdate')
-                    prevday = match.group('prevday')
-                    nextdate = match.group('nextdate')
-                    nextday = match.group('nextday')
-                    newline = f"[[{prevdate}|{prevday} 🡄]] | [[{nextdate}|🡆 {nextday}]]"
-                    lines[index] = newline
-            saveLinesToTextFile(sfn, lines)
+        newlines = []
+        for md in haf.vault.allNotes():
+            text = loadStringFromTextFile(md)            
+            if (matches := list(re.finditer(old, text))):
+                if matches:
+                    print(basenameWithoutExt(md))
+                    for match in matches:
+                        (start, end) = match.span()
+                        print(f"{start}, {end}")
+                        print(match.group(0))
+                        startBroader = max(start-20, 0)
+                        endBroader = min(end+20, len(text))
+                        print(("..." if startBroader else "") + text[startBroader:endBroader] + ("..." if endBroader < len(text) else ""))
+                        print('-'*50)
 
 
     # misc
+
+    elif isScript('bla'):
+        network = LinkNetwork(haf)
+        oldNote = 'Energy Body'
+        #linkingNotes = network.getBacklinksByNote(oldNote)
+        linkingNotes = network.collectReferencedNoteMatches(oldNote)
+        print(linkingNotes)
+        exit()
+        found = len(linkingNotes)
+        for linkingNote in linkingNotes:
+            markdown = network.getMarkdownByNote(linkingNote)
+            oldText = markdown.text
+            matches = network.getLinkMatchesByNote(linkingNote, oldNote)
+
 
     else:
         print("unknown script")
