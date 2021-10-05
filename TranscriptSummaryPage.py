@@ -47,22 +47,27 @@ class TranscriptSummaryPage(ObsidianNote):
                     parser.reset()
 
                 elif match == SummaryLineMatch.INDEX_COUNTS:
-                    allTermCounts = {} # type: dict[str,int]
-                    for mlParagraph in transcriptPage.markdownLines:
-                        if (termCounts := mlParagraph.termCounts):
-                            for entry, count in termCounts.items():
-                                if entry in allTermCounts:
-                                    allTermCounts[entry] += count
-                                else:
-                                    allTermCounts[entry] = count
+                    # old:
+                    # allTermCounts = {} # type: dict[str,int]
+                    # for mlParagraph in transcriptPage.markdownLines:
+                    #     if (termCounts := mlParagraph.termCounts):
+                    #         for entry, count in termCounts.items():
+                    #             if entry in allTermCounts:
+                    #                 allTermCounts[entry] += count
+                    #             else:
+                    #                 allTermCounts[entry] = count
 
-                    # resulting tuples is sorted descending by counts, for each count ascending by index entry
-                    tuples = sorted(allTermCounts.items(), key=lambda x: x[0])
-                    tuples = sorted(tuples, key=lambda x: x[1], reverse=True)
+                    # new:
+                    # allTermCounts = transcriptPage.collectAllTermCounts()
 
-                    entryFunc = lambda entry : f"[[{entry}]]" if allTermCounts[entry] == 1 else f"[[{entry}]] ({allTermCounts[entry]})"
-                    links = [entryFunc(tuple[0]) for tuple in tuples]
-                    parser.counts = " · ".join(links)
+                    # # resulting tuples is sorted descending by counts, for each count ascending by index entry
+                    # tuples = sorted(allTermCounts.items(), key=lambda x: x[0])
+                    # tuples = sorted(tuples, key=lambda x: x[1], reverse=True)
+
+                    # entryFunc = lambda entry : f"[[{entry}]]" if allTermCounts[entry] == 1 else f"[[{entry}]] ({allTermCounts[entry]})"
+                    # links = [entryFunc(tuple[0]) for tuple in tuples]
+                    # parser.counts = " · ".join(links)
+                    parser.counts = transcriptPage.collectAllTermLinks()
                     self.markdownLines[index].text = parser.canonicalIndexCounts(forceSpan=True)
                     parser.reset()
         finally:

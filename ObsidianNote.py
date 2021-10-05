@@ -16,6 +16,12 @@ class ObsidianNoteType(Enum):
     INDEX = 4
 
 
+class MyDumper(yaml.Dumper):
+
+    def increase_indent(self, flow=False, indentless=False):
+        return super(MyDumper, self).increase_indent(flow, False)
+
+
 # *********************************************
 # class ObsidianNote
 # *********************************************
@@ -35,7 +41,7 @@ class ObsidianNote:
         # IMPORTANT: frontmatter is *not* markdown
         self.yaml = extractYaml(textLines)
         if self.yaml:
-            skipAtBeginning = len(self.yaml) + 2
+            skipAtBeginning = len(loadFrontmatter(textLines)) + 2
             textLines = [line for index, line in enumerate(textLines) if index >= skipAtBeginning]
 
         self.assignTextLines(textLines)
@@ -82,7 +88,11 @@ class ObsidianNote:
         out = []
         if self.yaml:
             out.append("---")
-            out.extend(yaml.dump(self.yaml).splitlines())
+
+            # https://stackoverflow.com/questions/25108581/python-yaml-dump-bad-indentation
+            # added indent=3
+            out.extend(yaml.dump(self.yaml, Dumper=MyDumper, default_flow_style=False, indent=3).splitlines())
+            
             out.append("---")
 
         markdownTextLines = self.markdownLines.collectTextLines()

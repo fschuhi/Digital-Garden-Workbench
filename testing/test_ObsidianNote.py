@@ -44,17 +44,26 @@ class Test_ObsidianNote(unittest.TestCase):
 
         assert snippets.asText() == note.text
 
-        res = snippets.searchSection("^#+ Index", "^#+ Paragraphs")
+        res = snippets.searchSpan("^#+ Index", "^#+ Paragraphs")
         assert res is not None
-        (start, end, matchFrom, matchTo) = res
-        self.assertEqual(matchFrom.group(0), "## Index")
-        self.assertEqual(matchTo.group(0), "## Paragraphs")
+        (start, end) = res
+        self.assertEqual(snippets[start].text, "## Index")
+        self.assertEqual(snippets[end].text, "## Paragraphs")
 
         matchedSnippets = snippets[start:end]
         self.assertEqual(matchedSnippets[0].text, "## Index")
         self.assertNotEqual(matchedSnippets[-1].text, "## Paragraphs")
 
-        (start, end, matchFrom, matchTo) = snippets.searchSection("^#+ asdf", "^#+ wert")
+        (start, end) = snippets.searchSpan("^#+ asdf", "^#+ wert")
+        self.assertIsNone(start)
+
+        res = snippets.searchSpan("^#+ Index", "^#+ blabla", allowEOF=True)
+        assert res is not None
+        (start, end) = res
+        self.assertEqual(snippets[start].text, "## Index")
+        self.assertEqual(end, len(snippets))
+
+        (start, end) = snippets.searchSpan("^#+ Index", "^#+ blabla", allowEOF=False)
         self.assertIsNone(start)
 
 

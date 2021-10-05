@@ -334,11 +334,13 @@ class MarkdownLines(Iterable[MarkdownLine]):
         return (None, None)
 
 
-    def searchSection(self, fromPattern, toPattern, startIndex=0) -> Tuple[int, int, re.Match, re.Match]:
+    def searchSpan(self, fromPattern, toPattern, startIndex=0, allowEOF=True) -> Tuple[int, int, re.Match, re.Match]:
         (fromIndex, fromMatch) = self.search(fromPattern, startIndex)
         if fromIndex is not None:
             (toIndex, toMatch) = self.search(toPattern, fromIndex+1)
             if toIndex:
-                return (fromIndex, toIndex, fromMatch, toMatch)
-        return (None, None, None, None)
+                return (fromIndex, toIndex)
+            elif allowEOF:
+                return (fromIndex, len(self.markdownLines))
+        return (None, None)
             

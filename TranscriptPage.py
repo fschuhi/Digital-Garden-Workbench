@@ -107,16 +107,15 @@ class TranscriptPage(ObsidianNote):
             markdownLine.applySpacy(model, force)      
 
 
+    def collectTermCounts(self, term: str) -> list[tuple[int,int, int]]:
+        counts = []
+        for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
+            if (count := markdownLine.countTerm(term)):
+                counts.append( (pageNr, paragraphNr, count) )
+        return counts
+
     def collectTermLinks(self, term: str, boldLinkTargets: set[str] = None, targetType='#') -> str:
-
-        def collectTermCounts(term: str) -> list[tuple[int,int, int]]:
-            counts = []
-            for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():                
-                if (count := markdownLine.countTerm(term)):
-                    counts.append( (pageNr, paragraphNr, count) )
-            return counts
-
-        counts = collectTermCounts(term)
+        counts = self.collectTermCounts(term)
         links = []
         for pageNr, paragraphNr, count in counts:
             blockId = f"{pageNr}-{paragraphNr}"
@@ -127,7 +126,27 @@ class TranscriptPage(ObsidianNote):
             if count > 1:
                 link += f" ({count})"
             links.append(link)
-        return " · ".join(links)        
+        return ' · '.join(links)        
+
+
+    def collectAllTermCounts(self) -> dict[str,int]:
+        allTermCounts = {} # type: dict[str,int]
+        for mlParagraph in self.markdownLines:
+            if (termCounts := mlParagraph.termCounts):
+                for entry, count in termCounts.items():
+                    if entry in allTermCounts:
+                        allTermCounts[entry] += count
+                    else:
+                        allTermCounts[entry] = count
+        return allTermCounts
+
+    def collectAllTermLinks(self):
+        allTermCounts = self.collectAllTermCounts()
+        tuples = sorted(allTermCounts.items(), key=lambda x: x[0])
+        tuples = sorted(tuples, key=lambda x: x[1], reverse=True)
+        entryFunc = lambda entry : f"[[{entry}]]" if allTermCounts[entry] == 1 else f"[[{entry}]] ({allTermCounts[entry]})"
+        links = [entryFunc(tuple[0]) for tuple in tuples]
+        return ' · '.join(links)
 
 
 # *********************************************

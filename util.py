@@ -180,7 +180,7 @@ def loadYaml(sfnHAFYaml) -> dict[str,str]:
     return dict
 
 
-def extractYaml(lines: list[str]) -> dict[str,str]:
+def loadFrontmatter(lines: list[str]) -> list[str]:
     yamlLines = []
     if lines[0] != '---':
         return None
@@ -188,6 +188,13 @@ def extractYaml(lines: list[str]) -> dict[str,str]:
         if line == '---':
             break
         yamlLines.append(line)
+    return yamlLines
+
+
+def extractYaml(lines: list[str]) -> dict[str,str]:
+    yamlLines = loadFrontmatter(lines)
+    if not yamlLines:
+        return
     from io import StringIO
     file_like_io = StringIO('\n'.join(yamlLines))
     import yaml

@@ -588,7 +588,7 @@ if __name__ == "__main__":
 
     transcriptIndex = TranscriptIndex(RB_YAML)
 
-    if isScript(['reindexTranscripts', 'updateSummary', 'addMissingCitations', 'transferFilesToPublish', 'createNewSummaries']):
+    if isScript(['reindexTranscripts', 'updateSummary', 'addMissingCitations', 'transferFilesToPublish', 'createNewSummaries', 'top10']):
         transcriptModel = TranscriptModel(transcriptIndex)
 
     if isScript(['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml', 'replaceNoteLink']):
@@ -684,6 +684,8 @@ if __name__ == "__main__":
 
     elif isScript('createIndexEntryFiles'):
         transcriptIndex.createObsidianIndexEntryFiles(haf.dirIndex)
+        updateAlphabeticalIndex(haf, transcriptIndex)
+
     
     elif isScript('showOrphansInIndexFolder'):
         showOrphansInIndexFolder(haf, network, transcriptIndex, haf.dirIndex)
@@ -811,23 +813,21 @@ if __name__ == "__main__":
 
         newlines = []
         for md in haf.vault.allNotes():
-            text = loadStringFromTextFile(md)            
-            if (matches := list(re.finditer(old, text))):
-                if matches:
-                    print(basenameWithoutExt(md))
-                    for match in matches:
-                        (start, end) = match.span()
-                        print(f"{start}, {end}")
-                        print(match.group(0))
-                        startBroader = max(start-20, 0)
-                        endBroader = min(end+20, len(text))
-                        print(("..." if startBroader else "") + text[startBroader:endBroader] + ("..." if endBroader < len(text) else ""))
-                        print('-'*50)
+            lines = loadLinesFromTextFile(md)
+            for index, line in enumerate(lines):
+                if (matches := list(re.finditer(old, line))):
+                    if matches:
+                        print(basenameWithoutExt(md))
+                        for match in matches:
+                            (start, end) = match.span()
+                            print(f"{index}, {start}, {end}")
+                            print(line)
+                            print('-'*50)
 
 
-    # misc
+    # top 10 backlinks
 
-    elif isScript('heul'):
+    elif isScript('Top10FirstTryWithLinkNetwork'):
 
         # PROBLEM: LinkNetwork doesn't know how often a transcript refers to an index entry
         # without applying spacy, this info is only available via the summaries
@@ -854,7 +854,7 @@ if __name__ == "__main__":
                 print(referrer, visible)
 
 
-    elif isScript('bla'):
+    elif isScript('Top10SecondTryWithParagrapCounts'):
 
         def collectCounts(countsString: str) -> dict[str,int]:
             counts = {}
@@ -872,6 +872,7 @@ if __name__ == "__main__":
         parser = SummaryLineParser()
         for fnSummary in haf.collectSummaryFilenames():
             summary = TranscriptSummaryPage(fnSummary)
+            print(summary.filename)
             for ml in summary.markdownLines:
                 match = parser.match(ml)
                 if match == SummaryLineMatch.PARAGRAPH_COUNTS:                    
@@ -880,6 +881,61 @@ if __name__ == "__main__":
                         print(counts)
                     pass
             exit()
+
+
+    elif isScript('top10'):
+        # dict[term, list[Tuple[transcript name, count]]]
+        dict = {} # type: dict[str,list[Tuple[str,int]]]
+
+        for fnTranscript in haf.collectTranscriptFilenames():
+            transcript = TranscriptPage(fnTranscript)
+            transcriptName = transcript.filename
+            transcript.applySpacy(transcriptModel)
+            allTermCounts = transcript.collectAllTermCounts()
+            for (term, count) in allTermCounts.items():
+                if term in dict:
+                    counts = dict[term]
+                else:
+                    counts = []
+                    dict[term] = counts
+                counts.append((transcriptName, count))
+        
+        top10Header = "Top 10 referring transcripts"
+        yamlValue = 'showTop10ReferringTranscripts'
+
+        terms = [term for term in sorted(list(haf.collectIndexEntryNameSet())) if term in dict]
+        for term in terms:            
+            indexEntry = IndexEntryPage(haf.getIndexEntryFilename(term))            
+            if (showTop10ReferringTranscripts := value if ((value := indexEntry.getYamlValue(yamlValue)) is not None) else True):
+                tuples = sorted(dict[term], key=lambda x: x[1], reverse=True)
+                # func = lambda note, count: f"[[{note}]] ({count})"
+                # links = [func(note, count) for (note, count) in tuples]                    
+                links = [f"[[{note}]] ({count})" for (note, count) in tuples]                    
+                top10Links = links[:10]
+
+                # create the complete backlink section
+                section = []
+                section.append('### ' + top10Header)
+                section.extend(top10Links)
+                section.append("")
+
+                (start, end) = indexEntry.markdownLines.searchSpan(r"^#+ " + top10Header, r"^#+")
+                if start:
+                    # there is already a backlink section - - delete it
+                    indexEntry.markdownLines.delete(start, end)
+                    insert = start
+                else:
+                    section.insert(0, "")
+                    insert = len(indexEntry.markdownLines)
+
+                # insert or append the section
+                indexEntry.markdownLines.insert(insert, section)
+
+                indexEntry.save()
+
+
+    # misc
+    
 
     else:
         print("unknown script")
