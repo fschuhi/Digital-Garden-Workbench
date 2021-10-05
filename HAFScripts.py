@@ -485,7 +485,7 @@ def collectParagraphsListPage(talkname) -> list[str]:
     paragraphs.append("---")
     paragraphs.append("obsidianUIMode: preview")
     paragraphs.append("---")
-    paragraphs.append(f"### Paragraphs in [[{talkname}]]")
+    paragraphs.append(f"## Paragraphs in [[{talkname}]]")
     sfnSummaryMd = haf.getSummaryFilename(talkname)
     summary = TranscriptSummaryPage(sfnSummaryMd)
     for ml in summary.markdownLines:
