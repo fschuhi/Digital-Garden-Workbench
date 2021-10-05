@@ -827,19 +827,59 @@ if __name__ == "__main__":
 
     # misc
 
-    elif isScript('bla'):
-        network = LinkNetwork(haf)
-        oldNote = 'Energy Body'
-        #linkingNotes = network.getBacklinksByNote(oldNote)
-        linkingNotes = network.collectReferencedNoteMatches(oldNote)
-        print(linkingNotes)
-        exit()
-        found = len(linkingNotes)
-        for linkingNote in linkingNotes:
-            markdown = network.getMarkdownByNote(linkingNote)
-            oldText = markdown.text
-            matches = network.getLinkMatchesByNote(linkingNote, oldNote)
+    elif isScript('heul'):
 
+        # PROBLEM: LinkNetwork doesn't know how often a transcript refers to an index entry
+        # without applying spacy, this info is only available via the summaries
+        # so a better way is to create the IndexEntryNetwork from the available summaries, checking for the count lines and parsing them
+
+        network = LinkNetwork(haf)
+        indexEntry = 'Vessel'
+        linkingNotes = network.collectReferencedNoteMatches(indexEntry)
+
+        # summaries are duplicate all links we have, so ignore them
+        # also ignore self-links 
+        summaries = haf.collectSummaryNameSet()
+        linkingNotes = [(note, x) for (note,x) in linkingNotes if note.lower() != indexEntry.lower() and not note in summaries]
+
+        # https://stackoverflow.com/questions/45476509/group-list-of-tuples-efficiently/45476721
+        from itertools import groupby
+        from operator import itemgetter
+        b = [(k, [x for _, x in g]) for k, g in groupby(linkingNotes, itemgetter(0))]
+
+        for (referrer, matches) in b:
+            markdown = network.getMarkdownByNote(referrer)
+            for match in matches:
+                visible = shown if (shown := match.group('shown')) else match.group('note')
+                print(referrer, visible)
+
+
+    elif isScript('bla'):
+
+        def collectCounts(countsString: str) -> dict[str,int]:
+            counts = {}
+            singleCounts = countsString.split(' · ')
+            for singleCount in singleCounts:
+                match = re.match(r"\[\[(?P<entry>[^]]+)\]\]( \((?P<count>[0-9]+)\))?", singleCount)
+                if not match:
+                    print(countsString)
+                    print("!!!!" + singleCount)
+                assert match
+                count = suppliedCount if (suppliedCount := match.group('count')) else 1
+                counts[match.group('entry')] = count
+            return counts
+
+        parser = SummaryLineParser()
+        for fnSummary in haf.collectSummaryFilenames():
+            summary = TranscriptSummaryPage(fnSummary)
+            for ml in summary.markdownLines:
+                match = parser.match(ml)
+                if match == SummaryLineMatch.PARAGRAPH_COUNTS:                    
+                    if (countsString := parser.counts):
+                        counts = collectCounts(countsString)
+                        print(counts)
+                    pass
+            exit()
 
     else:
         print("unknown script")

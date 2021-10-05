@@ -112,6 +112,9 @@ class HAFEnvironment():
     def collectTranscriptNameSet(self):
         return set([basenameWithoutExt(filename) for filename in self.collectTranscriptFilenames()])
 
+    def collectSummaryNameSet(self):
+        return set([basenameWithoutExt(filename) for filename in self.collectSummaryFilenames()])
+
 
     def determineFilenameFromTalkname(self, filenames, talkname):
         talknameKey = determineTalkname(talkname).lower()
