@@ -72,12 +72,8 @@ def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName,
 # new transcripts
 # *********************************************
 
-def convertPlainMarkdownToTranscript(haf: HAFEnvironment, talkName):
-    sfnTranscriptMd = haf.getTranscriptFilename(talkName)
-    lines = loadLinesFromTextFile(sfnTranscriptMd)
-    page = TranscriptPage.fromPlainMarkdownLines(lines)
-    page.save(sfnTranscriptMd)
-
+# this is supersided by data/tmp based action
+# don't create new transcripts in the vault, we can do this very well manually, one by one
 
 def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
     filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
@@ -91,7 +87,8 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 # we need to deitalize manually
                 transcript = deitalicizeTermsWithDiacritics(transcript)
                 lines = transcript.splitlines()
-                page = TranscriptPage.fromPlainMarkdownLines(lines)
+                talkname = talknameFromFilename(sfnTranscriptMd)
+                page = TranscriptPage.fromPlainMarkdownLines(lines, talkname)
 
                 # create backup (if it doesn't exist yet)
                 from shutil import copyfile                
@@ -529,6 +526,7 @@ def get_arguments():
     parser.add_argument('--script')
     parser.add_argument('--retreatName')
     parser.add_argument('--talkName')
+    parser.add_argument('--path')
     parser.add_argument('--indexEntry')
     parser.add_argument('--out')
     parser.add_argument('--old')
@@ -560,7 +558,7 @@ if __name__ == "__main__":
             match = re.match(r"    # (.+)", line)
             if match:
                 lastcomment = match.group(1)
-            match = re.match(r"    elif script == '(.+)'", line)
+            match = re.match(r"    elif isScript\('(.+)'\)", line)
             if match:
                 if lastcomment != '':
                     print(('' if first else '\n') + '# ' + lastcomment)
@@ -580,7 +578,8 @@ if __name__ == "__main__":
     #indexEntry = args.indexEntry if args.indexEntry else 'Energy Body'
 
     retreatName = args.retreatName
-    talkname = args.talkName
+    summaryName = args.talkName
+    path = args.path
     indexEntry = args.indexEntry
     level = args.level
 
@@ -640,8 +639,8 @@ if __name__ == "__main__":
         print("reindexed")
 
     elif isScript('updateSummary'):
-        if talkname:
-            updateSummary(haf, talkname, transcriptModel)
+        if summaryName:
+            updateSummary(haf, summaryName, transcriptModel)
             print(f"updated talk summary")
         else:
             if retreatName:
@@ -651,13 +650,13 @@ if __name__ == "__main__":
             else:
                 #talkNames = list(haf.summaryFilenameByTalk.keys())
                 talkNames = haf.collectSummaryTalknames()
-            for talkname in talkNames:
-                updateSummary(haf, talkname, transcriptModel)
+            for summaryName in talkNames:
+                updateSummary(haf, summaryName, transcriptModel)
             print(f"updated all talk summaries")
 
     elif isScript('unspanSummary'):
-        assert talkname
-        sfn = haf.getSummaryFilename(talkname)
+        assert summaryName
+        sfn = haf.getSummaryFilename(summaryName)
         lines = loadLinesFromTextFile(sfn)
         for index, line in enumerate(lines):
             match = re.match(r"<span class=\"(counts|keywords)\">(?P<inside>[^<]+)</span>", line)
@@ -712,13 +711,13 @@ if __name__ == "__main__":
         print("converted")
 
     elif isScript("canonicalize"):
-        assert talkname
-        canonicalizeTranscript(haf, talkname)
+        assert summaryName
+        canonicalizeTranscript(haf, summaryName)
         print("canonicalized")
 
     elif isScript("deitalicizeTranscript"):
-        assert talkname
-        deitalicizeTranscript(haf, talkname)
+        assert summaryName
+        deitalicizeTranscript(haf, summaryName)
         print("deitalizised")
 
 
@@ -753,8 +752,8 @@ if __name__ == "__main__":
     # creating files
 
     elif isScript('convertPlainMarkdownToTranscript'):
-        assert talkname
-        convertPlainMarkdownToTranscript(haf, talkname)
+        assert summaryName
+        convertPlainMarkdownToTranscript(haf, summaryName)
         print("converted")
 
     elif isScript('firstIndexingOfRetreatFolder'):
@@ -779,9 +778,9 @@ if __name__ == "__main__":
         updateParagraphsListPages(haf)
 
     elif isScript('handleDecorations'):
-        assert talkname
-        transcript = TranscriptPage(haf.getTranscriptFilename(talkname))
-        summary = TranscriptSummaryPage(haf.getSummaryFilename(talkname))
+        assert summaryName
+        transcript = TranscriptPage(haf.getTranscriptFilename(summaryName))
+        summary = TranscriptSummaryPage(haf.getSummaryFilename(summaryName))
         summary.handleTranscriptDecorations(transcript)
         summary.save()
         transcript.save()
@@ -934,9 +933,9 @@ if __name__ == "__main__":
                 indexEntry.save()
 
 
-    # misc
+    # Shannon's feedback
 
-    elif isScript('heul'):
+    elif isScript('removeLevel6Headers'):
         #fn = r"m:\2007 New Years Retreat Insight Meditation\Transcripts\1229 What is Insight.md"
         fn = r"m:\Untitled.md"
         lines = loadLinesFromTextFile(fn)
@@ -947,10 +946,21 @@ if __name__ == "__main__":
             newlines.append(line)
         saveLinesToTextFile("tmp/tmp.md", newlines)
 
-    elif isScript('bla'):
+    elif isScript('createNewTranscriptFromPlainMarkup'):
+        # see bat/createNewTranscript.bat
+        assert path
+        lines = loadLinesFromTextFile(path)
+        summaryName = talknameFromFilename(path)
+        page = TranscriptPage.fromPlainMarkdownLines(lines, summaryName)        
+        page.save(f"tmp/{basenameWithoutExt(path)}.md")
+
+
+    elif isScript('changeParagraphIds'):
+        assert summaryName
+        transcriptName = basenameWithoutExt(haf.getTranscriptFilename(summaryName))
         import csv
         tuples = []
-        with open('What is Insight.csv', newline='') as csvfile:
+        with open('data/{transcriptName}.sv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
             for row in spamreader:
                 tuples.append(tuple(row))
@@ -964,7 +974,7 @@ if __name__ == "__main__":
             for line in lines:
                 newLine = line
                 for old, strand, new in tuples:
-                    newLine = newLine.replace(f"[[1229 What is Insight#^{old}|{old}]]", strand)
+                    newLine = newLine.replace(f"[[{transcriptName}#^{old}|{old}]]", strand)
                     changed = changed or (newLine != line)
                 pass1.append(newLine)
             if changed:
@@ -972,16 +982,12 @@ if __name__ == "__main__":
                 for line in pass1:
                     newLine = line
                     for old, strand, new in tuples:
-                        newLine = newLine.replace(strand, f"[[1229 What is Insight#^{new}|{new}]]")
+                        newLine = newLine.replace(strand, f"[[{transcriptName}#^{new}|{new}]]")
                     pass2.append(newLine)
                 saveLinesToTextFile(md, pass2)
 
-    elif isScript('seier'):
-        path = r"M:\1229 What is Insight (new).md"
-        lines = loadLinesFromTextFile(path)
-        page = TranscriptPage.fromPlainMarkdownLines(lines)
-        page.save("tmp/tmp.md")
 
+    # misc
 
 
     else:

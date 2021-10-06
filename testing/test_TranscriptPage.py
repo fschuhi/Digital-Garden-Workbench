@@ -91,7 +91,7 @@ class Test_TranscriptPage(unittest.TestCase):
         sfnPlainMdCompare = "testing/data/Test_TranscriptPage.test_fromPlainMarkdownLines.compare.md"
 
         lines = loadLinesFromTextFile(sfnPlainMdInput)
-        page = TranscriptPage.fromPlainMarkdownLines(lines)
+        page = TranscriptPage.fromPlainMarkdownLines(lines, 'SomeTalkname')
         page.save("tmp/tmp.md")        
         self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnPlainMdCompare))
 

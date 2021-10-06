@@ -31,7 +31,7 @@ class TranscriptPage(ObsidianNote):
 
 
     @classmethod
-    def fromPlainMarkdownLines(cls, lines: list[str]):
+    def fromPlainMarkdownLines(cls, lines: list[str], talkname):
         # IMPORTANT: passed sfnPlainMd is a sfnTranscriptMd, but contains only raw markdown
         # we generate trailing blockids for the paragraphs in this method
 
@@ -40,6 +40,12 @@ class TranscriptPage(ObsidianNote):
         textLines.append("obsidianUIMode: preview")
         textLines.append("---")
         textLines.append("#Transcript")
+        textLines.append('')
+        textLines.append(f"Summary: [[{talkname}]]")
+        textLines.append('')
+        textLines.append('---')
+        textLines.append('<br/>')
+        textLines.append('')
         textLines.append('')
 
         nPageIndicators = 0
@@ -67,7 +73,7 @@ class TranscriptPage(ObsidianNote):
 
                     # replace the empty line immediately before the paragraph w/ the target header
                     assert textLines[-2] == ''
-                    textLines[-2] = f"###### ^{pageNr}-{paragraphNr}"
+                    textLines[-2] = f"###### {pageNr}-{paragraphNr}"
                 
         # we need "#" new page indicators, otherwise the danger is too high that we wreck a properly blockid-indexed transcript
         assert nPageIndicators != 0
