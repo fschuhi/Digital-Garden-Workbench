@@ -15,6 +15,35 @@ TFootnotes = list[TFootnote]
 
 
 # *********************************************
+# script support
+# *********************************************
+
+def isScriptArg(args, check):
+    if isinstance(check, list):
+        lower = [s.lower() for s in check]
+        return args.script.lower() in lower
+    else:
+        return args.script.lower() == check.lower()
+
+def dumpScripts(py):
+    lines = loadLinesFromTextFile(py)
+    lastcomment = ''
+    first = True
+    for line in lines:
+        match = re.match(r"    # (.+)", line)
+        if match:
+            lastcomment = match.group(1)
+        match = re.match(r"    elif isScript\('(.+)'\)", line)
+        if match:
+            if lastcomment != '':
+                print(('' if first else '\n') + '# ' + lastcomment)
+                lastcomment = ''
+                first = False
+            script = match.group(1)
+            print('  ' + script)
+
+
+# *********************************************
 # deitalizise
 # *********************************************
 
