@@ -15,10 +15,19 @@ Internally, the Obsidian desktop application organizes the notes in "vaults". In
 
 The contents of the publish vault can be found [here](https://github.com/fschuhi/rob-burbea-digital-garden-publish).
 
-The workbench is a command line tool to help the ["gardening"](https://publish.obsidian.md/rob-burbea/Gardening):
+The workbench are command line tools to help the ["gardening"](https://publish.obsidian.md/rob-burbea/Gardening):
 
 ```console
-S:\python HAFScripts.py
+HAFScripts.py
+transcripts.py
+summaries.py
+index.py
+```
+
+Help for supported scripts is available with the --scripts parameter, e.g.
+
+```console
+summaries.py --scripts
 ```
 
 For the possible switches see the *.py
@@ -27,10 +36,13 @@ Among others, the workbench is used for the following tasks:
 * copy notes from the work to the publish vault
 * transcribe certain parts of notes to manage the UX of the Digital Garden
 * manage the main keyword index with its index entry files
+* reindex transcripts
 * generate link sections (for transcript pages, for paragraphs, for citations on index entry pages)
+* generate plain paragraph descriptions lists
+* create top 10 backlinks on index entry pages
 * manage breadcrumbs in summaries
 * paginate new talk transcripts
-* initialize new talk series
+* update summaries from transcript decorations
 * create skeleton notes for talk summaries
 * handle diacritics
 * transform tools to transformation tools to make the markdown uniform across all talks
