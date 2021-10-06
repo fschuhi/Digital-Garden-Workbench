@@ -935,7 +935,54 @@ if __name__ == "__main__":
 
 
     # misc
-    
+
+    elif isScript('heul'):
+        #fn = r"m:\2007 New Years Retreat Insight Meditation\Transcripts\1229 What is Insight.md"
+        fn = r"m:\Untitled.md"
+        lines = loadLinesFromTextFile(fn)
+        newlines = []
+        for line in lines:
+            if (not line.strip()) or line.startswith('#'):
+                continue
+            newlines.append(line)
+        saveLinesToTextFile("tmp/tmp.md", newlines)
+
+    elif isScript('bla'):
+        import csv
+        tuples = []
+        with open('What is Insight.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
+            for row in spamreader:
+                tuples.append(tuple(row))
+        del tuples[0]
+
+        # first pass
+        for md in haf.vault.allNotes():
+            lines = loadLinesFromTextFile(md)
+            pass1 = []
+            changed = False
+            for line in lines:
+                newLine = line
+                for old, strand, new in tuples:
+                    newLine = newLine.replace(f"[[1229 What is Insight#^{old}|{old}]]", strand)
+                    changed = changed or (newLine != line)
+                pass1.append(newLine)
+            if changed:
+                pass2 = []
+                for line in pass1:
+                    newLine = line
+                    for old, strand, new in tuples:
+                        newLine = newLine.replace(strand, f"[[1229 What is Insight#^{new}|{new}]]")
+                    pass2.append(newLine)
+                saveLinesToTextFile(md, pass2)
+
+    elif isScript('seier'):
+        path = r"M:\1229 What is Insight (new).md"
+        lines = loadLinesFromTextFile(path)
+        page = TranscriptPage.fromPlainMarkdownLines(lines)
+        page.save("tmp/tmp.md")
+
+
 
     else:
         print("unknown script")
