@@ -60,6 +60,8 @@ class TranscriptPage(ObsidianNote):
                 line = canonicalizeText(line)
                 line = deitalicizeTermsWithDiacritics(line)
 
+                print(line)
+
                 if line == "#":
                     pageNr += 1
                     paragraphNr = 0

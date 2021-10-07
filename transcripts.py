@@ -167,7 +167,9 @@ if __name__ == "__main__":
         lines = loadLinesFromTextFile(path)
         talkname = talknameFromFilename(path)
         page = TranscriptPage.fromPlainMarkdownLines(lines, talkname)        
-        page.save(f"tmp/{basenameWithoutExt(path)}.md")
+        out = f"tmp/{basenameWithoutExt(path)}.md"
+        page.save(out)
+        print(f"\nsaved to '{out}'")
 
 
     elif isScript('changeParagraphIds'):

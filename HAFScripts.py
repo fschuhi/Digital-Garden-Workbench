@@ -26,6 +26,8 @@ def get_arguments():
     parser.add_argument('--talkName')
     parser.add_argument('--out')
     parser.add_argument('--old')
+    parser.add_argument('--note')
+    parser.add_argument('--pattern')
     parser.add_argument('--new')
     return parser.parse_args()
 
@@ -158,6 +160,19 @@ if __name__ == "__main__":
 
 
     # misc
+
+    elif isScript('count'):
+        assert args.note
+        assert args.pattern
+        note = argsnote if (argsnote := args.note).endswith('.md') else argsnote + '.md'
+        path = haf.vault.findFile(note)
+        print(path)
+        lines = loadLinesFromTextFile(path)
+        n = 0
+        for line in lines:
+            if re.search(args.pattern, line):
+                n += 1
+        print(n)
 
 
     else:
