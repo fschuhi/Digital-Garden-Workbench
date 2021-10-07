@@ -60,8 +60,6 @@ class TranscriptPage(ObsidianNote):
                 line = canonicalizeText(line)
                 line = deitalicizeTermsWithDiacritics(line)
 
-                print(line)
-
                 if line == "#":
                     pageNr += 1
                     paragraphNr = 0
@@ -108,6 +106,24 @@ class TranscriptPage(ObsidianNote):
             if (pageNr == thePageNr) and (paragraphNr == theParagraphNr):
                 return markdownLine
         return None
+
+    def prevParagraph(self, thePageNr, theParagraphNr) -> Tuple[int,int]:
+        lastPageNr = None
+        lastParagraphNr = None
+        for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
+            if (pageNr == thePageNr) and (paragraphNr == theParagraphNr):
+                return (lastPageNr, lastParagraphNr)
+            lastPageNr = pageNr
+            lastParagraphNr = paragraphNr
+        return (lastPageNr, lastParagraphNr)
+
+    def nextParagraph(self, thePageNr, theParagraphNr) -> Tuple[int,int]:
+        found = False
+        for (pageNr, paragraphNr, markdownLine) in self.collectParagraphs():
+            if found:
+                return (pageNr, paragraphNr)
+            found = (pageNr == thePageNr) and (paragraphNr == theParagraphNr)
+        return (None, None)
 
 
     def applySpacy(self, model: TranscriptModel, force: bool = False):

@@ -25,7 +25,7 @@ class SummaryLineParser:
     def reset(self):
         self.headerLine = self.level = self.headerText = self.transcriptName = self.blockId = self.pageNr = self.paragraphNr = self.shownLinkText = self.counts = None
 
-    def match(self, ml: MarkdownLine):
+    def     match(self, ml: MarkdownLine):
         return self.matchText(ml.text)
 
     def matchText(self, text) -> SummaryLineMatch:

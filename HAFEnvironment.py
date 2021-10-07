@@ -50,6 +50,7 @@ class HAFEnvironment():
         filename = self.getTranscriptFilename(talkname)
         return self.vault.toplevelFolder(filename) if filename else None
 
+
     def transcriptExists(self, talkname):
         return self.retreatNameFromTalkname(talkname) is not None
 
@@ -168,3 +169,23 @@ class HAFEnvironment():
         # Obsidian Publish doesn't need the website address in <a href ...
         # return self.dict['Website']
         return ''
+
+
+    # top 10 list support
+
+    def createRetreatByTalknameLookup(self):
+        return {basenameWithoutExt(path): self.vault.toplevelFolder(path) for path in self.collectSummaryFilenames()}
+
+    def createDateByTalknameLookup(self):
+        retreatByTalkname = self.createRetreatByTalknameLookup()
+        dateByTalkname = {}
+        for fnTranscript in self.collectTranscriptFilenames():
+            transcriptName = basenameWithoutExt(fnTranscript)
+            talkname = talknameFromFilename(fnTranscript)
+            if talkname in retreatByTalkname:
+                retreatName = retreatByTalkname[talkname]
+                year = retreatName[:4]
+                date = f"{year}-{transcriptName[0:2]}-{transcriptName[2:4]}"
+                dateByTalkname[talkname] = date
+        return dateByTalkname
+

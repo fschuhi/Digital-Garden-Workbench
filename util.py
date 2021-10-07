@@ -443,8 +443,8 @@ def determineHeaderTarget(header):
     return re.sub(r"[.,/:?=()]", "", header)
 
 
-def parseBlockId(blockId) -> Tuple[int,int]:
-    match = re.match(r"([0-9]+)-([0-9]+)")
+def parseBlockId(blockid) -> Tuple[int,int]:
+    match = re.match(r"([0-9]+)-([0-9]+)", blockid)
     return (int(match.group(1)), int(match.group(2))) if match else None
 
 

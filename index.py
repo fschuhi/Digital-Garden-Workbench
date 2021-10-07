@@ -12,7 +12,8 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptPage import createTranscriptsDictionary
 from IndexEntryPage import IndexEntryPage
 from util import *
-from HAFEnvironment import HAFEnvironment
+from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
+from SummaryParagraph import SummaryParagraph, SummaryParagraphs, ParagraphTuple
 
 
 # *********************************************
@@ -252,87 +253,87 @@ if __name__ == "__main__":
         print("copied to clipboard")
 
 
-    # top 10 backlinks
+    # top backlinks
 
-    elif isScript('top10FirstTryWithLinkNetwork'):
+    elif isScript('topTalks'):
+        nTopDefault = 10
 
-        # PROBLEM: LinkNetwork doesn't know how often a transcript refers to an index entry
-        # without applying spacy, this info is only available via the summaries
-        # so a better way is to create the IndexEntryNetwork from the available summaries, checking for the count lines and parsing them
+        from collections import defaultdict
+        paragraphs = SummaryParagraphs(haf)
 
-        network = LinkNetwork(haf)
-        indexEntry = 'Vessel'
-        linkingNotes = network.collectReferencedNoteMatches(indexEntry)
-
-        # summaries are duplicate all links we have, so ignore them
-        # also ignore self-links 
-        summaries = haf.collectSummaryNameSet()
-        linkingNotes = [(note, x) for (note,x) in linkingNotes if note.lower() != indexEntry.lower() and not note in summaries]
-
-        # https://stackoverflow.com/questions/45476509/group-list-of-tuples-efficiently/45476721
-        from itertools import groupby
-        from operator import itemgetter
-        b = [(k, [x for _, x in g]) for k, g in groupby(linkingNotes, itemgetter(0))]
-
-        for (referrer, matches) in b:
-            markdown = network.getMarkdownByNote(referrer)
-            for match in matches:
-                visible = shown if (shown := match.group('shown')) else match.group('note')
-                print(referrer, visible)
-
-
-    elif isScript('top10'):
-        # dict[term, list[Tuple[transcript name, count]]]
-        dict = {} # type: dict[str,list[Tuple[str,int]]]
-
-        for fnTranscript in haf.collectTranscriptFilenames():
-            transcript = TranscriptPage(fnTranscript)
-            transcriptName = transcript.filename
-            transcript.applySpacy(transcriptModel)
-            allTermCounts = transcript.collectAllTermCounts()
-            for (term, count) in allTermCounts.items():
-                if term in dict:
-                    counts = dict[term]
-                else:
-                    counts = []
-                    dict[term] = counts
-                counts.append((transcriptName, count))
+        # ((ZAIVSGG))
+        dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
         
-        top10Header = "Top 10 referring transcripts"
-        yamlValue = 'showTop10ReferringTranscripts'
+        yamlKey = 'showTopReferringTalks'
 
-        terms = [term for term in sorted(list(haf.collectIndexEntryNameSet())) if term in dict]
-        for term in terms:            
-            indexEntry = IndexEntryPage(haf.getIndexEntryFilename(term))            
-            if (showTop10ReferringTranscripts := value if ((value := indexEntry.getYamlValue(yamlValue)) is not None) else True):
-                tuples = sorted(dict[term], key=lambda x: x[1], reverse=True)
-                # func = lambda note, count: f"[[{note}]] ({count})"
-                # links = [func(note, count) for (note, count) in tuples]                    
-                links = [f"[[{note}]] ({count})" for (note, count) in tuples]                    
-                top10Links = links[:10]
+        # vertical span for the section
+        # markdown lines in the section will be replaced (with bigger or smaller number or rows
+        # see ((UVLQMRI)) below
+        patternStart = r"^#+ Top ([0-9]+) referring talks"
+        patternEnd = r"^#+"
+        
+        # occurrences ((ZAIVSGG)) neither have retreats nor dates
+        retreatByTalkname = haf.createRetreatByTalknameLookup()
+        dateByTalkname = haf.createDateByTalknameLookup()
 
+        for term in list(haf.collectIndexEntryNameSet()):
+            indexEntry = IndexEntryPage(haf.getIndexEntryFilename(term))
+
+            showTopReferringTalks = value if ((value := indexEntry.getYamlValue(yamlKey)) is not None) else True
+            if showTopReferringTalks:
                 # create the complete backlink section
                 section = []
-                section.append('### ' + top10Header)
-                section.extend(top10Links)
-                section.append("")
 
-                (start, end) = indexEntry.markdownLines.searchSpan(r"^#+ " + top10Header, r"^#+")
+                # ((UVLQMRI)) try to find the span of the top-mentions-section
+                (start, end) = indexEntry.markdownLines.searchSpan(patternStart, patternEnd)
                 if start:
+                    # found it
+                    match = re.match(patternStart, indexEntry.markdownLines[start].text)
+                    nTop = int(match.group(1))
+
                     # there is already a backlink section - - delete it
                     indexEntry.markdownLines.delete(start, end)
                     insert = start
                 else:
-                    section.insert(0, "")
+                    # no section yet                    
+                    nTop = nTopDefault
+
+                    # will be added at the end, not just replaced -> have an empty line before the new last section of the page
+                    section.append("")
                     insert = len(indexEntry.markdownLines)
+
+                # Obsidian table
+                section.append(f"### Top {nTop} referring talks")
+                section.append("talk | count | series | date")
+                section.append(":- | - |: - | -")
+
+                # get all occurrences for the term
+                # those are paragraphs, i.e. multiple mentions for a talk            
+                tuples = dict[term] # type: list[ParagraphTuple]
+
+                # sum the multiple mentions for each talk
+                dictCounts = defaultdict(int) # dict[summaryName, count]
+                for pt in tuples:
+                    dictCounts[pt.summaryName] += pt.count
+
+                # top mentions is sorted descending
+                topMentions = sorted(dictCounts.items(), key=lambda x: x[1], reverse=True)[:nTop]
+
+                # create table rows
+                for (talkname, count) in topMentions:
+                    retreatName = retreatByTalkname[talkname]                    
+                    date = dateByTalkname[talkname]
+                    section.append(f"[[{talkname}]] | {count} | [[{retreatName}]] | {date}")
+
+                # empty line ends the section
+                section.append("")
 
                 # insert or append the section
                 indexEntry.markdownLines.insert(insert, section)
 
                 indexEntry.save()
 
-
-    # misc
+        print("done")
 
 
     else:
