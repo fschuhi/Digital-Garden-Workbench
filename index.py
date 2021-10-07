@@ -14,6 +14,7 @@ from IndexEntryPage import IndexEntryPage
 from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
 from SummaryParagraph import SummaryParagraph, SummaryParagraphs, ParagraphTuple
+from collections import defaultdict
 
 
 # *********************************************
@@ -183,6 +184,70 @@ def showOrphansInRBYaml(haf: HAFEnvironment, network: LinkNetwork, transcriptInd
     pyperclip.copy(out)
 
 
+# *********************************************
+# top referrers section builder
+# *********************************************
+
+def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault):
+    paragraphs = SummaryParagraphs(haf)
+    dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
+
+    # vertical span for the section
+    # markdown lines in the section will be replaced (with bigger or smaller number or rows
+    # see ((UVLQMRI)) below
+    patternEnd = r"^#+"
+
+    for term in list(haf.collectIndexEntryNameSet()):
+        indexEntry = IndexEntryPage(haf.getIndexEntryFilename(term))
+
+        # create the complete backlink section
+        section = []
+
+        # index entry page can change either by deletion only (if the yaml flag was set to False) or w/ a replaced section
+        changed = False
+
+        # ((UVLQMRI)) try to find the span of the top-mentions-section
+        (start, end) = indexEntry.markdownLines.searchSpan(patternStart, patternEnd)
+        if start:
+            # found it
+            match = re.match(patternStart, indexEntry.markdownLines[start].text)
+            nTop = int(match.group(1))
+
+            # there is already a backlink section - - delete it
+            indexEntry.markdownLines.delete(start, end)
+            insert = start
+
+            # we deleted something, which has to be reflected by saving
+            changed = True
+        else:
+            # no section yet                    
+            nTop = nTopDefault
+
+            # will be added at the end, not just replaced -> have an empty line before the new last section of the page
+            section.append("")
+            insert = len(indexEntry.markdownLines)
+
+        showTop = value if ((value := indexEntry.getYamlValue(yamlKey)) is not None) else True
+        if showTop:
+
+            # now we definitely now that we have changed
+            changed = True
+
+            # get all occurrences for the term
+            # those are paragraphs, i.e. multiple mentions for a talk            
+            occurrences = dict[term] # type: list[ParagraphTuple]
+
+            func(occurrences, section, nTop)
+
+            # empty line ends the section
+            section.append("")
+
+            # insert or append the section
+            indexEntry.markdownLines.insert(insert, section)
+
+        if changed:
+            indexEntry.save()
+
 
 # *********************************************
 # main
@@ -196,7 +261,6 @@ def get_arguments():
     parser.add_argument('--scripts', action="store_true")
     parser.add_argument("--sectionsort", action='store_true')
     return parser.parse_args()
-
 
 if __name__ == "__main__":
     args = get_arguments()
@@ -253,88 +317,105 @@ if __name__ == "__main__":
         print("copied to clipboard")
 
 
-    # top backlinks
+    elif isScript('topParagraphs'):
+        nTopDefault = 3
+
+        # we need to access previous and next paragraphs of the ones shown in the rows
+        # see ((KJQBZMS)) below
+        talknames = [basenameWithoutExt(fn) for fn in haf.collectSummaryFilenames()]
+        transcriptByTalkname = {talkname: TranscriptPage(haf.getTranscriptFilename(talkname)) for talkname in talknames}
+
+        dateByTalkname = haf.createDateByTalknameLookup()
+
+        def func(occurrences, section, nTop):
+            # Obsidian table
+            section.append(f"### Paragraphs with {nTop}+ mentions")
+            section.append("summary | description | count")
+            section.append(":- | : - | -")
+
+            # prune if necessary
+            if len(occurrences) > 10:
+                occurrences = [o for o in occurrences if o.count >= nTop]
+
+            # build a list with the necessary fields for sorting and display
+            topMentions = []
+            for o in occurrences:
+                date = dateByTalkname[o.summaryName]
+                topMentions.append( (o.summaryName, o.headerText, o.blockid, o.count, date))
+
+            # sort by dates, descending
+            # NOTE: date is not displayed
+            topMentions = sorted(topMentions, key=lambda x: x[4], reverse=True)
+
+            # main sort by count, descending
+            topMentions = sorted(topMentions, key=lambda x: x[3], reverse=True)
+
+            for (talkname, headerText, blockid, count, date) in topMentions:
+                (pageNr, paragraphNr) = parseBlockId(blockid)
+
+                # ((KJQBZMS)) get the transcript w/o going via the filesystem
+                transcript = transcriptByTalkname[talkname]
+                thisParagraph = f"[[{transcript.notename}#^{blockid}\\|.]]"
+
+                # determine previous and next paragraphs, if there are any
+                (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
+                (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
+                prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|.]]"
+                nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|.]]"
+
+                # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
+                paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] {prevParagraph} **{thisParagraph}** {nextParagraph}"
+
+                section.append( f"[[{talkname}]] | {paragraphLink} | {count}" )
+
+        # now delete, add or replace the section
+        yamlKey = 'showTopReferringParagraphs'
+        patternStart = r"^#+ Paragraphs with ([0-9]+)\+ mentions"
+        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault)
+
+        print("done")
+
 
     elif isScript('topTalks'):
         nTopDefault = 10
 
-        from collections import defaultdict
-        paragraphs = SummaryParagraphs(haf)
-
-        # ((ZAIVSGG))
-        dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
-        
-        yamlKey = 'showTopReferringTalks'
-
-        # vertical span for the section
-        # markdown lines in the section will be replaced (with bigger or smaller number or rows
-        # see ((UVLQMRI)) below
-        patternStart = r"^#+ Top ([0-9]+) referring talks"
-        patternEnd = r"^#+"
-        
-        # occurrences ((ZAIVSGG)) neither have retreats nor dates
+        # occurrences neither have retreats nor dates
         retreatByTalkname = haf.createRetreatByTalknameLookup()
         dateByTalkname = haf.createDateByTalknameLookup()
 
-        for term in list(haf.collectIndexEntryNameSet()):
-            indexEntry = IndexEntryPage(haf.getIndexEntryFilename(term))
+        def func(occurrences, section, nTop):
+            # Obsidian table
+            section.append(f"### Top {nTop} referring talks")
+            section.append("talk | count | series")
+            section.append(":- | - |: -")
 
-            showTopReferringTalks = value if ((value := indexEntry.getYamlValue(yamlKey)) is not None) else True
-            if showTopReferringTalks:
-                # create the complete backlink section
-                section = []
+            # sum the multiple mentions for each talk
+            dictCounts = defaultdict(int) # dict[summaryName, count]
+            for pt in occurrences:
+                dictCounts[pt.summaryName] += pt.count
 
-                # ((UVLQMRI)) try to find the span of the top-mentions-section
-                (start, end) = indexEntry.markdownLines.searchSpan(patternStart, patternEnd)
-                if start:
-                    # found it
-                    match = re.match(patternStart, indexEntry.markdownLines[start].text)
-                    nTop = int(match.group(1))
+            # just use the top occurrences
+            dictCountsItems = sorted(dictCounts.items(), key=lambda x: x[1], reverse=True)[:nTop]
 
-                    # there is already a backlink section - - delete it
-                    indexEntry.markdownLines.delete(start, end)
-                    insert = start
-                else:
-                    # no section yet                    
-                    nTop = nTopDefault
+            # build a list with the necessary fields for sorting and display
+            topMentions = [(talkname, count, retreatByTalkname[talkname], dateByTalkname[talkname]) for (talkname, count) in dictCountsItems]
 
-                    # will be added at the end, not just replaced -> have an empty line before the new last section of the page
-                    section.append("")
-                    insert = len(indexEntry.markdownLines)
+            # sort by dates, descending
+            # NOTE: date is not displayed
+            topMentions = sorted(topMentions, key=lambda x: x[3], reverse=True)
 
-                # Obsidian table
-                section.append(f"### Top {nTop} referring talks")
-                section.append("talk | count | series | date")
-                section.append(":- | - |: - | -")
+            # main sort by count, descending
+            topMentions = sorted(topMentions, key=lambda x: x[1], reverse=True)
 
-                # get all occurrences for the term
-                # those are paragraphs, i.e. multiple mentions for a talk            
-                tuples = dict[term] # type: list[ParagraphTuple]
+            for (talkname, count, retreatName, date) in topMentions:
+                section.append(f"[[{talkname}]] | {count} | [[{retreatName}]]")
 
-                # sum the multiple mentions for each talk
-                dictCounts = defaultdict(int) # dict[summaryName, count]
-                for pt in tuples:
-                    dictCounts[pt.summaryName] += pt.count
-
-                # top mentions is sorted descending
-                topMentions = sorted(dictCounts.items(), key=lambda x: x[1], reverse=True)[:nTop]
-
-                # create table rows
-                for (talkname, count) in topMentions:
-                    retreatName = retreatByTalkname[talkname]                    
-                    date = dateByTalkname[talkname]
-                    section.append(f"[[{talkname}]] | {count} | [[{retreatName}]] | {date}")
-
-                # empty line ends the section
-                section.append("")
-
-                # insert or append the section
-                indexEntry.markdownLines.insert(insert, section)
-
-                indexEntry.save()
+        # now delete, add or replace the section
+        yamlKey = 'showTopReferringTalks'
+        patternStart = r"^#+ Top ([0-9]+) referring talks"
+        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault)
 
         print("done")
-
 
     else:
         print("unknown script")
