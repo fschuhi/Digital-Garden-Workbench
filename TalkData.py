@@ -6,7 +6,7 @@ from util import *
 
 from HAFEnvironment import HAFEnvironment
 from TranscriptPage import TranscriptPage
-from TranscriptSummaryPage import TranscriptSummaryPage
+from TalkPage import TalkPage
 
 
 class TalkData():
@@ -21,15 +21,15 @@ class TalkData():
         cls.pdfName = basenameWithoutExt(cls.sfnPdf)
 
         cls.sfnTranscript = haf.getTranscriptFilename(talkName)
-        cls.sfnSummary = haf.getSummaryFilename(talkName)
+        cls.sfnTalk = haf.getTalkFilename(talkName)
 
         # "names" are the filenames, without the path and extentions
         cls.talkName = talkName
         cls.transcriptName = basenameWithoutExt(cls.sfnTranscript)
-        cls.summaryName = basenameWithoutExt(cls.sfnSummary)
+        cls.talkName = basenameWithoutExt(cls.sfnTalk)
 
         # NOTE that any of the files might be None
-        cls.transcriptPage = cls.summaryPage = None
+        cls.transcriptPage = cls.talkPage = None
         return cls()
 
 
@@ -37,8 +37,8 @@ class TalkData():
         assert os.path.exists(self.sfnTranscript)
         self.transcriptPage = TranscriptPage(self.sfnTranscript)
 
-    def loadSummaryPage(self):
-        assert os.path.exists(self.sfnSummary)
-        self.summaryPage = TranscriptSummaryPage(self.sfnSummary)
+    def loadTalkPage(self):
+        assert os.path.exists(self.sfnTalk)
+        self.talkPage = TalkPage(self.sfnTalk)
 
 

@@ -2,16 +2,16 @@
 
 from util import *
 from MarkdownLine import MarkdownLines
-from SummaryLineParser import SummaryLineParser
-from SummaryLineParser import SummaryLineMatch
+from TalkPageLineParser import TalkPageLineParser
+from TalkPageLineParser import TalkPageLineMatch
 from typing import Iterable
 
 
 # *********************************************
-# SummarySection
+# TalkSection
 # *********************************************
 
-class SummarySection():
+class TalkSection():
 
     def __init__(self, sourceLines: MarkdownLines, start, end):
         # create a copy of the passed MarkdownLines
@@ -23,13 +23,13 @@ class SummarySection():
         assert end-start == len(sourceLines)
 
         # make sure we conform to a section: header and counts
-        parser = SummaryLineParser()        
+        parser = TalkPageLineParser()        
         
-        assert parser.matchText(textLines[0]) == SummaryLineMatch.HEADER
+        assert parser.matchText(textLines[0]) == TalkPageLineMatch.HEADER
         self.headerText = parser.headerText
         self.level = parser.level
         
-        assert parser.matchText(textLines[1]) == SummaryLineMatch.PARAGRAPH_COUNTS
+        assert parser.matchText(textLines[1]) == TalkPageLineMatch.PARAGRAPH_COUNTS
         self.pageNr = parser.pageNr
         self.paragraphNr = parser.paragraphNr
 
@@ -82,13 +82,13 @@ class SummarySection():
 
 
 # *********************************************
-# SummarySections
+# TalkSections
 # *********************************************
 
-class SummarySections(Iterable[SummarySection]):
+class TalkSections(Iterable[TalkSection]):
 
     def __init__(self):
-        self.sections = [] # type: list[SummarySection]
+        self.sections = [] # type: list[TalkSection]
         pass
 
     def __iter__(self):
@@ -101,12 +101,12 @@ class SummarySections(Iterable[SummarySection]):
     def __len__(self):
         return len(self.sections)
 
-    def append(self, sourceLines: MarkdownLines, start, end) -> SummarySection:
-        newSection = SummarySection(sourceLines, start, end)
+    def append(self, sourceLines: MarkdownLines, start, end) -> TalkSection:
+        newSection = TalkSection(sourceLines, start, end)
         self.sections.append(newSection)
         return newSection
 
-    def findParagraph(self, pageNr: int, paragraphNr: int) -> SummarySection:
+    def findParagraph(self, pageNr: int, paragraphNr: int) -> TalkSection:
         for section in self.sections:
             if section.pageNr == pageNr and section.paragraphNr == paragraphNr:
                 return section

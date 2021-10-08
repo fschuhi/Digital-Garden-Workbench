@@ -11,7 +11,7 @@ from enum import Enum
 class ObsidianNoteType(Enum):
     UNKNOWN = 0
     TRANSCRIPT = 1
-    SUMMARY = 2
+    TALK = 2
     INDEX_ENTRY = 3
     INDEX = 4
 

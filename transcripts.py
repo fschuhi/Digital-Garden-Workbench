@@ -8,7 +8,6 @@ from TranscriptModel import TranscriptModel
 from consts import HAF_YAML, RB_YAML
 from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage
-from TranscriptSummaryPage import TranscriptSummaryPage
 from util import *
 from HAFEnvironment import HAFEnvironment, talknameFromFilename
 

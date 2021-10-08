@@ -5,25 +5,25 @@ if not "%doit%"=="do it" (
    echo aborted
    goto :EOF
 )
-echo .
+echo.
 
 python transcripts.py --script reindexTranscripts
-echo .
+echo.
 
-python summaries.py --script updateSummary
-echo .
+python talks.py --script updateTalk
+echo.
 
-python summaries.py --script updateParagraphsLists
-echo .
+python talks.py --script updateParagraphsLists
+echo.
 
 python index.py --script topTalks
-echo .
+echo.
 
 python index.py --script topParagraphs
-echo .
+echo.
 
 python HAFScripts.py --script transferFilesToPublish
-echo .
+echo.
 
 echo.
 echo INTENTION: "publish" from the publish vault
@@ -31,3 +31,4 @@ goto :EOF
 
 :EOF
 echo.
+set uname=doit

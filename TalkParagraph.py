@@ -5,8 +5,8 @@ from collections import namedtuple
 
 from typing import Tuple
 from HAFEnvironment import HAFEnvironment, determineTalkname
-from SummaryLineParser import SummaryLineMatch, SummaryLineParser
-from TranscriptSummaryPage import TranscriptSummaryPage
+from TalkPageLineParser import TalkPageLineMatch, TalkPageLineParser
+from TalkPage import TalkPage
 from util import determineHeaderTarget
 
 
@@ -28,18 +28,18 @@ def collectCounts(countsString: str) -> list[Tuple[str,int]]:
 
 
 # *********************************************
-# class SummaryParagraph
+# class TalkParagraph
 # *********************************************
 
-# summaryName, headerText, blockid
+# talkname, headerText, blockid
 
-ParagraphTuple = namedtuple('ParagraphTuple', 'summaryName headerText blockid term count')
+ParagraphTuple = namedtuple('ParagraphTuple', 'talkname headerText blockid term count')
 
-class SummaryParagraph():
+class TalkParagraph():
 
-    def __init__(self, parser: SummaryLineParser):
+    def __init__(self, parser: TalkPageLineParser):
         self.transcriptName = parser.transcriptName
-        self.summaryName = determineTalkname(parser.transcriptName)
+        self.talkname = determineTalkname(parser.transcriptName)
         self.blockid = parser.blockId
         self.headerText = parser.headerText
         self.countsString = parser.counts
@@ -49,22 +49,22 @@ class SummaryParagraph():
 
 
 # *********************************************
-# class SummaryParagraph
+# class TalkParagraphs
 # *********************************************
 
-class SummaryParagraphs():
+class TalkParagraphs():
 
     def __init__(self, haf: HAFEnvironment):
         self.haf = haf
-        self.paragraphs = [] # type: list[SummaryParagraph]
+        self.paragraphs = [] # type: list[TalkParagraph]
 
-        for filename in haf.collectSummaryFilenames():
-            summary = TranscriptSummaryPage(filename)
-            parser = SummaryLineParser()
-            for ml in summary.markdownLines:
+        for filename in haf.collectTalkFilenames():
+            talk = TalkPage(filename)
+            parser = TalkPageLineParser()
+            for ml in talk.markdownLines:
                 match = parser.match(ml)
-                if match == SummaryLineMatch.PARAGRAPH_COUNTS:
-                    self.paragraphs.append( SummaryParagraph(parser))
+                if match == TalkPageLineMatch.PARAGRAPH_COUNTS:
+                    self.paragraphs.append( TalkParagraph(parser))
 
     @property
     def occurrences(self) -> list[ParagraphTuple]:
@@ -77,7 +77,7 @@ class SummaryParagraphs():
         occurrences = []
         for paragraph in self.paragraphs:
             for (term, count) in paragraph.counts:
-                pt = ParagraphTuple(paragraph.summaryName, paragraph.headerText, paragraph.blockid, term, count)
+                pt = ParagraphTuple(paragraph.talkname, paragraph.headerText, paragraph.blockid, term, count)
                 occurrences.append(pt)
         return occurrences
         

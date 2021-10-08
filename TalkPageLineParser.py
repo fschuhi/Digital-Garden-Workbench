@@ -6,18 +6,18 @@ import re
 
 
 # *********************************************
-# class SummaryLineParser
+# class TalkPageLineParser
 # *********************************************
 
 from enum import Enum
-class SummaryLineMatch(Enum):
+class TalkPageLineMatch(Enum):
     NONE = 0
     HEADER = 1
     PARAGRAPH_COUNTS = 2
     INDEX_COUNTS = 3
 
 
-class SummaryLineParser:
+class TalkPageLineParser:
 
     def __init__(self) -> None:
         self.reset()
@@ -28,7 +28,7 @@ class SummaryLineParser:
     def     match(self, ml: MarkdownLine):
         return self.matchText(ml.text)
 
-    def matchText(self, text) -> SummaryLineMatch:
+    def matchText(self, text) -> TalkPageLineMatch:
         
         # intentionally capture any header
         if (match := re.match(r"(#+ )(.+)", text)):
@@ -41,7 +41,7 @@ class SummaryLineParser:
 
             # not all headers are a HEADER match
             # in the testcases we use "old style" level 6, normally 5
-            return SummaryLineMatch.HEADER if self.level >= 5 else SummaryLineMatch.NONE
+            return TalkPageLineMatch.HEADER if self.level >= 5 else TalkPageLineMatch.NONE
 
         # **[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_
         pattern = r"(?P<spanStart><span class=\"(keywords|counts)\">)?(\*\*)?\[\[(?P<transcriptName>[0-9]+ [^#]+)#\^?(?P<blockId>(?P<pageNr>[0-9]+)-(?P<paragraphNr>[0-9]+))(\|(?P<shownLinkText>[0-9]+-[0-9]+))?\]\](\*\*)?(: _)?(?P<counts>[^_<]*)_?(?P<spanEnd></span>)?$"        
@@ -56,7 +56,7 @@ class SummaryLineParser:
             self.shownLinkText = match.group('shownLinkText')
             self.counts = match.group('counts')
             self.spanEnd = match.group('spanEnd')
-            return SummaryLineMatch.PARAGRAPH_COUNTS
+            return TalkPageLineMatch.PARAGRAPH_COUNTS
 
         # <span class="counts">_[[Compassion]] (3) · [[Dukkha]] (2) · [[Contraction]] (2) · [[The Self]]_</span>
         pattern = r"(?P<spanStart><span class=\"counts\">)?_?(?P<counts>\[\[[^\]]+\]\] \([0-9]+\)( · \[\[[^\]]+\]\]( \([0-9]+\))?)*)_?(?P<spanEnd></span>)?$"        
@@ -67,9 +67,9 @@ class SummaryLineParser:
                 self.spanStart = match.group('spanStart')
                 self.counts = match.group('counts')
                 self.spanEnd = match.group('spanEnd')
-                return SummaryLineMatch.INDEX_COUNTS
+                return TalkPageLineMatch.INDEX_COUNTS
 
-        return SummaryLineMatch.NONE
+        return TalkPageLineMatch.NONE
 
 
     def canonicalParagraphCounts(self, forceSpan=False, targetType='#'):

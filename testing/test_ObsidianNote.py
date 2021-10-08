@@ -12,8 +12,8 @@ from consts import HAF_YAML, HAF_YAML_TESTING
 class Test_ObsidianNote(unittest.TestCase):
 
     def getNote(self, haf, talkName):
-        md = haf.getSummaryFilename(talkName)
-        return ObsidianNote(ObsidianNoteType.SUMMARY, md)
+        md = haf.getTalkFilename(talkName)
+        return ObsidianNote(ObsidianNoteType.TALK, md)
 
 
     def test_yaml(self):

@@ -2,7 +2,7 @@
 
 from MarkdownLine import MarkdownLine
 from TranscriptPage import TranscriptPage
-from TranscriptSummaryPage import TranscriptSummaryPage
+from TalkPage import TalkPage
 from util import *
 from HAFEnvironment import HAFEnvironment, talknameFromFilename
 from consts import HAF_PUBLISH_YAML, HAF_YAML
@@ -82,7 +82,7 @@ class Publishing:
         mirrorRetreatsDir(lambda r: source.pdfFolder(r), lambda r: target.pdfFolder(r), '.pdf')
         mirrorRetreatsDir(lambda r: source.imagesFolder(r), lambda r: target.imagesFolder(r), None)
         mirrorRetreatsDir(lambda r: source.transcriptsFolder(r), lambda r: target.transcriptsFolder(r))
-        mirrorRetreatsDir(lambda r: source.summariesFolder(r), lambda r: target.summariesFolder(r))
+        mirrorRetreatsDir(lambda r: source.talksFolder(r), lambda r: target.talksFolder(r))
         mirrorRetreatsDir(lambda r: source.listsFolder(r), lambda r: target.listsFolder(r))
 
 
@@ -185,11 +185,11 @@ class Publishing:
 # fullstops in transcripts
 
     def modifyFullstops(self):
-        summaryFilenames = self.hafWork.collectSummaryFilenames()
-        for summaryFilename in summaryFilenames:
-            summary = TranscriptSummaryPage(summaryFilename)
-            headerTargets = summary.collectParagraphHeaderTargets()
-            talkname = talknameFromFilename(summaryFilename)
+        talkFilenames = self.hafWork.collectTalkFilenames()
+        for talkFilename in talkFilenames:
+            talk = TalkPage(talkFilename)
+            headerTargets = talk.collectParagraphHeaderTargets()
+            talkname = talknameFromFilename(talkFilename)
 
             # intentionally from the publish 
             transcriptFilename = self.hafPublish.getTranscriptFilename(talkname)
@@ -207,7 +207,7 @@ class Publishing:
                         pass
                     else:
                         if blockid not in headerTargets:
-                            # we might have left out this particular paragraph from the summary
+                            # we might have left out this particular paragraph from the talk
                             pass
                         else:
                             headerTarget = headerTargets[blockid]
@@ -217,8 +217,8 @@ class Publishing:
                             else:
                                 match = re.match(r'(.+)([.?!"]) \^' + blockid + "$", markdownLine.text)
                                 if match:
-                                    linkToSummary = f"[[{talkname}#{headerTarget}|{match.group(2)}]]"  # ∘∙⦿꘎᙮
-                                    markdownLine.text = f"{match.group(1)}{linkToSummary} ^{blockid}"
+                                    linkToTalk = f"[[{talkname}#{headerTarget}|{match.group(2)}]]"  # ∘∙⦿꘎᙮
+                                    markdownLine.text = f"{match.group(1)}{linkToTalk} ^{blockid}"
             transcript.save(transcriptFilename)
 
 
@@ -235,7 +235,7 @@ class Publishing:
             assert note
             target = match.group('target')
             
-            # convert links on summary to transcript
+            # convert links on talk to transcript
             if target and target.startswith('#^') and note in transcriptNameSet:
                 return True
 
@@ -246,15 +246,14 @@ class Publishing:
             return False
 
         for filename in filenames:
-            # print(baseNameWithoutExt(sfnSummaryMd))
             text = loadStringFromTextFile(filename)
             markdown = MarkdownLine(text)
             markdown.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filterLinks)}")
             saveStringToTextFile(filename, markdown.text)
 
 
-    def replaceLinksInAllSummaries(self):
-        filenames = self.hafPublish.collectSummaryFilenames()
+    def replaceLinksInAllTalks(self):
+        filenames = self.hafPublish.collectTalkFilenames()
         self.__replaceLinks(filenames, True)
 
     def replaceLinksInAllRootFilenames(self):

@@ -4,17 +4,17 @@ from TranscriptPage import TranscriptPage
 from HAFEnvironment import HAFEnvironment, determineTalkname
 from TranscriptIndex import TranscriptIndex
 from TranscriptModel import TranscriptModel
-from TranscriptSummaryPage import TranscriptSummaryPage, createNewSummaryPage
+from Talk import Talk, createNewTalkPage
 from consts import HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 import filecmp
 
 
 # *********************************************
-# TranscriptSummaryPage
+# Talk
 # *********************************************
 
-class Test_TranscriptSummaryPage(unittest.TestCase):
+class Test_TalkPage(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -30,13 +30,13 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
         transcriptPage = TranscriptPage(sfnTranscriptMd)
         transcriptPage.applySpacy(self.transcriptModel)
     
-        sfnSummaryMd = self.haf.getSummaryFilename(self.transcriptName)
-        summaryPage = TranscriptSummaryPage(sfnSummaryMd)
+        fnTalk = self.haf.getTalkFilename(self.transcriptName)
+        talk = Talk(fnTalk)
     
-        summaryPage.update(transcriptPage, targetType='#^')
-        summaryPage.save("tmp/tmp.md")
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnSummaryMd))
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_updateWithOldTargetType.md"))
+        talk.update(transcriptPage, targetType='#^')
+        talk.save("tmp/tmp.md")
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", fnTalk))
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_Talk.test_updateWithOldTargetType.md"))
 
 
     def test_updateWithNewTargetType(self):
@@ -44,26 +44,25 @@ class Test_TranscriptSummaryPage(unittest.TestCase):
         transcriptPage = TranscriptPage(sfnTranscriptMd)
         transcriptPage.applySpacy(self.transcriptModel)
     
-        sfnSummaryMd = self.haf.getSummaryFilename(self.transcriptName)
-        summaryPage = TranscriptSummaryPage(sfnSummaryMd)
+        fnTalk = self.haf.getTalkFilename(self.transcriptName)
+        talk = Talk(fnTalk)
     
-        summaryPage.update(transcriptPage, targetType='#')
-        summaryPage.save("tmp/tmp.md")
-        #self.assertTrue(filecmp.cmp("tmp/tmp.md", sfnSummaryMd))
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_updateWithNewTargetType.md"))
+        talk.update(transcriptPage, targetType='#')
+        talk.save("tmp/tmp.md")
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_Talk.test_updateWithNewTargetType.md"))
 
 
     def test_createNew(self):
         talkName = determineTalkname(self.transcriptName)
-        createNewSummaryPage(talkName, self.haf, self.transcriptModel, "tmp/tmp.md")
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_TranscriptSummaryPage.test_createNew.md"))
+        createNewTalkPage(talkName, self.haf, self.transcriptModel, "tmp/tmp.md")
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_Talk.test_createNew.md"))
 
 
     def test_collectMissingParagraphHeaderTexts(self):
         talkName = "From Insight to Love"
-        sfnSummaryMd = self.haf.getSummaryFilename(talkName)
-        summaryPage = TranscriptSummaryPage(sfnSummaryMd)
-        self.assertEqual(summaryPage.collectMissingParagraphHeaderTexts(), 2)
+        fnTalk = self.haf.getTalkFilename(talkName)
+        talk = Talk(fnTalk)
+        self.assertEqual(talk.collectMissingParagraphHeaderTexts(), 2)
 
 
 if __name__ == "__main__":

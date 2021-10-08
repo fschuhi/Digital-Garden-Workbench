@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from HAFEnvironment import HAFEnvironment
-from SummaryParagraph import SummaryParagraphs
+from TalkParagraph import TalkParagraphs
 from TranscriptPage import TranscriptPage
 from util import basenameWithoutExt, determineHeaderTarget, parseBlockId, saveLinesToTextFile
 from Publishing import Publishing
@@ -11,14 +11,14 @@ import filecmp
 
 
 # *********************************************
-# SummaryParagraph
+# TalkParagraph
 # *********************************************
 
-class Test_SummaryParagraph(unittest.TestCase):
+class Test_TalkParagraph(unittest.TestCase):
 
     def test_1(self):
         haf = HAFEnvironment(HAF_YAML)
-        paragraphs = SummaryParagraphs(haf)
+        paragraphs = TalkParagraphs(haf)
         #occurrences = sorted(paragraphs.collectTermOccurrences('Preliminaries'), key=lambda o: o[3], reverse=True)
         #print(occurrences)
 
@@ -29,10 +29,10 @@ class Test_SummaryParagraph(unittest.TestCase):
 
         section = []
         section.append(f"### Paragraphs with {min}+ mentions")
-        section.append("summary | description | count")
+        section.append("talk | description | count")
         section.append(":- | : - | -")
         for o in [_ for _ in occurrences if _.count >= min]:
-            sfnTranscript = haf.getTranscriptFilename(o.summaryName)
+            sfnTranscript = haf.getTranscriptFilename(o.talkname)
             transcript = TranscriptPage(sfnTranscript)
 
             (pageNr, paragraphNr) = parseBlockId(o.blockid)
@@ -42,9 +42,9 @@ class Test_SummaryParagraph(unittest.TestCase):
             (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
             prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|.]]"
             nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|.]]"
-            paragraphLink = f"[[{o.summaryName}#{determineHeaderTarget(o.headerText)}\\|{o.headerText}]] {prevParagraph} **{thisParagraph}** {nextParagraph}"
+            paragraphLink = f"[[{o.talkname}#{determineHeaderTarget(o.headerText)}\\|{o.headerText}]] {prevParagraph} **{thisParagraph}** {nextParagraph}"
 
-            section.append( f"[[{o.summaryName}]] | {paragraphLink} | {o.count}" )
+            section.append( f"[[{o.talkname}]] | {paragraphLink} | {o.count}" )
 
         saveLinesToTextFile(r"M:/Brainstorming/Untitled.md", section)
 

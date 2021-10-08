@@ -19,15 +19,15 @@ The workbench are command line tools to help the ["gardening"](https://publish.o
 
 ```console
 HAFScripts.py
+talks.py
 transcripts.py
-summaries.py
 index.py
 ```
 
 Help for supported scripts is available with the --scripts parameter, e.g.
 
 ```console
-summaries.py --scripts
+talks.py --scripts
 ```
 
 For the possible switches see the *.py
@@ -39,11 +39,11 @@ Among others, the workbench is used for the following tasks:
 * reindex transcripts
 * generate link sections (for transcript pages, for paragraphs, for citations on index entry pages)
 * generate plain paragraph descriptions lists
-* create top 10 backlinks on index entry pages
-* manage breadcrumbs in summaries
+* create top 10 backlinks for talks and transcript paragraphs on index entry pages
+* manage breadcrumbs in talks
 * paginate new talk transcripts
-* update summaries from transcript decorations
-* create skeleton notes for talk summaries
+* update talks from transcript decorations
+* create skeleton notes for talk talks
 * handle diacritics
 * transform tools to transformation tools to make the markdown uniform across all talks
 

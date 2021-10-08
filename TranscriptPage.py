@@ -41,7 +41,7 @@ class TranscriptPage(ObsidianNote):
         textLines.append("---")
         textLines.append("#Transcript")
         textLines.append('')
-        textLines.append(f"Summary: [[{talkname}]]")
+        textLines.append(f"[[{talkname}]]")
         textLines.append('')
         textLines.append('---')
         textLines.append('<br/>')

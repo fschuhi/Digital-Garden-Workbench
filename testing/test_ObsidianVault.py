@@ -33,8 +33,8 @@ class Test_ObsidianVault(unittest.TestCase):
         self.assertListEqual( self.vault.folderNotes('2020 Vajra Music'), ['testing\\data\\_Markdown\\2020 Vajra Music\\2020 Vajra Music.md'])
         self.assertListEqual( self.vault.folderNotes('2020 Vajra Music/**'), \
             ['testing\\data\\_Markdown\\2020 Vajra Music\\2020 Vajra Music.md', \
-            'testing\\data\\_Markdown\\2020 Vajra Music\\Summaries\\Preliminaries Regarding Voice, Movement, and Gesture - Part 1.md', \
-            'testing\\data\\_Markdown\\2020 Vajra Music\\Summaries\\Preliminaries Regarding Voice, Movement, and Gesture - Part 2.md', \
+            'testing\\data\\_Markdown\\2020 Vajra Music\\Talks\\Preliminaries Regarding Voice, Movement, and Gesture - Part 1.md', \
+            'testing\\data\\_Markdown\\2020 Vajra Music\\Talks\\Preliminaries Regarding Voice, Movement, and Gesture - Part 2.md', \
             'testing\\data\\_Markdown\\2020 Vajra Music\\Transcripts\\0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1.md', \
             'testing\\data\\_Markdown\\2020 Vajra Music\\Transcripts\\0302 Preliminaries Regarding Voice, Movement, and Gesture - Part 2.md'])
 

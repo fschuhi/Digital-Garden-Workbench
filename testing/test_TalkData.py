@@ -25,7 +25,7 @@ class Test_TalkData(unittest.TestCase):
         td = TalkData.fromTalkName("Preliminaries Regarding Voice, Movement, and Gesture - Part 1", self.haf)
         self.assertEqual(os.path.basename(td.sfnPdf), "2020_0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1.pdf")
         self.assertEqual(os.path.basename(td.sfnTranscript), "0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1.md")
-        self.assertEqual(os.path.basename(td.sfnSummary), "Preliminaries Regarding Voice, Movement, and Gesture - Part 1.md")
+        self.assertEqual(os.path.basename(td.sfnTalk), "Preliminaries Regarding Voice, Movement, and Gesture - Part 1.md")
 
         td.loadTranscriptPage()
         self.assertEqual(td.transcriptPage.filename, td.transcriptName)

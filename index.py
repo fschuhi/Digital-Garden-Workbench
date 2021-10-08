@@ -13,7 +13,7 @@ from TranscriptPage import createTranscriptsDictionary
 from IndexEntryPage import IndexEntryPage
 from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
-from SummaryParagraph import SummaryParagraph, SummaryParagraphs, ParagraphTuple
+from TalkParagraph import TalkParagraph, TalkParagraphs, ParagraphTuple
 from collections import defaultdict
 
 
@@ -189,7 +189,7 @@ def showOrphansInRBYaml(haf: HAFEnvironment, network: LinkNetwork, transcriptInd
 # *********************************************
 
 def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault):
-    paragraphs = SummaryParagraphs(haf)
+    paragraphs = TalkParagraphs(haf)
     dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
 
     # vertical span for the section
@@ -322,7 +322,7 @@ if __name__ == "__main__":
 
         # we need to access previous and next paragraphs of the ones shown in the rows
         # see ((KJQBZMS)) below
-        talknames = [basenameWithoutExt(fn) for fn in haf.collectSummaryFilenames()]
+        talknames = [basenameWithoutExt(fn) for fn in haf.collectTalkFilenames()]
         transcriptByTalkname = {talkname: TranscriptPage(haf.getTranscriptFilename(talkname)) for talkname in talknames}
 
         dateByTalkname = haf.createDateByTalknameLookup()
@@ -340,8 +340,8 @@ if __name__ == "__main__":
             # build a list with the necessary fields for sorting and display
             topMentions = []
             for o in occurrences:
-                date = dateByTalkname[o.summaryName]
-                topMentions.append( (o.summaryName, o.headerText, o.blockid, o.count, date))
+                date = dateByTalkname[o.talkname]
+                topMentions.append( (o.talkname, o.headerText, o.blockid, o.count, date))
 
             # sort by dates, descending
             # NOTE: date is not displayed
@@ -391,9 +391,9 @@ if __name__ == "__main__":
             section.append(":- | - |: -")
 
             # sum the multiple mentions for each talk
-            dictCounts = defaultdict(int) # dict[summaryName, count]
+            dictCounts = defaultdict(int) # dict[talkname, count]
             for pt in occurrences:
-                dictCounts[pt.summaryName] += pt.count
+                dictCounts[pt.talkname] += pt.count
 
             # just use the top occurrences
             dictCountsItems = sorted(dictCounts.items(), key=lambda x: x[1], reverse=True)[:nTop]

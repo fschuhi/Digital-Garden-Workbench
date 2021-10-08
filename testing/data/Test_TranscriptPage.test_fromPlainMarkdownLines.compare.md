@@ -3,7 +3,7 @@ obsidianUIMode: preview
 ---
 #Transcript
 
-Summary: [[SomeTalkname]]
+[[SomeTalkname]]
 
 ---
 <br/>

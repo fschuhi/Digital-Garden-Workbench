@@ -9,33 +9,33 @@ from util import *
 
 from HAFEnvironment import HAFEnvironment, determineTalkname
 from TranscriptPage import TranscriptPage
-from SummarySection import SummarySection, SummarySections
-from SummaryLineParser import SummaryLineParser
-from SummaryLineParser import SummaryLineMatch
+from TalkSection import TalkSection, TalkSections
+from TalkPageLineParser import TalkPageLineParser, TalkPageLineMatch
 import os
 import re
 
 
 # *********************************************
-# class TranscriptSummaryPage
+# class TalkPage
+
 # *********************************************
 
-class TranscriptSummaryPage(ObsidianNote):
+class TalkPage(ObsidianNote):
 
     def __init__(self, path: str):
-        super().__init__(ObsidianNoteType.SUMMARY, path)
+        super().__init__(ObsidianNoteType.TALK, path)
 
 
     def update(self, transcriptPage: TranscriptPage, targetType='#') -> None:
         # IMPORTANT: number of makdown lines
-        parser = SummaryLineParser()
+        parser = TalkPageLineParser()
 
         transcriptPage.bufferParagraphs = True
         try:
             for index, ml in enumerate(self.markdownLines):
-                if (match := parser.match(ml)) == SummaryLineMatch.PARAGRAPH_COUNTS:
+                if (match := parser.match(ml)) == TalkPageLineMatch.PARAGRAPH_COUNTS:
                     assert parser.transcriptName == transcriptPage.filename
-                    # headers on a summary page refer to paragraphs in the transcript
+                    # headers on a talk page refer to paragraphs in the transcript
                     pageNr = parser.pageNr
                     paragraphNr = parser.paragraphNr
 
@@ -46,7 +46,7 @@ class TranscriptSummaryPage(ObsidianNote):
                     self.markdownLines[index].text = parser.canonicalParagraphCounts(forceSpan=True, targetType=targetType)
                     parser.reset()
 
-                elif match == SummaryLineMatch.INDEX_COUNTS:
+                elif match == TalkPageLineMatch.INDEX_COUNTS:
                     # old:
                     # allTermCounts = {} # type: dict[str,int]
                     # for mlParagraph in transcriptPage.markdownLines:
@@ -76,9 +76,9 @@ class TranscriptSummaryPage(ObsidianNote):
 
     def collectMissingParagraphHeaderTexts(self) -> int:
         pageNrs = set()
-        parser = SummaryLineParser()
+        parser = TalkPageLineParser()
         for ml in self.markdownLines:
-            if parser.match(ml) == SummaryLineMatch.PARAGRAPH_COUNTS:
+            if parser.match(ml) == TalkPageLineMatch.PARAGRAPH_COUNTS:
                 if (not parser.headerText) or parser.headerText == '...':
                     pageNrs.add(parser.pageNr)
         return len(pageNrs)
@@ -86,9 +86,9 @@ class TranscriptSummaryPage(ObsidianNote):
 
     def collectParagraphHeaderTexts(self) -> list[Tuple[int, int, str]]:
         targets = {}
-        parser = SummaryLineParser()
+        parser = TalkPageLineParser()
         for ml in self.markdownLines:
-            if (match := parser.match(ml)) == SummaryLineMatch.PARAGRAPH_COUNTS:
+            if (match := parser.match(ml)) == TalkPageLineMatch.PARAGRAPH_COUNTS:
                 header = determineHeaderTarget(parser.headerText)
                 blockid = f"{parser.pageNr}-{parser.paragraphNr}"
                 targets[blockid] = header
@@ -96,9 +96,9 @@ class TranscriptSummaryPage(ObsidianNote):
 
     def collectParagraphHeaderTargets(self) -> dict[str,str]:
         targets = {}
-        parser = SummaryLineParser()
+        parser = TalkPageLineParser()
         for ml in self.markdownLines:
-            if (match := parser.match(ml)) == SummaryLineMatch.PARAGRAPH_COUNTS:
+            if (match := parser.match(ml)) == TalkPageLineMatch.PARAGRAPH_COUNTS:
                 headerTarget = determineHeaderTarget(parser.headerText)
                 blockid = f"{parser.pageNr}-{parser.paragraphNr}"
                 targets[blockid] = headerTarget
@@ -106,11 +106,11 @@ class TranscriptSummaryPage(ObsidianNote):
 
 
     def collectSectionSpans(self) -> list[Tuple[int,int]]:
-        parser = SummaryLineParser()
+        parser = TalkPageLineParser()
         sectionsSpans = []
         start = None
         for index, ml in enumerate(self.markdownLines):
-            if parser.match(ml) == SummaryLineMatch.HEADER:
+            if parser.match(ml) == TalkPageLineMatch.HEADER:
                 # close the previous section and start new one
                 if start:
                     #print(ml.text)
@@ -127,8 +127,8 @@ class TranscriptSummaryPage(ObsidianNote):
         return sectionsSpans
 
 
-    def collectSections(self) -> SummarySections:
-        sections = SummarySections()
+    def collectSections(self) -> TalkSections:
+        sections = TalkSections()
         sectionSpans = self.collectSectionSpans()
         for start, end in sectionSpans:
             sourceLines = self.markdownLines[start:end]
@@ -137,8 +137,8 @@ class TranscriptSummaryPage(ObsidianNote):
 
 
     def getAudioFilename(self):
-        for mlSummary in self.markdownLines:
-            if (matchAudio := parseAudioLink(mlSummary.text)):
+        for mlTalk in self.markdownLines:
+            if (matchAudio := parseAudioLink(mlTalk.text)):
                 return matchAudio.group('filename')
 
 
@@ -186,7 +186,7 @@ class TranscriptSummaryPage(ObsidianNote):
             # decorations might be separated by spaces => remove duplicate spaces
             mlTranscript.text = re.sub('  +', ' ', mlTranscript.text)
 
-            # replace section in this summary
+            # replace section in this talk
             deleted = section.end - section.start
             self.markdownLines.delete(section.start+delta, section.end+delta)
             insertedTextLines = section.markdownLines.collectTextLines()
@@ -199,7 +199,7 @@ class TranscriptSummaryPage(ObsidianNote):
 # factory
 # *********************************************
 
-def createNewSummaryPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn: str = None):
+def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn: str = None):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)    
     transcriptPage = TranscriptPage(sfnTranscriptMd)
     transcriptPage.applySpacy(model)

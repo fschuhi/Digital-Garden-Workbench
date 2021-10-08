@@ -2,19 +2,19 @@
 
 import unittest
 from TranscriptPage import TranscriptPage
-from TranscriptSummaryPage import TranscriptSummaryPage
+from TalkPage import TalkPage
 import filecmp
 
 # *********************************************
-# SummarySection
+# TalkSection
 # *********************************************
 
-class Test_SummarySection(unittest.TestCase):
+class TestTalkSection(unittest.TestCase):
 
     def test_1(self):
-        pSummary = r"testing/data/Test_SummarySection.What is Insight (before).md"
-        summary = TranscriptSummaryPage(pSummary)
-        sections = summary.collectSections()
+        fnTalk = r"testing/data/Test_TalkSection.What is Insight (before).md"
+        talk = TalkPage(fnTalk)
+        sections = talk.collectSections()
         lastSection = sections[-1]
         self.assertListEqual(lastSection.markdownLines.collectTextLines(), ['##### ...', '[[1229 What is Insight#^16-1|16-1]]', '', '---'])
         section = sections.findParagraph(16,1)
@@ -30,23 +30,18 @@ class Test_SummarySection(unittest.TestCase):
 
 
     def test_handleDecorations(self):
-        pSummary = r"testing/data/Test_SummarySection.What is Insight (before).md"
-        summary = TranscriptSummaryPage(pSummary)
+        fnTalk = r"testing/data/Test_TalkSection.What is Insight (before).md"
+        talk = TalkPage(fnTalk)
 
-        # spans = summary.collectSectionSpans()
-        # (start, end) = spans[0]
-        # for index in range(start, end):
-        #     print(summary.markdownLines[index].text)
-        # return
 
-        pTranscript = r"testing/data/Test_SummarySection.1229 What is Insight (before).md"
+        pTranscript = r"testing/data/Test_TalkSection.1229 What is Insight (before).md"
         transcript = TranscriptPage(pTranscript)
-        summary.handleTranscriptDecorations(transcript)
-        summary.save("tmp/tmp.md")
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", r"testing/data/Test_SummarySection.What is Insight (after).md"))
+        talk.handleTranscriptDecorations(transcript)
+        talk.save("tmp/tmp.md")
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", r"testing/data/Test_TalkSection.What is Insight (after).md"))
 
         transcript.save("tmp/tmp.md")
-        self.assertTrue(filecmp.cmp("tmp/tmp.md", r"testing/data/Test_SummarySection.1229 What is Insight (after).md"))
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", r"testing/data/Test_TalkSection.1229 What is Insight (after).md"))
 
 if __name__ == "__main__":
     unittest.main()

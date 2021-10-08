@@ -174,7 +174,7 @@ class MarkdownLine:
 
 # using spacy results (previously in TranscriptParagraph)
 
-    # ((JJFZHVO)) Keywords section on summary page
+    # ((JJFZHVO)) Keywords section on talks page
 
     def collectShownLinks(self) -> str:
         assert self.hasAppliedSpacy, "must first apply spacy to this paragraph"

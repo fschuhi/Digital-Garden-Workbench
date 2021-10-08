@@ -67,8 +67,8 @@ class HAFEnvironment():
     def collectTranscriptFilenames(self, retreat=None):
         return self.vault.folderNotes(os.path.join(retreat if retreat else '', 'Transcripts'))
 
-    def collectSummaryFilenames(self, retreat=None):
-        return self.vault.folderNotes(os.path.join(retreat if retreat else '', 'Summaries'))
+    def collectTalkFilenames(self, retreat=None):
+        return self.vault.folderNotes(os.path.join(retreat if retreat else '', 'Talks'))
 
     def collectListFilenames(self, retreat=None):
         return self.vault.folderNotes(os.path.join(retreat if retreat else '', 'Lists'))
@@ -77,8 +77,8 @@ class HAFEnvironment():
     def collectTranscriptTalknames(self, retreat=None):
         return [talknameFromFilename(filename) for filename in self.collectTranscriptFilenames(retreat)]
 
-    def collectSummaryTalknames(self, retreat=None):
-        return [talknameFromFilename(filename) for filename in self.collectSummaryFilenames(retreat)]
+    def collectTalknames(self, retreat=None):
+        return [talknameFromFilename(filename) for filename in self.collectTalkFilenames(retreat)]
 
 
     def retreatFolder(self, retreatName):
@@ -93,8 +93,8 @@ class HAFEnvironment():
     def transcriptsFolder(self, retreatName):
         return self.retreatSubfolder(retreatName, 'Transcripts')
 
-    def summariesFolder(self, retreatName):
-        return self.retreatSubfolder(retreatName, 'Summaries')
+    def talksFolder(self, retreatName):
+        return self.retreatSubfolder(retreatName, 'Talks')
 
     def listsFolder(self, retreatName):
         return self.retreatSubfolder(retreatName, 'Lists')
@@ -113,8 +113,8 @@ class HAFEnvironment():
     def collectTranscriptNameSet(self):
         return set([basenameWithoutExt(filename) for filename in self.collectTranscriptFilenames()])
 
-    def collectSummaryNameSet(self):
-        return set([basenameWithoutExt(filename) for filename in self.collectSummaryFilenames()])
+    def collectTalknameSet(self):
+        return set([basenameWithoutExt(filename) for filename in self.collectTalkFilenames()])
 
 
     def determineFilenameFromTalkname(self, filenames, talkname):
@@ -128,8 +128,8 @@ class HAFEnvironment():
     def getTranscriptFilename(self, talkname):
         return self.determineFilenameFromTalkname(self.collectTranscriptFilenames(), talkname)
 
-    def getSummaryFilename(self, talkname):
-        return self.determineFilenameFromTalkname(self.collectSummaryFilenames(), talkname)
+    def getTalkFilename(self, talkname):
+        return self.determineFilenameFromTalkname(self.collectTalkFilenames(), talkname)
 
     def getListFilename(self, talkname):
         return self.determineFilenameFromTalkname(self.collectListFilenames(), talkname)
@@ -154,15 +154,15 @@ class HAFEnvironment():
         return os.path.join(dirTranscripts, f"{date} {talkname}.md")
 
 
-    def createSummaryFilename(self, talkname):
+    def createTalkFilename(self, talkname):
         retreatName = self.retreatNameFromTalkname(talkname)
-        dirSummaries = self.summariesFolder(retreatName)
-        return os.path.join(dirSummaries, talkname + '.md')
+        dirTalks = self.talksFolder(retreatName)
+        return os.path.join(dirTalks, talkname + '.md')
 
     def createListFilename(self, talkname):
         retreatName = self.retreatNameFromTalkname(talkname)
-        dirSummaries = self.listsFolder(retreatName)
-        return os.path.join(dirSummaries, talkname + ' -.md')
+        dirTalks = self.listsFolder(retreatName)
+        return os.path.join(dirTalks, talkname + ' -.md')
 
 
     def website(self):
@@ -174,7 +174,7 @@ class HAFEnvironment():
     # top 10 list support
 
     def createRetreatByTalknameLookup(self):
-        return {basenameWithoutExt(path): self.vault.toplevelFolder(path) for path in self.collectSummaryFilenames()}
+        return {basenameWithoutExt(path): self.vault.toplevelFolder(path) for path in self.collectTalkFilenames()}
 
     def createDateByTalknameLookup(self):
         retreatByTalkname = self.createRetreatByTalknameLookup()

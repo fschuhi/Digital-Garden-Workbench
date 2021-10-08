@@ -2,13 +2,14 @@
 
 import re
 import os
+import pyperclip
 
 from LinkNetwork import LinkNetwork
 from Publishing import Publishing
 from TranscriptModel import TranscriptModel
 from consts import HAF_PUBLISH_YAML, HAF_YAML, RB_YAML
 from TranscriptIndex import TranscriptIndex
-from summaries import updateParagraphsListPages
+from talks import updateParagraphsListPages
 from util import *
 from HAFEnvironment import HAFEnvironment
 
@@ -63,23 +64,11 @@ if __name__ == "__main__":
     # publish
 
     elif isScript('transferFilesToPublish'):
-        # in principle that's a good idea: make sure that the main vault is in a finalised shape
-        # but this may take time, especially when we work on a particular retreats or talk - - no need to update everything
-
-        # for retreatName in haf.retreatNames:
-        #     applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel)
-        # print("reindexed")
-        
-        # talkNames = haf.collectSummaryTalknames()
-        # for talkname in talkNames:
-        #     updateSummary(haf, talkname, transcriptModel)
-        # print("summaries updated")
-
         updateParagraphsListPages(haf)
 
         publishing = Publishing()
         publishing.transferFilesToPublish()
-        publishing.replaceLinksInAllSummaries()
+        publishing.replaceLinksInAllTalks()
         publishing.replaceLinksInAllRootFilenames()
         publishing.replaceLinksInSpecialFiles()
         print("files transferred to publish vault")
@@ -173,6 +162,14 @@ if __name__ == "__main__":
             if re.search(args.pattern, line):
                 n += 1
         print(n)
+
+
+    elif isScript('delLF'):
+        clp = pyperclip.paste()
+        clp = re.sub(r"\n|\r\n", " ", clp)
+        clp = canonicalizeText(clp)
+        pyperclip.copy(clp)
+
 
 
     else:

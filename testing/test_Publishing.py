@@ -17,8 +17,8 @@ class Test_Publishing(unittest.TestCase):
     def test_convertMarkdown(self):
         publishing = Publishing()
         haf_publish = HAFEnvironment(HAF_YAML_TESTING)
-        sfnSummary = haf_publish.getSummaryFilename("Preliminaries Regarding Voice, Movement, and Gesture - Part 1")
-        convertedLines = publishing.convertMarkdownFile(sfnSummary)
+        sfnTalk = haf_publish.getTalkFilename("Preliminaries Regarding Voice, Movement, and Gesture - Part 1")
+        convertedLines = publishing.convertMarkdownFile(sfnTalk)
         saveLinesToTextFile("tmp/tmp.md", convertedLines)
         self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_Publishing.test_convertMarkdown.md"))
 

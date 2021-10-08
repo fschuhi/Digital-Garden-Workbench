@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from types import SimpleNamespace
-from SummaryLineParser import SummaryLineMatch, SummaryLineParser
+from TalkPageLineParser import TalkPageLineMatch, TalkPageLineParser
 import unittest
 
 # *********************************************
@@ -33,7 +33,7 @@ class Test_AnonymousClass(unittest.TestCase):
         self.assertEqual(foo, bar)
 
 
-class Test_SummaryLineParser(unittest.TestCase):
+class Test_TalkPageLineParser(unittest.TestCase):
     
     headerLine1 = "###### It's going to be about movement, gesture, and voice"
     countsLine1a = "**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-3|1-3]]**: _[[Preliminaries]], [[Embodiment]] (2)_"
@@ -44,10 +44,10 @@ class Test_SummaryLineParser(unittest.TestCase):
     headerLine2 = "### Index"
     keywordsLine4 = "<span class=\"counts\">_[[Compassion]] (3) · [[Dukkha]] (2) · [[Contraction]] (2) · [[The Self]]_</span>"
 
-    def test_SummaryLineParser1a(self):
-        parser = SummaryLineParser()
-        self.assertEqual(parser.matchText(self.headerLine1), SummaryLineMatch.HEADER)
-        self.assertEqual(parser.matchText(self.countsLine1a), SummaryLineMatch.PARAGRAPH_COUNTS)
+    def test_TalkPageLineParser1a(self):
+        parser = TalkPageLineParser()
+        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.HEADER)
+        self.assertEqual(parser.matchText(self.countsLine1a), TalkPageLineMatch.PARAGRAPH_COUNTS)
 
         self.assertEqual(parser.headerText, "It's going to be about movement, gesture, and voice") # ((ATRDIWI))
         self.assertEqual(parser.level, 6)
@@ -59,16 +59,16 @@ class Test_SummaryLineParser(unittest.TestCase):
         self.assertEqual(parser.canonicalParagraphCounts(targetType='#^'), self.countsLine1a)
 
 
-    def test_SummaryLineParser1b(self):
-        parser = SummaryLineParser()
-        self.assertEqual(parser.matchText(self.headerLine1), SummaryLineMatch.HEADER)
-        self.assertEqual(parser.matchText(self.countsLine1a), SummaryLineMatch.PARAGRAPH_COUNTS)
+    def test_TalkPageLineParser1b(self):
+        parser = TalkPageLineParser()
+        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.HEADER)
+        self.assertEqual(parser.matchText(self.countsLine1a), TalkPageLineMatch.PARAGRAPH_COUNTS)
         self.assertEqual(parser.canonicalParagraphCounts(targetType='#'), self.countsLine1b)
 
 
-    def test_SummaryLineParser2(self):
-        parser = SummaryLineParser()
-        self.assertEqual(parser.matchText(self.countsLine2), SummaryLineMatch.PARAGRAPH_COUNTS)
+    def test_TalkPageLineParser2(self):
+        parser = TalkPageLineParser()
+        self.assertEqual(parser.matchText(self.countsLine2), TalkPageLineMatch.PARAGRAPH_COUNTS)
 
         self.assertEqual(parser.transcriptName, "0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1")
         self.assertEqual(parser.pageNr, 1)
@@ -78,10 +78,10 @@ class Test_SummaryLineParser(unittest.TestCase):
         self.assertEqual(parser.canonicalParagraphCounts(), self.countsLine2)
 
 
-    def test_SummaryLineParser3(self):
-        parser = SummaryLineParser()
-        self.assertEqual(parser.matchText(self.headerLine1), SummaryLineMatch.HEADER)
-        self.assertEqual(parser.matchText(self.countsLine3), SummaryLineMatch.PARAGRAPH_COUNTS)
+    def test_TalkPageLineParser3(self):
+        parser = TalkPageLineParser()
+        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.HEADER)
+        self.assertEqual(parser.matchText(self.countsLine3), TalkPageLineMatch.PARAGRAPH_COUNTS)
 
         self.assertEqual(parser.headerText, "It's going to be about movement, gesture, and voice") # ((ATRDIWI))
         self.assertEqual(parser.level, 6)
@@ -93,13 +93,13 @@ class Test_SummaryLineParser(unittest.TestCase):
         self.assertEqual(parser.canonicalParagraphCounts(), self.countsLine3)
 
 
-    def test_SummaryLineParser4(self):
-        parser = SummaryLineParser()
+    def test_TalkPageLineParser4(self):
+        parser = TalkPageLineParser()
 
         # must be either 5 or 6 '#'
-        self.assertEqual(parser.matchText(self.headerLine2), SummaryLineMatch.NONE)
+        self.assertEqual(parser.matchText(self.headerLine2), TalkPageLineMatch.NONE)
         
-        self.assertEqual(parser.matchText(self.keywordsLine4), SummaryLineMatch.INDEX_COUNTS)
+        self.assertEqual(parser.matchText(self.keywordsLine4), TalkPageLineMatch.INDEX_COUNTS)
 
 
 

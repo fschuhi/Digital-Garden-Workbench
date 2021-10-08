@@ -41,9 +41,9 @@ class Test_HAFEnvironment(unittest.TestCase):
         self.assertTrue(os.path.exists(sfn))
 
 
-    def test_createSummaryFilename(self):
+    def test_createTalkFilename(self):
         talkName = "Preliminaries Regarding Voice, Movement, and Gesture - Part 1"
-        sfn = self.haf.createSummaryFilename(talkName)
+        sfn = self.haf.createTalkFilename(talkName)
         self.assertTrue(os.path.exists(sfn))
 
 

@@ -10,27 +10,27 @@ from consts import HAF_YAML, RB_YAML
 from KanbanNote import KanbanNote
 from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage
-from TranscriptSummaryPage import SummaryLineMatch, SummaryLineParser, TranscriptSummaryPage, createNewSummaryPage
+from TalkPage import TalkPageLineMatch, TalkPageLineParser, TalkPage, createNewTalkPage
 from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
 
 # *********************************************
-# Talk summaries (Kanban)
+# Talks (Kanban)
 # *********************************************
 
-def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf: HAFEnvironment, retreatName):
+def addMissingTranscriptParagraphHeaderTextCardsForTalksInRetreat(sfnKanban, haf: HAFEnvironment, retreatName):
     kb = KanbanNote(sfnKanban)
-    filenames = filterExt(haf.collectSummaryFilenames(retreatName), '.md')
-    for sfnSummaryMd in filenames:
-        # load the summary page
-        summary = TranscriptSummaryPage(sfnSummaryMd)
-        talkName = basenameWithoutExt(sfnSummaryMd)
+    filenames = filterExt(haf.collectTalkFilenames(retreatName), '.md')
+    for fnTalk in filenames:
+        # load the talk page
+        talk = TalkPage(fnTalk)
+        talkName = basenameWithoutExt(fnTalk)
 
         # talks can contain brackets, which we need to "escape" for regex searching
         safeTalkname = re.sub("[()]", ".", talkName)
 
         # collect number of missing paragraph header texts
-        missing = summary.collectMissingParagraphHeaderTexts()
+        missing = talk.collectMissingParagraphHeaderTexts()
         newCard = f"[[{talkName}]] ({missing if missing else 'ok'})"
         searchFunc = lambda ln, c: re.match(r"\[\[" + safeTalkname + r"\]\] \([0-9ok]+\)", c)
         foundCards = kb.findCards(searchFunc)
@@ -48,35 +48,35 @@ def addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban,
 
 
 # *********************************************
-# Summaries
+# talks
 # *********************************************
 
-def createNewTranscriptSummariesForRetreat(haf: HAFEnvironment, retreatName):
+def createNewTranscriptTalksForRetreat(haf: HAFEnvironment, retreatName):
     filenames = haf.collectTranscriptFilenames(retreatName)
     for sfnTranscriptMd in filenames:        
         talkname = talknameFromFilename(sfnTranscriptMd)
-        sfnSummaryMd = haf.getSummaryFilename(talkname)
-        if sfnSummaryMd is not None:
-            summary = loadStringFromTextFile(sfnSummaryMd)
-            if re.search(r'#Talk', summary):
+        fnTalk = haf.getTalkFilename(talkname)
+        if fnTalk is not None:
+            talk = loadStringFromTextFile(fnTalk)
+            if re.search(r'#Talk', talk):
                 #print(markupName + " - continue")
                 continue
 
-        sfnSummaryMd = haf.createSummaryFilename(talkname)
-        print("creating " + sfnSummaryMd)
+        fnTalk = haf.createTalkFilename(talkname)
+        print("creating " + fnTalk)
 
         if re.search(r'#Transcript', transcript := loadStringFromTextFile(sfnTranscriptMd)):
             # we need to deitalize manually
             talkName = determineTalkname(talkname)
             #print(talkName + " - createNew")
-            createNewSummaryPage(talkName, haf, transcriptModel, sfnSummaryMd)
+            createNewTalkPage(talkName, haf, transcriptModel, fnTalk)
         else:
-            # it's a transcript page in the making - - not indexed yet, thus we can't do a summary on it yet
+            # it's a transcript page in the making - - not indexed yet, thus we can't do a talk on it yet
             pass
 
 
-def addAudioLinksToSummaryWithDecoratedTranscript(summary: TranscriptSummaryPage, transcript: TranscriptPage):
-    summaryLineParser = SummaryLineParser()
+def addAudioLinksToTalkWithDecoratedTranscript(talk: TalkPage, transcript: TranscriptPage):
+    talkPageLineParser = TalkPageLineParser()
 
     index = 0
     timestampTranscript = None
@@ -85,11 +85,11 @@ def addAudioLinksToSummaryWithDecoratedTranscript(summary: TranscriptSummaryPage
     changed = False
     mlTranscriptHeader = None
     while True:
-        if index >= len(summary.markdownLines):
+        if index >= len(talk.markdownLines):
             break
-        ml = summary.markdownLines[index]
+        ml = talk.markdownLines[index]
 
-        # assumption: first audio link in the summary points to the audio for this talk
+        # assumption: first audio link in the talk points to the audio for this talk
         if not foundFirstAudio:
             if (matchAudio := parseAudioLink(ml.text)):
                 foundFirstAudio = True
@@ -104,26 +104,26 @@ def addAudioLinksToSummaryWithDecoratedTranscript(summary: TranscriptSummaryPage
 
                 matchAudio = parseAudioLink(ml.text)
                 if matchAudio and matchAudio.group('audioid') == audioId:
-                    oldTimestampSummary = canonicalTimestamp(matchAudio.group('timestamp'))
-                    if oldTimestampSummary == timestampTranscript:
+                    oldTimestampTalk = canonicalTimestamp(matchAudio.group('timestamp'))
+                    if oldTimestampTalk == timestampTranscript:
                         ml.text = audioLink
                     else:
-                        print(f"retained {oldTimestampSummary} (transcript: {timestampTranscript})")
+                        print(f"retained {oldTimestampTalk} (transcript: {timestampTranscript})")
                 else:
-                    summary.markdownLines.insert(index, audioLink)
-                    summary.markdownLines.insert(index+1, "")
+                    talk.markdownLines.insert(index, audioLink)
+                    talk.markdownLines.insert(index+1, "")
                     index += 2
                 timestampTranscript = None
 
         # other matchers which manipulate timestampTranscript go here
 
-        if summaryLineParser.match(ml) == SummaryLineMatch.HEADER:
+        if talkPageLineParser.match(ml) == TalkPageLineMatch.HEADER:
             # collect for ((WMZAZUR)) below
             mlTranscriptHeader = ml
 
-        if summaryLineParser.match(ml) == SummaryLineMatch.PARAGRAPH_COUNTS:
+        if talkPageLineParser.match(ml) == TalkPageLineMatch.PARAGRAPH_COUNTS:
             # pull the timestamp from the beginning of the transcript paragraph
-            mlTranscript = transcript.findParagraph(summaryLineParser.pageNr, summaryLineParser.paragraphNr)
+            mlTranscript = transcript.findParagraph(talkPageLineParser.pageNr, talkPageLineParser.paragraphNr)
             assert mlTranscript
             while True:
                 match = re.match(r"\[((?P<timestamp>(0?1:)?[0-9][0-9]:[0-9][0-9])|(?P<header>[^]]+)) *\]", mlTranscript.text)
@@ -138,14 +138,14 @@ def addAudioLinksToSummaryWithDecoratedTranscript(summary: TranscriptSummaryPage
 
                     # ((WMZAZUR)) make sure that we have (the right) header as object
                     assert mlTranscriptHeader
-                    assert summaryLineParser.headerLine == mlTranscriptHeader.text
+                    assert talkPageLineParser.headerLine == mlTranscriptHeader.text
 
                     # we only overwrite ... headers (i.e. not yet entered)                                
-                    if summaryLineParser.headerText == '...':
+                    if talkPageLineParser.headerText == '...':
                         # go back up and change the header
-                        mlTranscriptHeader.text = f"{summaryLineParser.level * '#'} {headerTranscript}"
+                        mlTranscriptHeader.text = f"{talkPageLineParser.level * '#'} {headerTranscript}"
                     else:
-                        print(f"retained header for {summaryLineParser.blockId}")
+                        print(f"retained header for {talkPageLineParser.blockId}")
                     mlTranscriptHeader = None
 
                 # regardless of the type of match (timestamp or header), remove the paragraph decoration from the transcript
@@ -156,61 +156,61 @@ def addAudioLinksToSummaryWithDecoratedTranscript(summary: TranscriptSummaryPage
         index += 1
 
     if changed:
-        summary.save()
+        talk.save()
         transcript.save()
 
 
-def updateSummary(haf, talkName, transcriptModel, sfn=None):
+def updateTalk(haf, talkName, transcriptModel, sfn=None):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
     transcriptPage = TranscriptPage(sfnTranscriptMd)
     transcriptPage.applySpacy(transcriptModel)
 
-    sfnSummaryMd = haf.getSummaryFilename(talkName)
-    summaryPage = TranscriptSummaryPage(sfnSummaryMd)
+    fnTalk = haf.getTalkFilename(talkName)
+    talk = TalkPage(fnTalk)
     print(talkName)
-    summaryPage.update(transcriptPage, targetType='#^')
+    talk.update(transcriptPage, targetType='#^')
     
-    if not sfn: sfn = sfnSummaryMd
-    summaryPage.save(sfn)
+    if not sfn: sfn = fnTalk
+    talk.save(sfn)
 
 
 # *********************************************
 # breadcrumbs
 # *********************************************
 
-def updateBreadcrumbsInSummaries():
+def updateBreadcrumbsInTalks():
     for retreatName in haf.retreatNames:
         transcripts = haf.collectTranscriptFilenames(retreatName)
         assert transcripts
         for index, transcript in enumerate(transcripts):
             talkname = talknameFromFilename(transcript)
-            summary = haf.getSummaryFilename(talkname)
-            if not summary:
+            talk = haf.getTalkFilename(talkname)
+            if not talk:
                 continue
-            note = ObsidianNote(ObsidianNoteType.SUMMARY, summary)
+            note = ObsidianNote(ObsidianNoteType.TALK, talk)
             for markdownLine in note.markdownLines:
                 if re.search(r"[⬅️⬆️➡️🡄🡅🡆]", markdownLine.text):
                     if len(transcripts) == 1:
                         pass
                     else:
                         if index == 0:
-                            prevSummary = None
-                            nextSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[1])) if len(transcripts) > 1 else None
+                            prevTalk = None
+                            nextTalk = haf.getTalkFilename(talknameFromFilename(transcripts[1])) if len(transcripts) > 1 else None
                         elif index == len(transcripts)-1:
-                            prevSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[-2])) if len(transcripts) > 1 else None
-                            nextSummary = None
+                            prevTalk = haf.getTalkFilename(talknameFromFilename(transcripts[-2])) if len(transcripts) > 1 else None
+                            nextTalk = None
                         else:
-                            prevSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[index-1]))
-                            nextSummary = haf.getSummaryFilename(talknameFromFilename(transcripts[index+1]))
+                            prevTalk = haf.getTalkFilename(talknameFromFilename(transcripts[index-1]))
+                            nextTalk = haf.getTalkFilename(talknameFromFilename(transcripts[index+1]))
                             pass
 
-                        prevLink = f"[[{basenameWithoutExt(prevSummary)}|{basenameWithoutExt(prevSummary)} 🡄]]" if prevSummary else ''
-                        nextLink = f"[[{basenameWithoutExt(nextSummary)}|🡆 {basenameWithoutExt(nextSummary)}]]" if nextSummary else ''
+                        prevLink = f"[[{basenameWithoutExt(prevTalk)}|{basenameWithoutExt(prevTalk)} 🡄]]" if prevTalk else ''
+                        nextLink = f"[[{basenameWithoutExt(nextTalk)}|🡆 {basenameWithoutExt(nextTalk)}]]" if nextTalk else ''
                         
                         newline = f"{prevLink} | [[{retreatName}|🡅]] | {nextLink}"
                         markdownLine.text = newline
                     
-            note.save(summary)
+            note.save(talk)
 
 
 # *********************************************
@@ -223,9 +223,9 @@ def collectParagraphsListPage(haf, talkname) -> list[str]:
     paragraphs.append("obsidianUIMode: preview")
     paragraphs.append("---")
     paragraphs.append(f"## Paragraphs in [[{talkname}]]")
-    sfnSummaryMd = haf.getSummaryFilename(talkname)
-    summary = TranscriptSummaryPage(sfnSummaryMd)
-    for ml in summary.markdownLines:
+    fnTalk = haf.getTalkFilename(talkname)
+    talk = TalkPage(fnTalk)
+    for ml in talk.markdownLines:
         if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", ml.text)):
             description = match.group("description") # type: str
             headerLink = determineHeaderTarget(description)
@@ -242,10 +242,10 @@ def collectParagraphsListPage(haf, talkname) -> list[str]:
 
 
 def updateParagraphsListPages(haf: HAFEnvironment):
-    summaries = haf.collectSummaryFilenames()
-    for sfnSummaryMd in summaries:
-        talkname = talknameFromFilename(sfnSummaryMd)        
-        note = ObsidianNote(ObsidianNoteType.SUMMARY, sfnSummaryMd)
+    talkFilenames = haf.collectTalkFilenames()
+    for fnTalk in talkFilenames:
+        talkname = talknameFromFilename(fnTalk)        
+        note = ObsidianNote(ObsidianNoteType.TALK, fnTalk)
         createPage = note.getYamlValue('ParagraphsListPage')
         if (createPage is None) or createPage:
             pageLines = collectParagraphsListPage(haf, talkname)
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     talkname = args.talkName
 
     transcriptIndex = TranscriptIndex(RB_YAML)
-    if isScript(['updateSummary', 'createNewSummaries']):
+    if isScript(['updateTalk', 'createNewTalks']):
         transcriptModel = TranscriptModel(transcriptIndex)
 
     if False:
@@ -301,34 +301,31 @@ if __name__ == "__main__":
 
     # Kanban stuff
 
-    elif isScript('addMissingSummaryCards'):
+    elif isScript('addMissingTalkCards'):
         assert retreatName
-        sfnKanban = haf.vault.findFile('Talk summaries (Kanban).md')
-        addMissingTranscriptParagraphHeaderTextCardsForSummariesInRetreat(sfnKanban, haf, retreatName)
+        sfnKanban = haf.vault.findFile('Talks (Kanban).md')
+        addMissingTranscriptParagraphHeaderTextCardsForTalksInRetreat(sfnKanban, haf, retreatName)
         print('done')
 
 
     # updating
 
-    elif isScript('updateSummary'):
+    elif isScript('updateTalk'):
         if talkname:
-            updateSummary(haf, talkname, transcriptModel)
-            print(f"updated talk summary")
+            updateTalk(haf, talkname, transcriptModel)
+            print(f"updated talk")
         else:
             if retreatName:
-                # talkNames = [basenameWithoutExt(sfn) for sfn in haf.summaryFilenamesByRetreat[retreatName]]
-                # talkNames = [basenameWithoutExt(sfn) for sfn in haf.retreatSummaries(retreatName)]
-                talkNames = [basenameWithoutExt(sfn) for sfn in haf.collectSummaryFilenames(retreatName)]
+                talkNames = [basenameWithoutExt(sfn) for sfn in haf.collectTalkFilenames(retreatName)]
             else:
-                #talkNames = list(haf.summaryFilenameByTalk.keys())
-                talkNames = haf.collectSummaryTalknames()
+                talkNames = haf.collectTalknames()
             for talkname in talkNames:
-                updateSummary(haf, talkname, transcriptModel)
-            print(f"updated all talk summaries")
+                updateTalk(haf, talkname, transcriptModel)
+            print(f"updated all talks")
 
-    elif isScript('unspanSummary'):
+    elif isScript('unspanTalk'):
         assert talkname
-        sfn = haf.getSummaryFilename(talkname)
+        sfn = haf.getTalkFilename(talkname)
         lines = loadLinesFromTextFile(sfn)
         for index, line in enumerate(lines):
             match = re.match(r"<span class=\"(counts|keywords)\">(?P<inside>[^<]+)</span>", line)
@@ -340,26 +337,26 @@ if __name__ == "__main__":
 
     # creating files
 
-    elif isScript('createNewSummaries'):
+    elif isScript('createNewTalks'):
         assert retreatName
-        createNewTranscriptSummariesForRetreat(haf, retreatName)
-        updateBreadcrumbsInSummaries()
+        createNewTranscriptTalksForRetreat(haf, retreatName)
+        updateBreadcrumbsInTalks()
         print("created")
 
 
-    # modifiying summaries
+    # modifiying talks
 
     elif isScript('handleDecorations'):
         assert talkname
         transcript = TranscriptPage(haf.getTranscriptFilename(talkname))
-        summary = TranscriptSummaryPage(haf.getSummaryFilename(talkname))
-        summary.handleTranscriptDecorations(transcript)
-        summary.save()
+        talk = TalkPage(haf.getTalkFilename(talkname))
+        talk.handleTranscriptDecorations(transcript)
+        talk.save()
         transcript.save()
 
 
     elif isScript('updateBreadcrumbs'):
-        updateBreadcrumbsInSummaries()
+        updateBreadcrumbsInTalks()
         print("updated")
 
     elif isScript('updateParagraphsLists'):
@@ -383,13 +380,13 @@ if __name__ == "__main__":
                 counts[match.group('entry')] = count
             return counts
 
-        parser = SummaryLineParser()
-        for fnSummary in haf.collectSummaryFilenames():
-            summary = TranscriptSummaryPage(fnSummary)
-            print(summary.filename)
-            for ml in summary.markdownLines:
+        parser = TalkPageLineParser()
+        for fnTalk in haf.collectTalkFilenames():
+            talk = TalkPage(fnTalk)
+            print(talk.filename)
+            for ml in talk.markdownLines:
                 match = parser.match(ml)
-                if match == SummaryLineMatch.PARAGRAPH_COUNTS:                    
+                if match == TalkPageLineMatch.PARAGRAPH_COUNTS:                    
                     if (countsString := parser.counts):
                         counts = collectCounts(countsString)
                         print(counts)
