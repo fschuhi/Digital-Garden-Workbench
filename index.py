@@ -330,7 +330,7 @@ if __name__ == "__main__":
         def func(occurrences, section, nTop):
             # Obsidian table
             section.append(f"### Paragraphs with {nTop}+ mentions")
-            section.append("summary | description | count")
+            section.append("description | count | talk")
             section.append(":- | : - | -")
 
             # prune if necessary
@@ -351,22 +351,23 @@ if __name__ == "__main__":
             topMentions = sorted(topMentions, key=lambda x: x[3], reverse=True)
 
             for (talkname, headerText, blockid, count, date) in topMentions:
-                (pageNr, paragraphNr) = parseBlockId(blockid)
+                if headerText != '...':
+                    (pageNr, paragraphNr) = parseBlockId(blockid)
 
-                # ((KJQBZMS)) get the transcript w/o going via the filesystem
-                transcript = transcriptByTalkname[talkname]
-                thisParagraph = f"[[{transcript.notename}#^{blockid}\\|.]]"
+                    # ((KJQBZMS)) get the transcript w/o going via the filesystem
+                    transcript = transcriptByTalkname[talkname]
+                    thisParagraph = f"[[{transcript.notename}#^{blockid}\\|.]]"
 
-                # determine previous and next paragraphs, if there are any
-                (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
-                (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
-                prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|.]]"
-                nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|.]]"
+                    # determine previous and next paragraphs, if there are any
+                    (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
+                    (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
+                    prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|.]]"
+                    nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|.]]"
 
-                # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
-                paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] {prevParagraph} **{thisParagraph}** {nextParagraph}"
+                    # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
+                    paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph} &nbsp; **{thisParagraph}** &nbsp; {nextParagraph}"
 
-                section.append( f"[[{talkname}]] | {paragraphLink} | {count}" )
+                    section.append( f"{paragraphLink} | {count} | [[{talkname}]]" )
 
         # now delete, add or replace the section
         yamlKey = 'showTopReferringParagraphs'
