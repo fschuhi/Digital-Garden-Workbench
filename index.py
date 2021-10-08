@@ -331,7 +331,7 @@ if __name__ == "__main__":
             # Obsidian table
             section.append(f"### Paragraphs with {nTop}+ mentions")
             section.append("description | count | talk")
-            section.append(":- | : - | -")
+            section.append(":- | : - | :-")
 
             # prune if necessary
             if len(occurrences) > 10:

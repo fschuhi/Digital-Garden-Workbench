@@ -167,6 +167,7 @@ def updateSummary(haf, talkName, transcriptModel, sfn=None):
 
     sfnSummaryMd = haf.getSummaryFilename(talkName)
     summaryPage = TranscriptSummaryPage(sfnSummaryMd)
+    print(talkName)
     summaryPage.update(transcriptPage, targetType='#^')
     
     if not sfn: sfn = sfnSummaryMd
