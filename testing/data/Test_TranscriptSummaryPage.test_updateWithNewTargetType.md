@@ -1,7 +1,7 @@
 ---
 obsidianUIMode: preview
 ---
-#TranscriptSummary
+#Talk
 
 ![[20200301-Rob_Burbea-GAIA-preliminaries_regarding_voice_movement_and_gesture_part_1-62452.mp3]]
 

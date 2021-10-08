@@ -3,7 +3,7 @@ ParagraphsListPage: false
 Series: 2007 New Years Retreat Insight Meditation
 obsidianUIMode: source
 ---
-#TranscriptSummary
+#Talk
 
  | [[2007 New Years Retreat Insight Meditation|🡅]] | [[Joy (talk)|🡆 Joy (talk)]]
 

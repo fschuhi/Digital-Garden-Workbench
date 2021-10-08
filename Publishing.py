@@ -39,15 +39,19 @@ class Publishing:
         self.copyFile("Rob Burbea/Diacritics.md", "/")
         self.copyFile("Rob Burbea/Rob Burbea.md", "/")
 
-        self.copyFile("Images/Digital Garden/digital-garden-big.png", "Images")
-        self.copyFile("Images/Digital Garden/digital-garden-small.png", "Images")
-        self.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
-        self.copyFile("Images/Digital Garden/link.png", "Images")
+        # self.copyFile("Images/Digital Garden/digital-garden-big.png", "Images")
+        # self.copyFile("Images/Digital Garden/digital-garden-small.png", "Images")
+        # self.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
+        # self.copyFile("Images/Digital Garden/link.png", "Images")
+        # self.copyFile("Images/Digital Garden/help1.png", "Images")
+        # self.copyFile("Images/Digital Garden/help2.png", "Images")
+        # self.copyFile("Images/Digital Garden/help3.png", "Images")
+        # self.copyFile("Images/Digital Garden/help4.png", "Images")
 
-        self.copyFile("Images/Digital Garden/help1.png", "Images")
-        self.copyFile("Images/Digital Garden/help2.png", "Images")
-        self.copyFile("Images/Digital Garden/help3.png", "Images")
-        self.copyFile("Images/Digital Garden/help4.png", "Images")
+        mirrorDir(os.path.join(self.hafWork.root, "Images/Digital Garden"), os.path.join(self.hafPublish.root, "Images"))
+        mirrorDir(os.path.join(self.hafWork.root, "css-snippets"), os.path.join(self.hafPublish.root, "css-snippets"))
+        self.copyFile("css-snippets/publish.css", "/")
+        
 
         self.modifyFullstops()
 

@@ -174,7 +174,7 @@ def createTempfile():
     return tmp
 
 
-def mirrorDir(source, target, ext='.md'):
+def mirrorDir(source, target, ext=None):
     if not (os.path.isdir(target) and os.path.isdir(source)):
         return
 

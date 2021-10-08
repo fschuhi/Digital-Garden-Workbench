@@ -58,7 +58,7 @@ def createNewTranscriptSummariesForRetreat(haf: HAFEnvironment, retreatName):
         sfnSummaryMd = haf.getSummaryFilename(talkname)
         if sfnSummaryMd is not None:
             summary = loadStringFromTextFile(sfnSummaryMd)
-            if re.search(r'#TranscriptSummary', summary):
+            if re.search(r'#Talk', summary):
                 #print(markupName + " - continue")
                 continue
 

@@ -1,7 +1,7 @@
 ---
 obsidianUIMode: preview
 ---
-#TranscriptSummary
+#Talk
 
 <audio controls preload=metadata style=" width:300px;" controlslist="nodownload"><source src="https://dharmaseed.org/talks/62452/20200301-Rob_Burbea-GAIA-preliminaries_regarding_voice_movement_and_gesture_part_1-62452.mp3" type="audio/mpeg">???</audio>
 

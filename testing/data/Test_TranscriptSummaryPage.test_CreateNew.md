@@ -3,7 +3,7 @@ obsidianUIMode: preview
 ParagraphsListPage: false
 Series: 2020 Vajra Music
 ---
-#TranscriptSummary
+#Talk
 
 [[prev|prev 🡄]] | [[2020 Vajra Music|🡅]] | [[next|🡆 next]]
 

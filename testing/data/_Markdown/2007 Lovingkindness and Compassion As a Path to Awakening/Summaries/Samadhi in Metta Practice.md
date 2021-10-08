@@ -1,7 +1,7 @@
 ---
 obsidianUIMode: preview
 ---
-#TranscriptSummary
+#Talk
 
 ![[20070122-Rob_Burbea-GAIA-samadhi_in_metta_practice-12294.mp3]]
 
