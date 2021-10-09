@@ -45,7 +45,7 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 pass
             else:
                 # we need to deitalize manually
-                transcript = deitalicizeTermsWithDiacritics(transcript)
+                # transcript = deitalicizeTermsWithDiacritics(transcript)
                 lines = transcript.splitlines()
                 talkname = talknameFromFilename(sfnTranscriptMd)
                 page = TranscriptPage.fromPlainMarkdownLines(lines, talkname)
@@ -59,6 +59,7 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
 
 
 def deitalicizeTranscript(haf: HAFEnvironment, talkName):
+    assert False, "we do not deitalicize anymore"
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
     transcript = loadStringFromTextFile(sfnTranscriptMd)
     transcript = deitalicizeTermsWithDiacritics(transcript)
@@ -176,7 +177,7 @@ if __name__ == "__main__":
         transcriptName = basenameWithoutExt(haf.getTranscriptFilename(talkname))
         import csv
         tuples = []
-        with open('data/{transcriptName}.sv', newline='') as csvfile:
+        with open(f'data/{transcriptName}.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
             for row in spamreader:
                 tuples.append(tuple(row))

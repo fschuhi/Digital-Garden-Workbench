@@ -72,14 +72,19 @@ def deitalicizeTerms(text: str, terms: list[str]) -> str:
 # ((IKTVHOR)) Deitalicize with yaml
 def deitalicizeTermsWithDiacritics(text: str) -> str:
     return deitalicizeTerms(text, [\
-        'anattā', 'bodhicitta', 'brahmavihāra', 'brahmavihāras', \
-        'dāna','dharma', 'dharmas', 'dukkha', \
+        'anattā', 'arūparāga', 'āsavas', \
+        'bodhicitta','brahmavihāra', 'brahmavihāras', \
+        'chandarāga', \
+        'dāna', 'dharma', 'dharmas', 'dukkha', \
         'jhāna', 'jhānas', \
-        'karuṇā', \
+        'kāma', 'kāmacchanda', 'kāmeti', 'karuṇā', \
         'mettā', 'muditā', 'mudrā', 'mudrās', \
         'papañca', 'pīti' \
-        'samatha', 'samādhi', 'saṃsāra', 'Satipaṭṭhāna Sutta', 'sīla', \
-        'upekkhā', \
+        'rāga', 'rūpa', 'rūparāga', \
+        'samādhi', 'samatha', 'saṃsāra', 'saṃyojanāni', 'Saṃyutta Nikāya', 'saṅkhārā', 'saṅkhāras', 'Satipaṭṭhāna Sutta', 'sīla', \
+        'taṇhā', \
+        'upādāna', 'upekkhā', \
+        'vedanā', 'vibhava-taṇhā', \
         ] )
 
 

@@ -58,7 +58,7 @@ class TranscriptPage(ObsidianNote):
                 # doing the indexing as a reindexing (i.e. there are block indicators) is allowed
                 line = re.sub(r" \^[0-9]+-[0-9]+$", "", line)
                 line = canonicalizeText(line)
-                line = deitalicizeTermsWithDiacritics(line)
+                # line = deitalicizeTermsWithDiacritics(line)
 
                 if line == "#":
                     pageNr += 1

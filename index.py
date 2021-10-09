@@ -188,7 +188,7 @@ def showOrphansInRBYaml(haf: HAFEnvironment, network: LinkNetwork, transcriptInd
 # top referrers section builder
 # *********************************************
 
-def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault):
+def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeNoDescriptions):
     paragraphs = TalkParagraphs(haf)
     dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
 
@@ -237,7 +237,12 @@ def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault):
             # those are paragraphs, i.e. multiple mentions for a talk            
             occurrences = dict[term] # type: list[ParagraphTuple]
 
-            func(occurrences, section, nTop)
+            if excludeNoDescriptions:
+                # we don't even send the paragraphs which do not have a description yet
+                # NOTE: this changes the behaviour for "show at least 10"
+                occurrences = [o for o in occurrences if o.headerText != '...']
+
+            func(term, occurrences, section, nTop)
 
             # empty line ends the section
             section.append("")
@@ -327,7 +332,7 @@ if __name__ == "__main__":
 
         dateByTalkname = haf.createDateByTalknameLookup()
 
-        def func(occurrences, section, nTop):
+        def func(term, occurrences, section, nTop):
             # Obsidian table
             section.append(f"### Paragraphs with {nTop}+ mentions")
             section.append("description | count | talk")
@@ -351,28 +356,31 @@ if __name__ == "__main__":
             topMentions = sorted(topMentions, key=lambda x: x[3], reverse=True)
 
             for (talkname, headerText, blockid, count, date) in topMentions:
-                if headerText != '...':
-                    (pageNr, paragraphNr) = parseBlockId(blockid)
+                # enforced by caller
+                assert headerText != '...'
 
-                    # ((KJQBZMS)) get the transcript w/o going via the filesystem
-                    transcript = transcriptByTalkname[talkname]
-                    thisParagraph = f"[[{transcript.notename}#^{blockid}\\|.]]"
+                (pageNr, paragraphNr) = parseBlockId(blockid)
 
-                    # determine previous and next paragraphs, if there are any
-                    (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
-                    (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
-                    prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|.]]"
-                    nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|.]]"
+                # ((KJQBZMS)) get the transcript w/o going via the filesystem
+                transcript = transcriptByTalkname[talkname]
+                thisParagraph = f"[[{transcript.notename}#^{blockid}\\|•]]"
 
-                    # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
-                    paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph} &nbsp; **{thisParagraph}** &nbsp; {nextParagraph}"
+                # determine previous and next paragraphs, if there are any
+                (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
+                (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
+                prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|◀]]"
+                nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|▶]]"
 
-                    section.append( f"{paragraphLink} | {count} | [[{talkname}]]" )
+                # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
+                # paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph} &nbsp; **{thisParagraph}** &nbsp; {nextParagraph}"
+                paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph}**{thisParagraph}**{nextParagraph}"
+
+                section.append( f"{paragraphLink} | {count} | [[{talkname}]]" )
 
         # now delete, add or replace the section
         yamlKey = 'showTopReferringParagraphs'
         patternStart = r"^#+ Paragraphs with ([0-9]+)\+ mentions"
-        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault)
+        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeNoDescriptions=True)
 
         print("done")
 
@@ -384,7 +392,7 @@ if __name__ == "__main__":
         retreatByTalkname = haf.createRetreatByTalknameLookup()
         dateByTalkname = haf.createDateByTalknameLookup()
 
-        def func(occurrences, section, nTop):
+        def func(term, occurrences, section, nTop):
             # Obsidian table
             section.append(f"### Top {nTop} referring talks")
             section.append("talk | count | series")
@@ -414,7 +422,7 @@ if __name__ == "__main__":
         # now delete, add or replace the section
         yamlKey = 'showTopReferringTalks'
         patternStart = r"^#+ Top ([0-9]+) referring talks"
-        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault)
+        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeNoDescriptions=False)
 
         print("done")
 

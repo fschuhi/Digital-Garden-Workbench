@@ -89,7 +89,8 @@ Persons:
   - Rosa Parks:
       - /Parks, Rosa
   - Rumi
-  - Sariputta
+  - Sariputta:
+      - Sāriputta
   - St. Paul:
       - Paul
   - Stephen Batchelor:
@@ -110,8 +111,17 @@ Persons:
       - /Blake, William
 
 Buddhology:
+  - Rupa:
+      - rūpa
+  - Aruparaga:
+      - arūparāga
+  - Asavas:
+      - āsavas
   - Samsara:
       - saṃsāra
+  - Fetters:
+      - saṃyojanāni
+      - fetter
   - Commentaries:
       - commentarial
   - Aksayamati Sutra:
@@ -177,18 +187,23 @@ Buddhology:
       - Buddhist iconography
   - Chanda:
       - noble aspiration
+  - Chandaraga:
+      - chandarāga
   - Citta
   - Clinging:
       - upadana
+      - upādāna
       - non-clinging
       - raga
+      - rāga
       - ruparaga
+      - rūparāga
       - lobha
       - cling
       - clingings
   - Compassion:
-      - Karuṇā
-      - Karunā
+      - karuṇā
+      - karunā
       - karuna
   - Conventional reality:
       - relative truth
@@ -197,6 +212,7 @@ Buddhology:
       - tanha
       - taṇhā
       - vibhava-tanha
+      - vibhava-taṇhā
       - crave
       - cravings
       - push and pull
@@ -274,6 +290,8 @@ Buddhology:
   - Eternality
   - Fetters:
       - samyojanani
+  - Samyutta Nikaya:
+      - Saṃyutta Nikāya
   - Four Bases:
       - Four Bases of Power
       - Four Bases of Success
@@ -355,6 +373,12 @@ Buddhology:
       - fourth jhāna
       - realm of nothingness
       - realm of neither perception nor non-perception
+  - Kama:
+      - kāma
+  - Kamacchanda:
+      - kāmacchanda
+  - Kameti:
+      - kāmeti
   - Karma
   - Kusala:
       - akusala
@@ -388,10 +412,12 @@ Buddhology:
       - mindful ob the body
       - mindfulness-based cognitive theory
   - Mudita:
+      - muditā
       - sympathetic joy
       - spiritual joy
   - Mudra:
       - mudrā
+      - mudrās
       - mudras
   - Near enemy:
       - near enemies
@@ -418,7 +444,6 @@ Buddhology:
       - papañca
       - proliferation
       - non-proliferation
-      - non-papanca
       - complication
   - Piti:
       - pīti
@@ -452,6 +477,10 @@ Buddhology:
   - Sangha:
       - saṅgha
   - Sankhara:
+      - saṅkhārā
+      - saṅkhāra
+      - saṅkhārās
+      - saṅkhāras
       - habit formations
       - deeply engrained habit
       - deeply engrained habits
@@ -501,6 +530,7 @@ Buddhology:
   - Vajrayana:
       - Vajrayāna
   - Vedana:
+      - vedanā
       - pleasant vedana
       - unpleasant vedana
   - Vedic:

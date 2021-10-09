@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from posixpath import basename
 import re
 import os
 import pyperclip
@@ -170,6 +171,15 @@ if __name__ == "__main__":
         clp = canonicalizeText(clp)
         pyperclip.copy(clp)
 
+    elif isScript('removeHeadersFromTranscript'):
+        assert talkname
+        newlines = []
+        fnTranscript = haf.getTranscriptFilename(talkname)
+        lines = loadLinesFromTextFile(fnTranscript)
+        for line in lines:
+            if re.search(r"\^[0-9-]+$", line):
+                newlines.append(line)
+        saveLinesToTextFile("tmp/" + basenameWithoutExt(fnTranscript) + '.md', newlines)
 
 
     else:
