@@ -229,7 +229,7 @@ def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn
         "![[audio goes here.mp3]]", \
         "", \
         "## Index", \
-        "<span class=\"counts\">_[[some keyword]] (99)_</span>"
+        "<span class=\"counts\">_[[some keyword]] (99)_</span>", \
         "<br/>\n", \
         "## Paragraphs", \
         "", \

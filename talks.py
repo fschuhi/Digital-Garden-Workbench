@@ -51,7 +51,7 @@ def addMissingTranscriptParagraphHeaderTextCardsForTalksInRetreat(sfnKanban, haf
 # talks
 # *********************************************
 
-def createNewTranscriptTalksForRetreat(haf: HAFEnvironment, retreatName):
+def createNewTalkPagesForRetreat(haf: HAFEnvironment, retreatName):
     filenames = haf.collectTranscriptFilenames(retreatName)
     for sfnTranscriptMd in filenames:        
         talkname = talknameFromFilename(sfnTranscriptMd)
@@ -339,7 +339,7 @@ if __name__ == "__main__":
 
     elif isScript('createNewTalks'):
         assert retreatName
-        createNewTranscriptTalksForRetreat(haf, retreatName)
+        createNewTalkPagesForRetreat(haf, retreatName)
         updateBreadcrumbsInTalks()
         print("created")
 
