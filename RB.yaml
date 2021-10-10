@@ -15,6 +15,7 @@ ignored:
   - we are calling
   - what I'm calling
   - would wonder
+  - love the
 
 Persons:
   - Shantideva:
@@ -42,7 +43,8 @@ Persons:
       - Catherine
   - Charles Tart:
       - /Tart, Charles
-  - Chogyam Trungpa
+  - Chogyam Trungpa:
+      - Chögyam Trungpa
   - Dalai Lama
   - Dwight Eisenhower:
       - /Eisenhower, Dwight
@@ -116,6 +118,10 @@ Persons:
       - /Blake, William
 
 Buddhology:
+  - stream-entry
+  - Kalyanamittata:
+      - kalyāṇamittatā
+      - spiritual friendship
   - Rupa:
       - rūpa
   - Aruparaga:
@@ -397,6 +403,7 @@ Buddhology:
   - Love:
       - sense of connection
       - self-love
+      - romantic love
   - Mahamudra:
       - Mahāmudrā
   - Mahayana:
@@ -546,6 +553,7 @@ Buddhology:
       - Rinzai Zen
 
 Philosophy:
+  - Eclecticism
   - Anthropology
   - Christianity:
       - New Testament: .
@@ -1181,6 +1189,7 @@ Robology:
       - wonder in being
       - cultivating wonder
   - Future thinking
+  - Artificial intelligence
 
 Retreats:
   - Eros Unfettered

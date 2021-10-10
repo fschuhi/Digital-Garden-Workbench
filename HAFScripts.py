@@ -31,6 +31,7 @@ def get_arguments():
     parser.add_argument('--note')
     parser.add_argument('--pattern')
     parser.add_argument('--new')
+    parser.add_argument('--path')
     return parser.parse_args()
 
 
@@ -180,6 +181,23 @@ if __name__ == "__main__":
             if re.search(r"\^[0-9-]+$", line):
                 newlines.append(line)
         saveLinesToTextFile("tmp/" + basenameWithoutExt(fnTranscript) + '.md', newlines)
+
+
+    elif isScript('canonicalUnderline'):
+        # Usually applied to Brainstorming/Untitled.md, which we use to set up a new talk by copying from a Word document.
+        # Some docs throw Obsidian off-track with regard to underlines (which have to be paired in Obsidian), so this tries to rectify that.
+        assert args.path
+        lines = loadLinesFromTextFile(args.path)
+        newlines = []
+        for line in lines:
+            newline = canonicalizeText(line)            
+            newline = re.sub(r"_ _( ?[^_]+? ?)_ ?_", r" _\1_ ", newline)
+            if (match := re.match(r"^ *?_(.+)_$", newline)):
+                newline = match.group(1)
+            print(newline)
+            newlines.append(newline)
+        saveLinesToTextFile("tmp/" + basenameWithoutExt(args.path) + '.md', newlines)
+        
 
 
     else:
