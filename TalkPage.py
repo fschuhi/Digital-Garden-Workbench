@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from MarkdownLine import MarkdownLine
+from MarkdownLine import MarkdownLine, SpacyMode
 from ObsidianNote import ObsidianNote, ObsidianNoteType
 from TranscriptIndex import TranscriptIndex
 from genericpath import exists
@@ -202,7 +202,7 @@ class TalkPage(ObsidianNote):
 def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn: str = None):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)    
     transcriptPage = TranscriptPage(sfnTranscriptMd)
-    transcriptPage.applySpacy(model)
+    transcriptPage.applySpacy(model, mode=SpacyMode.ONLY_FIRST, force=False)
 
     sfnPdf = haf.getPDFFilename(talkName)
 
@@ -210,6 +210,11 @@ def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn
     transcriptName = basenameWithoutExt(sfnTranscriptMd)
     retreatName = transcriptPage.retreatname
     markdownLines = transcriptPage.markdownLines
+
+    timestamp = pdfName[:4] + transcriptName[:2] + transcriptName[2:4]
+    pAudio = haf.vault.findFile(timestamp + '*')
+    audioname = os.path.base(pAudio) if pAudio else "audio goes here.mp3"
+
     
     newLines = []
     newLines.extend([ \
@@ -226,7 +231,7 @@ def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn
         f"Transcript: [[{transcriptName}]]", \
         f"Transcript PDF: [[{pdfName}.pdf]]", \
         "", \
-        "![[audio goes here.mp3]]", \
+        f"![[{audioname}]]", \
         "", \
         "## Index", \
         "<span class=\"counts\">_[[some keyword]] (99)_</span>", \

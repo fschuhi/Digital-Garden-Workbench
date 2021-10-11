@@ -171,11 +171,16 @@ if __name__ == "__main__":
         lines = loadLinesFromTextFile(path)
         newlines = []
         for line in lines:
-            newline = canonicalizeText(line)            
+            # intentionally not canonicalize, so that we can find page breaks easier
+            # newline = canonicalizeText(line)            
             newline = re.sub(r"_ _( ?[^_]+? ?)_ ?_", r" _\1_ ", newline)
             if (match := re.match(r"^ *?_(.+)_$", newline)):
                 newline = match.group(1)
             print(newline)
+            newline = re.sub(r"_([.,;()])_", r"\1", newline)
+            newline = re.sub(r"__\)_", r")_", newline)
+            newline = re.sub(r"_ ([.,;])", r"_\1", newline)
+            newline = newline.replace("_.’_", ".’")
             newlines.append(newline)
         saveLinesToTextFile("tmp/" + basenameWithoutExt(path) + '.md', newlines)
         

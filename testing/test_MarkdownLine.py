@@ -4,7 +4,7 @@ from TranscriptModel import TranscriptModel
 from TranscriptIndex import TranscriptIndex
 from util import *
 from HAFEnvironment import HAFEnvironment
-from MarkdownLine import MarkdownLine
+from MarkdownLine import MarkdownLine, SpacyMode
 from consts import HAF_YAML, HAF_YAML_TESTING, RB_YAML_TESTING
 import unittest
 
@@ -197,20 +197,20 @@ class Test_MarkdownSnippet(unittest.TestCase):
     def test_ReplaceIndexEntries(self):
         # applying Spacy inserts links to index entries
         markdown = MarkdownLine(self.defaultText())
-        markdown.applySpacy(self.transcriptModel)
+        markdown.applySpacy(self.transcriptModel, mode=SpacyMode.ONLY_FIRST, force=True)
         self.assertEqual(markdown.text, self.expectedText())
 
 
     def test_ReplaceIndexEntriesWithFootnotes(self):
         textWithFootnotes = self.defaultText().replace(",", "^[footnote in middle]") + "^[footnote at end]"
         markdown = MarkdownLine(textWithFootnotes)
-        markdown.applySpacy(self.transcriptModel)
+        markdown.applySpacy(self.transcriptModel, mode=SpacyMode.ONLY_FIRST, force=True)
         self.assertEqual(markdown.text, self.expectedText().replace(",", "^[footnote in middle]") + "^[footnote at end]")
 
 
     def test_CheckTermCounts(self):
         markdown = MarkdownLine(self.defaultText())
-        markdown.applySpacy(self.transcriptModel)
+        markdown.applySpacy(self.transcriptModel, mode=SpacyMode.ONLY_FIRST, force=True)
         self.assertEqual(repr(markdown.shownLinks), "['Preliminaries', 'Tibetan Buddhism']")
         self.assertEqual(markdown.termCounts['Preliminaries'], 2)
         self.assertEqual(markdown.termCounts['Tibetan Buddhism'], 1)

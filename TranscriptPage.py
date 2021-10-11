@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from ObsidianNote import ObsidianNote, ObsidianNoteType
-from MarkdownLine import MarkdownLine
+from MarkdownLine import MarkdownLine, SpacyMode
 from util import *
 
 import os
@@ -126,9 +126,9 @@ class TranscriptPage(ObsidianNote):
         return (None, None)
 
 
-    def applySpacy(self, model: TranscriptModel, force: bool = False):
+    def applySpacy(self, model: TranscriptModel, mode: SpacyMode, force: bool):
         for (_, _, markdownLine) in self.collectParagraphs():
-            markdownLine.applySpacy(model, force)      
+            markdownLine.applySpacy(model, mode, force)
 
 
     def collectTermCounts(self, term: str) -> list[tuple[int,int, int]]:
@@ -181,7 +181,7 @@ def createTranscriptsDictionary(filenames: list[str], transcriptModel: Transcrip
     transcripts = {}
     for filename in filenames:
         transcriptPage = TranscriptPage(filename)
-        transcriptPage.applySpacy(transcriptModel)
+        transcriptPage.applySpacy(transcriptModel, mode=SpacyMode.ONLY_FIRST, force=False)
         transcripts[transcriptPage.filename] = transcriptPage
     return transcripts
 

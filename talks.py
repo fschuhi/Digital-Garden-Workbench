@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from MarkdownLine import SpacyMode
 from ObsidianNote import ObsidianNote, ObsidianNoteType
 import re
 import os
@@ -68,7 +69,7 @@ def createNewTalkPagesForRetreat(haf: HAFEnvironment, retreatName):
         if re.search(r'#Transcript', transcript := loadStringFromTextFile(sfnTranscriptMd)):
             # we need to deitalize manually
             talkName = determineTalkname(talkname)
-            #print(talkName + " - createNew")
+            print(talkName + " - createNewTalkPage")
             createNewTalkPage(talkName, haf, transcriptModel, fnTalk)
         else:
             # it's a transcript page in the making - - not indexed yet, thus we can't do a talk on it yet
@@ -163,7 +164,7 @@ def addAudioLinksToTalkWithDecoratedTranscript(talk: TalkPage, transcript: Trans
 def updateTalk(haf, talkName, transcriptModel, sfn=None):
     sfnTranscriptMd = haf.getTranscriptFilename(talkName)
     transcriptPage = TranscriptPage(sfnTranscriptMd)
-    transcriptPage.applySpacy(transcriptModel)
+    transcriptPage.applySpacy(transcriptModel, mode=SpacyMode.ONLY_FIRST, force=False)
 
     fnTalk = haf.getTalkFilename(talkName)
     talk = TalkPage(fnTalk)
@@ -298,7 +299,7 @@ if __name__ == "__main__":
 
     # Kanban stuff
 
-    elif isScript('addMissingTalkCards'):
+    elif isScript('updateKanban'):
         assert retreatName
         sfnKanban = haf.vault.findFile('Talks (Kanban).md')
         addMissingTranscriptParagraphHeaderTextCardsForTalksInRetreat(sfnKanban, haf, retreatName)

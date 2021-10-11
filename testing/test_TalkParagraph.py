@@ -46,7 +46,7 @@ class Test_TalkParagraph(unittest.TestCase):
 
             section.append( f"[[{o.talkname}]] | {paragraphLink} | {o.count}" )
 
-        saveLinesToTextFile(r"M:/Brainstorming/Untitled.md", section)
+        saveLinesToTextFile(r"tmp/Test_TalkParagraph.test_1.md", section)
 
 
 if __name__ == "__main__":

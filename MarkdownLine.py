@@ -7,6 +7,13 @@ from util import *
 from typing import Iterable, Tuple
 import re
 
+from enum import Enum
+class SpacyMode(Enum):
+    ONLY_FIRST = 0
+    ALL_LINKS = 1
+    NO_LINKS = 2
+
+
 # *********************************************
 # class MarkdownLine
 # *********************************************
@@ -107,7 +114,7 @@ class MarkdownLine:
 
 # removing links, parallel update of footnotes
 
-    def applySpacy(self, model: TranscriptModel, force: bool = False):
+    def applySpacy(self, model: TranscriptModel, mode: SpacyMode, force: bool):
         if self.hasAppliedSpacy and not force:
             return
 
@@ -120,7 +127,9 @@ class MarkdownLine:
         self.removeAllLinks()
 
         self.shownLinks = [] # type: list[str]
-        self.termCounts = {} # type: dict[str,int]
+        #self.termCounts = {} # type: dict[str,int]
+        from collections import defaultdict
+        self.termCounts = defaultdict(int)
 
         # each paragraph is a doc, 1 PhraseMatcher is used for all of the paragraph docs
         doc = model.nlp(self.text)
@@ -143,26 +152,49 @@ class MarkdownLine:
                 pass
             else:
                 link = model.transcriptIndex.patternLinks[matchText.lower()]
-                if link in self.termCounts:                
-                    self.termCounts[link] += 1
-                    # only link once to a particular page/heading on page
-                else:
-                    self.termCounts[link] = 1
+                firstLink = link not in self.termCounts
+                self.termCounts[link] += 1
+                if firstLink:
                     self.shownLinks.append(link)
-                    
-                    if matchText.lower() == link.lower():
-                        # no need to have a piped link, because Obsidian is case insensitive for links
-                        linkText = "[[" + matchText + "]]"
-                    else:
-                        # NOTE: the link can contain a #, i.e. point to a heading on the page
-                        linkText = "[[" + link + "|" + matchText + "]]"
+                
+                if mode == SpacyMode.NO_LINKS:
+                    continue
+                
+                if (not firstLink) and (mode == SpacyMode.ONLY_FIRST):
+                    continue
 
-                    # sync the position in the original text and the text with the links
-                    start = doc[span.start].idx + lenDelta
-                    end = start + len(matchText)
-                    self.replace(start, end, linkText)
-                    lenDelta += len(linkText) - len(matchText)
+                if matchText.lower() == link.lower():
+                    # no need to have a piped link, because Obsidian is case insensitive for links
+                    linkText = "[[" + matchText + "]]"
+                else:
+                    # NOTE: the link can contain a #, i.e. point to a heading on the page
+                    linkText = "[[" + link + "|" + matchText + "]]"
+
+                # sync the position in the original text and the text with the links
+                start = doc[span.start].idx + lenDelta
+                end = start + len(matchText)
+                self.replace(start, end, linkText)
+                lenDelta += len(linkText) - len(matchText)
                     
+                # if link in self.termCounts:                
+                #     self.termCounts[link] += 1
+                #     # only link once to a particular page/heading on page
+                # else:
+                #     self.termCounts[link] = 1
+                #     self.shownLinks.append(link)
+                    
+                #     if matchText.lower() == link.lower():
+                #         # no need to have a piped link, because Obsidian is case insensitive for links
+                #         linkText = "[[" + matchText + "]]"
+                #     else:
+                #         # NOTE: the link can contain a #, i.e. point to a heading on the page
+                #         linkText = "[[" + link + "|" + matchText + "]]"
+
+                #     # sync the position in the original text and the text with the links
+                #     start = doc[span.start].idx + lenDelta
+                #     end = start + len(matchText)
+                #     self.replace(start, end, linkText)
+                #     lenDelta += len(linkText) - len(matchText)
 
         # ((PWECFSR)) from above
         # The paragraph now contains links, but not yet footnotes =>  add footnotes to the paragraph

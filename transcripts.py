@@ -2,6 +2,7 @@
 
 import re
 import os
+from MarkdownLine import SpacyMode
 
 from Publishing import Publishing
 from TranscriptModel import TranscriptModel
@@ -16,16 +17,20 @@ from HAFEnvironment import HAFEnvironment, talknameFromFilename
 # Transcripts
 # *********************************************
 
-def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName, transcriptModel: TranscriptModel):
+def applySpacyToTranscriptParagraphsForPage(haf: HAFEnvironment, sfnTranscriptMd, transcriptModel: TranscriptModel, mode: SpacyMode):
+    markdownName = basenameWithoutExt(sfnTranscriptMd)
+    if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
+        transcript = loadStringFromTextFile(sfnTranscriptMd)
+        if re.search(r'#Transcript', transcript):
+            page = TranscriptPage(sfnTranscriptMd)
+            page.applySpacy(transcriptModel, mode, force=False)
+            page.save(sfnTranscriptMd)
+
+
+def applySpacyToTranscriptParagraphsForRetreat(haf: HAFEnvironment, retreatName, transcriptModel: TranscriptModel, mode: SpacyMode):
     filenames = filterExt(haf.collectTranscriptFilenames(retreatName), '.md')
     for sfnTranscriptMd in filenames:
-        markdownName = basenameWithoutExt(sfnTranscriptMd)
-        if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
-            transcript = loadStringFromTextFile(sfnTranscriptMd)
-            if re.search(r'#Transcript', transcript):
-                page = TranscriptPage(sfnTranscriptMd)
-                page.applySpacy(transcriptModel)
-                page.save(sfnTranscriptMd)
+        applySpacyToTranscriptParagraphsForPage(haf, sfnTranscriptMd, transcriptModel, mode)
 
 
 # *********************************************
@@ -85,6 +90,8 @@ def get_arguments():
     parser.add_argument('-r')
     parser.add_argument('-t')
     parser.add_argument('-p')
+    parser.add_argument('-allLinks', dest='allLinks', action='store_true')
+    parser.add_argument('-noLinks', dest='noLinks', action='store_true')
     return parser.parse_args()
 
 
@@ -100,6 +107,8 @@ if __name__ == "__main__":
     retreatName = args.r
     talkname = args.t
     path = args.p
+    allLinks = args.allLinks
+    noLinks = args.noLinks
 
     if isScript('scripts'):
         dumpScripts(__file__)
@@ -111,11 +120,22 @@ if __name__ == "__main__":
     elif isScript('reindex'):
         transcriptIndex = TranscriptIndex(RB_YAML)
         transcriptModel = TranscriptModel(transcriptIndex)
-        if retreatName:
-            applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel)
+        if noLinks:
+            mode = SpacyMode.NO_LINKS
+        elif allLinks:
+            mode = SpacyMode.ALL_LINKS
         else:
-            for retreatName in haf.retreatNames:
-                applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel)
+            mode = SpacyMode.ONLY_FIRST
+        print(mode)
+        if talkname:
+            sfnTranscriptMd = haf.getTranscriptFilename(talkname)
+            applySpacyToTranscriptParagraphsForPage(haf, sfnTranscriptMd, transcriptModel, mode)
+        else:
+            if retreatName:
+                applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel, mode)
+            else:
+                for retreatName in haf.retreatNames:
+                    applySpacyToTranscriptParagraphsForRetreat(haf, retreatName, transcriptModel, mode)
         print("reindexed")
 
 

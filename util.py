@@ -445,8 +445,8 @@ def parseParagraph(paragraphOnPage: str):
 
 def determineHeaderTarget(header):
     # IMPORTANT: the "..." for yet-missing paragraph description will be ''
-    header = re.sub(r"/", " ", header)
-    header = re.sub(r"[.,:?=()]", "", header)
+    header = re.sub(r"[./]", " ", header)
+    header = re.sub(r"[,:?=()]", "", header)
     header = re.sub(r"  +", " ", header)
     return header
 

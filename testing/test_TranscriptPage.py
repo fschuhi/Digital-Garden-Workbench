@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from MarkdownLine import SpacyMode
 from util import *
 from HAFEnvironment import HAFEnvironment
 from TranscriptIndex import TranscriptIndex
@@ -42,7 +43,7 @@ class Test_TranscriptPage(unittest.TestCase):
 
     def test_applySpacyToParagraphs(self):
         page = TranscriptPage(self.sfnTranscriptMd1)
-        page.applySpacy(self.transcriptModel)
+        page.applySpacy(self.transcriptModel, mode=SpacyMode.ONLY_FIRST, force=False)
         #applySpacyToParagraphs(self.transcriptModel, page.paragraphs)
         page.save("tmp/tmp.md")
         import filecmp
@@ -58,7 +59,7 @@ class Test_TranscriptPage(unittest.TestCase):
 
     def test_collectTermLinks(self):
         page = TranscriptPage(self.sfnTranscriptMd1)
-        page.applySpacy(self.transcriptModel)
+        page.applySpacy(self.transcriptModel, mode=SpacyMode.ONLY_FIRST, force=False)
 
         markdownLine = page.findParagraph(1,3)
         self.assertEqual(markdownLine.countTerm('History'), 0)
@@ -77,7 +78,7 @@ class Test_TranscriptPage(unittest.TestCase):
 
     def test_saveToObsidian(self):
         page = TranscriptPage(self.sfnTranscriptMd1)
-        page.applySpacy(self.transcriptModel)
+        page.applySpacy(self.transcriptModel, mode=SpacyMode.ONLY_FIRST, force=False)
 
         # check that TranscriptPage is "idempotent", i.e. exactly the same if saved w/o any changes from the version we loaded
         page.save("tmp/tmp.md")

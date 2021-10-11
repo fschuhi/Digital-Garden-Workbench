@@ -7,6 +7,7 @@ if not "%doit%"=="do it" (
 )
 echo.
 
+rem onlyFirst, not allLinks
 python transcripts.py reindex
 echo.
 

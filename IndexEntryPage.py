@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from MarkdownLine import MarkdownLine
+from MarkdownLine import MarkdownLine, SpacyMode
 from ObsidianNote import ObsidianNote, ObsidianNoteType
 from TranscriptModel import TranscriptModel
 from genericpath import exists
@@ -122,7 +122,7 @@ class IndexEntryPage(ObsidianNote):
             if (match := citationParagraphParser.matchCitationParagraph(ml.text)):
                 oldCitation = match.group('citation')
                 markdown = MarkdownLine(oldCitation)
-                markdown.applySpacy(transcriptModel)
+                markdown.applySpacy(transcriptModel, mode=SpacyMode.ONLY_FIRST, forec=False)
                 citationParagraphParser.citation = markdown.text
                 self.markdownLines[index].text = citationParagraphParser.canonicalCitationParagraph()
 
