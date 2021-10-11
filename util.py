@@ -445,7 +445,10 @@ def parseParagraph(paragraphOnPage: str):
 
 def determineHeaderTarget(header):
     # IMPORTANT: the "..." for yet-missing paragraph description will be ''
-    return re.sub(r"[.,/:?=()]", "", header)
+    header = re.sub(r"/", " ", header)
+    header = re.sub(r"[.,:?=()]", "", header)
+    header = re.sub(r"  +", " ", header)
+    return header
 
 
 def parseBlockId(blockid) -> Tuple[int,int]:

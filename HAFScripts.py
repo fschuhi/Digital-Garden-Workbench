@@ -10,7 +10,6 @@ from Publishing import Publishing
 from TranscriptModel import TranscriptModel
 from consts import HAF_PUBLISH_YAML, HAF_YAML, RB_YAML
 from TranscriptIndex import TranscriptIndex
-from talks import updateParagraphsListPages
 from util import *
 from HAFEnvironment import HAFEnvironment
 
@@ -61,8 +60,6 @@ if __name__ == "__main__":
     # publish
 
     elif isScript('transferFilesToPublish'):
-        updateParagraphsListPages(haf)
-
         publishing = Publishing()
         publishing.transferFilesToPublish()
         publishing.replaceLinksInAllTalks()
