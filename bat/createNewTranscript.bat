@@ -1,2 +1,2 @@
 @echo off
-python transcripts.py --script createNewTranscript --path "data/1231 Joy (talk) (new).plain.md"
+python transcripts.py createNewTranscript -p "data/1231 Joy (talk) (new).plain.md"

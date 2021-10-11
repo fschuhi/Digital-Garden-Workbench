@@ -1,2 +1,2 @@
 @echo off
-python HAFScripts.py --script transferFilesToPublish
+python HAFScripts.py transferFilesToPublish

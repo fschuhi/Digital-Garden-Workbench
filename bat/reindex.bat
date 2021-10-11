@@ -1,2 +1,2 @@
 @echo off
-python transcripts.py --script reindexTranscripts
+python transcripts.py reindex

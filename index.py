@@ -261,17 +261,13 @@ def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeN
 def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--script')
-    parser.add_argument('--indexEntry')
-    parser.add_argument('--scripts', action="store_true")
-    parser.add_argument("--sectionsort", action='store_true')
+    parser.add_argument('script', nargs='?')
+    parser.add_argument('-i')
+    parser.add_argument("-sectionsort", action='store_true')
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = get_arguments()
-    if args.scripts:
-        dumpScripts(__file__)
-        exit()
 
     def isScript(check):
         return isScriptArg(args, check)
@@ -279,7 +275,7 @@ if __name__ == "__main__":
     haf = HAFEnvironment(HAF_YAML)
 
     script = args.script
-    indexEntry = args.indexEntry
+    indexEntry = args.i
 
     transcriptIndex = TranscriptIndex(RB_YAML)
     if isScript(['addMissingCitations', 'top10']):
@@ -287,8 +283,9 @@ if __name__ == "__main__":
     if isScript(['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml']):
         network = LinkNetwork(haf)
 
-    if False:
-        pass
+    if isScript('scripts'):
+        dumpScripts(__file__)
+        exit()
 
 
     # index stuff
@@ -361,19 +358,23 @@ if __name__ == "__main__":
 
                 (pageNr, paragraphNr) = parseBlockId(blockid)
 
-                # ((KJQBZMS)) get the transcript w/o going via the filesystem
-                transcript = transcriptByTalkname[talkname]
-                thisParagraph = f"[[{transcript.notename}#^{blockid}\\|•]]"
+                if False:
 
-                # determine previous and next paragraphs, if there are any
-                (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
-                (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
-                prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|◀]]"
-                nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|▶]]"
+                    # ((KJQBZMS)) get the transcript w/o going via the filesystem
+                    transcript = transcriptByTalkname[talkname]
+                    thisParagraph = f"[[{transcript.notename}#^{blockid}\\|•]]"
 
-                # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
-                # paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph} &nbsp; **{thisParagraph}** &nbsp; {nextParagraph}"
-                paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph}**{thisParagraph}**{nextParagraph}"
+                    # determine previous and next paragraphs, if there are any
+                    (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
+                    (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
+                    prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|◀]]"
+                    nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|▶]]"
+
+                    # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
+                    # paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph} &nbsp; **{thisParagraph}** &nbsp; {nextParagraph}"
+                    paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph}**{thisParagraph}**{nextParagraph}"
+                else:
+                    paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]]"
 
                 section.append( f"{paragraphLink} | {count} | [[{talkname}]]" )
 

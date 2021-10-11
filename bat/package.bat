@@ -7,22 +7,22 @@ if not "%doit%"=="do it" (
 )
 echo.
 
-python transcripts.py --script reindexTranscripts
+python transcripts.py reindex
 echo.
 
-python talks.py --script updateTalk
+python talks.py update
 echo.
 
-python talks.py --script updateParagraphsLists
+python talks.py updateParagraphsLists
 echo.
 
-python index.py --script topTalks
+python index.py topTalks
 echo.
 
-python index.py --script topParagraphs
+python index.py topParagraphs
 echo.
 
-python HAFScripts.py --script transferFilesToPublish
+python HAFScripts.py transferFilesToPublish
 echo.
 
 echo.

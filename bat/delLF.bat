@@ -1,2 +1,2 @@
 @echo off
-python HAFScripts.py --script delLF
+python HAFScripts.py delLF

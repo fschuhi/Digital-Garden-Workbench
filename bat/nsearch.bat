@@ -1,2 +1,2 @@
 @echo off
-python HAFScripts.py --script search --old %1
+python HAFScripts.py search -s %1

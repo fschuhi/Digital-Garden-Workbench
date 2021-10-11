@@ -81,19 +81,15 @@ def canonicalizeTranscript(haf: HAFEnvironment, talkName):
 def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--script')
-    parser.add_argument('--retreatName')
-    parser.add_argument('--talkName')
-    parser.add_argument('--path')
-    parser.add_argument('--scripts', action="store_true")
+    parser.add_argument('script')
+    parser.add_argument('-r')
+    parser.add_argument('-t')
+    parser.add_argument('-p')
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = get_arguments()
-    if args.scripts:
-        dumpScripts(__file__)
-        exit()
 
     def isScript(check):
         return isScriptArg(args, check)
@@ -101,17 +97,18 @@ if __name__ == "__main__":
     haf = HAFEnvironment(HAF_YAML)
 
     script = args.script
-    retreatName = args.retreatName
-    talkname = args.talkName
-    path = args.path
+    retreatName = args.r
+    talkname = args.t
+    path = args.p
 
-    if False:
-        pass
+    if isScript('scripts'):
+        dumpScripts(__file__)
+        exit()
 
 
     # reindexing, updating
 
-    elif isScript('reindexTranscripts'):
+    elif isScript('reindex'):
         transcriptIndex = TranscriptIndex(RB_YAML)
         transcriptModel = TranscriptModel(transcriptIndex)
         if retreatName:
@@ -134,7 +131,7 @@ if __name__ == "__main__":
         canonicalizeTranscript(haf, talkname)
         print("canonicalized")
 
-    elif isScript("deitalicizeTranscript"):
+    elif isScript("deitalicize"):
         assert talkname
         deitalicizeTranscript(haf, talkname)
         print("deitalizised")

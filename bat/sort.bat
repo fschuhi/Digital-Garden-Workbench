@@ -1,5 +1,4 @@
 @echo off
 copy RB.yaml RB.yaml.bak
-python HAFScripts.py --script sortRBYaml
-
-rem python HAFScripts.py --script sortRBYaml --sectionsort
+python HAFScripts.py sortRBYaml
+rem python HAFScripts.py sortRBYaml --sectionsort

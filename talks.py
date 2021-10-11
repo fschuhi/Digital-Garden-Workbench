@@ -262,10 +262,9 @@ def updateParagraphsListPages(haf: HAFEnvironment):
 def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--script')
-    parser.add_argument('--retreatName')
-    parser.add_argument('--talkName')
-    parser.add_argument('--scripts', action="store_true")
+    parser.add_argument('script')
+    parser.add_argument('-r')
+    parser.add_argument('-t')
     return parser.parse_args()
 
 def isScript(check):
@@ -278,9 +277,6 @@ def isScript(check):
 
 if __name__ == "__main__":
     args = get_arguments()
-    if args.scripts:
-        dumpScripts(__file__)
-        exit()
 
     def isScript(check):
         return isScriptArg(args, check)
@@ -288,15 +284,16 @@ if __name__ == "__main__":
     haf = HAFEnvironment(HAF_YAML)
 
     script = args.script
-    retreatName = args.retreatName
-    talkname = args.talkName
+    retreatName = args.r
+    talkname = args.t
 
     transcriptIndex = TranscriptIndex(RB_YAML)
-    if isScript(['updateTalk', 'createNewTalks']):
+    if isScript(['update', 'createNewTalks']):
         transcriptModel = TranscriptModel(transcriptIndex)
 
-    if False:
-        pass
+    if isScript('scripts'):
+        dumpScripts(__file__)
+        exit()
 
 
     # Kanban stuff
@@ -310,7 +307,7 @@ if __name__ == "__main__":
 
     # updating
 
-    elif isScript('updateTalk'):
+    elif isScript('update'):
         if talkname:
             updateTalk(haf, talkname, transcriptModel)
             print(f"updated talk")
@@ -323,7 +320,7 @@ if __name__ == "__main__":
                 updateTalk(haf, talkname, transcriptModel)
             print(f"updated all talks")
 
-    elif isScript('unspanTalk'):
+    elif isScript('unspan'):
         assert talkname
         sfn = haf.getTalkFilename(talkname)
         lines = loadLinesFromTextFile(sfn)

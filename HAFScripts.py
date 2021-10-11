@@ -22,24 +22,17 @@ from HAFEnvironment import HAFEnvironment
 def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--scripts', action="store_true")
-    parser.add_argument('--script')
-    parser.add_argument('--retreatName')
-    parser.add_argument('--talkName')
-    parser.add_argument('--out')
-    parser.add_argument('--old')
-    parser.add_argument('--note')
-    parser.add_argument('--pattern')
-    parser.add_argument('--new')
-    parser.add_argument('--path')
+    parser.add_argument('script')
+    parser.add_argument('-old')
+    parser.add_argument('-n')
+    parser.add_argument('-s')
+    parser.add_argument('-new')
+    parser.add_argument('-p')
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = get_arguments()
-    if args.scripts:
-        dumpScripts(__file__)
-        exit()
 
     def isScript(check):
         return isScriptArg(args, check)
@@ -48,10 +41,11 @@ if __name__ == "__main__":
     haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
 
     script = args.script
-    retreatName = args.retreatName
-    talkname = args.talkName
     old = args.old
     new = args.new
+    pattern = args.s
+    note = args.n
+    path = args.p
     
     transcriptIndex = TranscriptIndex(RB_YAML)
     if isScript(['transferFilesToPublish', 'top10']):
@@ -59,8 +53,9 @@ if __name__ == "__main__":
     if isScript(['replaceNoteLink']):
         network = LinkNetwork(haf)
 
-    if False:
-        pass
+    if isScript('scripts'):
+        dumpScripts(__file__)
+        exit()
 
 
     # publish
@@ -81,8 +76,8 @@ if __name__ == "__main__":
     elif isScript('replaceNoteLink'): 
 
         def replaceNoteLink(network: LinkNetwork, oldNote, newNote):
-            oldNote = args.old
-            newNote = args.new
+            oldNote = old
+            newNote = new
             assert oldNote and newNote
             changed = 0
             unchanged = 0
@@ -107,8 +102,8 @@ if __name__ == "__main__":
             return (found, changed, unchanged)
 
         # needs args "old", "new"
-        oldNote = args.old
-        newNote = args.new
+        oldNote = old
+        newNote = new
         (found, changed, unchanged) = replaceNoteLink(network, oldNote, newNote)
         if not found:
             print('not found')
@@ -132,15 +127,14 @@ if __name__ == "__main__":
 
 
     elif isScript('search'):
-        old = args.old
-        assert old
-        print("old", old)
+        assert pattern
+        print("pattern: " + pattern)
 
         newlines = []
         for md in haf.vault.allNotes():
             lines = loadLinesFromTextFile(md)
             for index, line in enumerate(lines):
-                if (matches := list(re.finditer(old, line))):
+                if (matches := list(re.finditer(pattern, line))):
                     if matches:
                         print(basenameWithoutExt(md))
                         for match in matches:
@@ -153,15 +147,15 @@ if __name__ == "__main__":
     # misc
 
     elif isScript('count'):
-        assert args.note
-        assert args.pattern
-        note = argsnote if (argsnote := args.note).endswith('.md') else argsnote + '.md'
+        assert note
+        assert pattern
+        note = note if note.endswith('.md') else note + '.md'
         path = haf.vault.findFile(note)
         print(path)
         lines = loadLinesFromTextFile(path)
         n = 0
         for line in lines:
-            if re.search(args.pattern, line):
+            if re.search(pattern, line):
                 n += 1
         print(n)
 
@@ -172,22 +166,12 @@ if __name__ == "__main__":
         clp = canonicalizeText(clp)
         pyperclip.copy(clp)
 
-    elif isScript('removeHeadersFromTranscript'):
-        assert talkname
-        newlines = []
-        fnTranscript = haf.getTranscriptFilename(talkname)
-        lines = loadLinesFromTextFile(fnTranscript)
-        for line in lines:
-            if re.search(r"\^[0-9-]+$", line):
-                newlines.append(line)
-        saveLinesToTextFile("tmp/" + basenameWithoutExt(fnTranscript) + '.md', newlines)
-
 
     elif isScript('canonicalUnderline'):
         # Usually applied to Brainstorming/Untitled.md, which we use to set up a new talk by copying from a Word document.
         # Some docs throw Obsidian off-track with regard to underlines (which have to be paired in Obsidian), so this tries to rectify that.
-        assert args.path
-        lines = loadLinesFromTextFile(args.path)
+        assert path
+        lines = loadLinesFromTextFile(path)
         newlines = []
         for line in lines:
             newline = canonicalizeText(line)            
@@ -196,7 +180,7 @@ if __name__ == "__main__":
                 newline = match.group(1)
             print(newline)
             newlines.append(newline)
-        saveLinesToTextFile("tmp/" + basenameWithoutExt(args.path) + '.md', newlines)
+        saveLinesToTextFile("tmp/" + basenameWithoutExt(path) + '.md', newlines)
         
 
 
