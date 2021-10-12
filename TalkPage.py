@@ -213,8 +213,7 @@ def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn
 
     timestamp = pdfName[:4] + transcriptName[:2] + transcriptName[2:4]
     pAudio = haf.vault.findFile(timestamp + '*')
-    audioname = os.path.base(pAudio) if pAudio else "audio goes here.mp3"
-
+    audioname = os.path.basename(pAudio) if pAudio else "audio goes here.mp3"
     
     newLines = []
     newLines.extend([ \

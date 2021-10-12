@@ -192,6 +192,7 @@ class Publishing:
             talkname = talknameFromFilename(talkFilename)
 
             # intentionally from the publish 
+            print(talkname)
             transcriptFilename = self.hafPublish.getTranscriptFilename(talkname)
             assert transcriptFilename
 

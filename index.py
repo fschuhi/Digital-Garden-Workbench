@@ -320,7 +320,7 @@ if __name__ == "__main__":
 
 
     elif isScript('topParagraphs'):
-        nTopDefault = 3
+        nTopDefault = 4
 
         # we need to access previous and next paragraphs of the ones shown in the rows
         # see ((KJQBZMS)) below
@@ -330,6 +330,7 @@ if __name__ == "__main__":
         dateByTalkname = haf.createDateByTalknameLookup()
 
         def func(term, occurrences, section, nTop):
+
             # Obsidian table
             section.append(f"### Paragraphs with {nTop}+ mentions")
             section.append("description | count | talk")
@@ -337,7 +338,11 @@ if __name__ == "__main__":
 
             # prune if necessary
             if len(occurrences) > 10:
-                occurrences = [o for o in occurrences if o.count >= nTop]
+                prunedOccurrences = [o for o in occurrences if o.count >= nTop]
+                if prunedOccurrences:
+                    occurrences = prunedOccurrences
+                else:
+                    occurrences = occurrences[:10]
 
             # build a list with the necessary fields for sorting and display
             topMentions = []
@@ -377,6 +382,7 @@ if __name__ == "__main__":
                     paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]]"
 
                 section.append( f"{paragraphLink} | {count} | [[{talkname}]]" )
+            return True
 
         # now delete, add or replace the section
         yamlKey = 'showTopReferringParagraphs'

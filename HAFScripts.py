@@ -173,16 +173,35 @@ if __name__ == "__main__":
         for line in lines:
             # intentionally not canonicalize, so that we can find page breaks easier
             # newline = canonicalizeText(line)            
-            newline = re.sub(r"_ _( ?[^_]+? ?)_ ?_", r" _\1_ ", newline)
+            newline = re.sub(r"_ _( ?[^_]+? ?)_ ?_", r" _\1_ ", line)
             if (match := re.match(r"^ *?_(.+)_$", newline)):
                 newline = match.group(1)
-            print(newline)
             newline = re.sub(r"_([.,;()])_", r"\1", newline)
             newline = re.sub(r"__\)_", r")_", newline)
             newline = re.sub(r"_ ([.,;])", r"_\1", newline)
             newline = newline.replace("_.’_", ".’")
+            newline = newline.replace("__", "")
+            newline = newline.replace("** **", " ")
+            print(newline)
             newlines.append(newline)
         saveLinesToTextFile("tmp/" + basenameWithoutExt(path) + '.md', newlines)
+
+
+    elif isScript('cleanupIndexEntries'):
+        indexEntries = list(haf.collectIndexEntryNameSet())
+        for indexEntry in indexEntries:
+            newlines = []
+            path = haf.getIndexEntryFilename(indexEntry)
+            lines = loadLinesFromTextFile(path)
+            lastWasEmpty = False
+            for line in lines:
+                if lastWasEmpty and not line:
+                    pass
+                else:
+                    newlines.append(line)
+                lastWasEmpty = not line
+
+            saveLinesToTextFile(path, newlines)
         
 
 
