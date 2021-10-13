@@ -24,10 +24,10 @@ transcripts.py
 index.py
 ```
 
-Help for supported scripts is available with the --scripts parameter, e.g.
+Help for supported scripts is available with the scripts parameter, e.g.
 
 ```console
-talks.py --scripts
+talks.py scripts
 ```
 
 For the possible switches see the *.py
@@ -45,5 +45,8 @@ Among others, the workbench is used for the following tasks:
 * update talks from transcript decorations
 * create skeleton notes for talk talks
 * handle diacritics
+* make canonical special characters (like punctuation)
 * transform tools to transformation tools to make the markdown uniform across all talks
-
+* replace across all pages (also for links)
+* searching with regular expressions
+* managing Kanban boards for workflows
