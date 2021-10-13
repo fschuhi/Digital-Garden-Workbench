@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import yaml
+import csv
 
 # *********************************************
 # shared types
@@ -119,6 +120,26 @@ def saveStringToTextFile(sfn, text: str):
 def saveLinesToTextFile(sfn, lines: list[str]):
     text = '\n'.join(lines) + '\n'
     saveStringToTextFile(sfn, text)
+
+
+# *********************************************
+# csv read/write
+# *********************************************
+
+def loadTuplesFromCsv(path) -> list[Tuple]:
+    tuples = []
+    with open(path, newline='', encoding='utf8') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='"')
+        for row in reader:
+            tuples.append(tuple(row))
+    return tuples
+
+def saveTuplesToCsv(path, tuples: list[Tuple]):
+    with open(path, 'w', newline='', encoding='utf8') as csvfile:
+        csvfile.write('\ufeff')
+        writer = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for tuple in tuples:
+            writer.writerow(list(tuple))
 
 
 # *********************************************

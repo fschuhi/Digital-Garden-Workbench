@@ -193,11 +193,7 @@ if __name__ == "__main__":
         assert talkname
         transcriptName = basenameWithoutExt(haf.getTranscriptFilename(talkname))
         import csv
-        tuples = []
-        with open(f'data/{transcriptName}.csv', newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
-            for row in spamreader:
-                tuples.append(tuple(row))
+        tuples = loadTuplesFromCsv(f'data/{transcriptName}.csv')
         del tuples[0]
 
         # first pass

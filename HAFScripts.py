@@ -12,6 +12,8 @@ from consts import HAF_PUBLISH_YAML, HAF_YAML, RB_YAML
 from TranscriptIndex import TranscriptIndex
 from util import *
 from HAFEnvironment import HAFEnvironment
+from TalkPage import TalkPage
+from TranscriptPage import TranscriptPage
 
 
 # *********************************************
@@ -187,23 +189,85 @@ if __name__ == "__main__":
         saveLinesToTextFile("tmp/" + basenameWithoutExt(path) + '.md', newlines)
 
 
-    elif isScript('cleanupIndexEntries'):
-        indexEntries = list(haf.collectIndexEntryNameSet())
-        for indexEntry in indexEntries:
-            newlines = []
-            path = haf.getIndexEntryFilename(indexEntry)
-            lines = loadLinesFromTextFile(path)
-            lastWasEmpty = False
-            for line in lines:
-                if lastWasEmpty and not line:
-                    pass
-                else:
-                    newlines.append(line)
-                lastWasEmpty = not line
+    elif isScript('writeCsv'):
+        talkname = "Samadhi in Metta Practice"
+        talk = TalkPage(haf.getTalkFilename(talkname))
+        transcript = TranscriptPage(haf.getTranscriptFilename(talkname))
+        import csv
+        tuples = []
+        tuples.append(('bla', 'heul'))
+        sections = talk.collectSections()
+        for section in sections:
+            ml = transcript.findParagraph(section.pageNr, section.paragraphNr)
+            assert ml
+            ml.removeAllLinks()
+            tuples.append((section.headerText, ml.text))
+        saveTuplesToCsv("tmp/bla.csv", tuples)
 
-            saveLinesToTextFile(path, newlines)
-        
 
+    elif isScript('readCsv'):
+        talkname2007 = "Samadhi in Metta Practice"
+        talk2007 = TalkPage(haf.getTalkFilename(talkname2007))
+        sections2007 = talk2007.collectSections()
+        transcript2007 = TranscriptPage(haf.getTranscriptFilename(talkname2007))
+
+        talkname2008 = "The Place of Samadhi in Metta Practice"
+        talk2008 = TalkPage(haf.getTalkFilename(talkname2008))
+        sections2008 = talk2008.collectSections()
+        transcript2008 = TranscriptPage(haf.getTranscriptFilename(talkname2008))
+
+        path = "data/2008 vs 2007.csv"
+        tuples = []
+        import csv
+        tuples = loadTuplesFromCsv(path)
+        del tuples[0]
+
+        lines = []
+        lines.append("---")
+        lines.append("obsidianUIMode: preview")
+        lines.append("---")
+        lines.append("")
+        lines.append("## Synopsis")
+        lines.append("")
+        lines.append(f"left:\t[[{transcript2008.notename}]] (==[[{transcript2008.retreatname}|{transcript2008.retreatname[:4]}]]==)")
+        lines.append(f"right:\t[[{transcript2007.notename}]] ([[{transcript2007.retreatname}|{transcript2007.retreatname[:4]}]])")
+        lines.append("")
+        lines.append(f"==[[{transcript2008.notename}\\|2008]]== | [[{transcript2007.notename}\\|2007]]")
+        lines.append("- | -")
+
+        for tuple in tuples:
+            (blockid2008, blockid2007, ref2007, comment) = tuple                        
+            cell2008 = cell2007 = ""
+            if blockid2008 or ref2007 or comment:
+                if blockid2008:
+                    section2008 = sections2008.findParagraph(*parseBlockId(blockid2008))
+                    headerText2008 = section2008.headerText
+                    paragraph2008 = transcript2008.findParagraph(*parseBlockId(blockid2008))
+                    paragraph2008.removeAllLinks()
+                    (_, _, paragraph2008text) = parseParagraph(paragraph2008.text)
+                    talkLink2008 = f"[[{talkname2008}#{determineHeaderTarget(headerText2008)}\\|{headerText2008}]]"
+                    transcriptLink2008 = f"[[{transcript2008.notename}#^{blockid2008}\\|{blockid2008}]]"
+                    cell2008 = f"<span class=\"blockid\">{blockid2008}</span>&nbsp;&nbsp;{talkLink2008}<br/><hr class=\"cell\">{paragraph2008text}"
+                if comment:
+                    cell2008 = f"{cell2008}<br/><hr class=\"cell\"><span style=\"color:red\">{comment}</span>"
+            if blockid2007 or ref2007:
+                if blockid2007:
+                    section2007 = sections2007.findParagraph(*parseBlockId(blockid2007))
+                    headerText2007 = section2007.headerText
+                    paragraph2007 = transcript2007.findParagraph(*parseBlockId(blockid2007))
+                    paragraph2007.removeAllLinks()
+                    (_, _, paragraph2007text) = parseParagraph(paragraph2007.text)
+                    talkLink2007 = f"[[{talkname2007}#{determineHeaderTarget(headerText2007)}\\|{headerText2007}]]"
+                    transcriptLink2007 = f"[[{transcript2007.notename}#^{blockid2007}\\|{blockid2007}]]"
+                    cell2007 = f"<span class=\"blockid\">{blockid2007}</span>&nbsp;&nbsp;{talkLink2007}<br/><hr class=\"cell\">{paragraph2007text}"
+                if ref2007:
+                    section2007ref = sections2007.findParagraph(*parseBlockId(ref2007))
+                    headerText2007ref = section2007ref.headerText
+                    talkLink2007ref = f"<span style=\"color:red\">also</span> [[{talkname2007}#{determineHeaderTarget(headerText2007ref)}\\|{headerText2007ref}]]"
+                    cell2007 = f"{cell2007}<br/><hr class=\"cell\">{talkLink2007ref}"
+            lines.append(f"| {cell2008} | {cell2007} |")
+
+        saveLinesToTextFile("M:/Brainstorming/Untitled.md", lines)
 
     else:
         print("unknown script")
