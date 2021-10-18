@@ -25,6 +25,11 @@ class Publishing:
 # mirroring
 
     def transferFilesToPublish(self):
+        # we need to recreate all synopses, because the headers might have changed
+        from synopsis import createSynopsis
+        createSynopsis(self.hafWork, "The Place of Samadhi in Metta Practice", "Samadhi in Metta Practice", "data/Synopsis 1/2008 vs 2007.csv", r"M:\2008 Lovingkindness and Compassion As a Path to Awakening\Synopsis 1.md")
+        createSynopsis(self.hafWork, "Exploring the World of Loving Kindness", "Expressions of Metta", "data/Synopsis 2/2008 vs 2007.csv", r"M:\2008 Lovingkindness and Compassion As a Path to Awakening\Synopsis 2.md")
+        
         self.mirrorRetreatFiles()
 
         #print("2")
@@ -38,15 +43,6 @@ class Publishing:
         self.copyFile("Rob Burbea/Gardening.md", "/")
         self.copyFile("Rob Burbea/Diacritics.md", "/")
         self.copyFile("Rob Burbea/Rob Burbea.md", "/")
-
-        # self.copyFile("Images/Digital Garden/digital-garden-big.png", "Images")
-        # self.copyFile("Images/Digital Garden/digital-garden-small.png", "Images")
-        # self.copyFile("Images/Digital Garden/Rob Burbea.png", "Images")
-        # self.copyFile("Images/Digital Garden/link.png", "Images")
-        # self.copyFile("Images/Digital Garden/help1.png", "Images")
-        # self.copyFile("Images/Digital Garden/help2.png", "Images")
-        # self.copyFile("Images/Digital Garden/help3.png", "Images")
-        # self.copyFile("Images/Digital Garden/help4.png", "Images")
 
         mirrorDir(os.path.join(self.hafWork.root, "Images/Digital Garden"), os.path.join(self.hafPublish.root, "Images"))
         mirrorDir(os.path.join(self.hafWork.root, "css-snippets"), os.path.join(self.hafPublish.root, "css-snippets"))
@@ -176,11 +172,8 @@ class Publishing:
                     if pluginTitle:
                         title = pluginTitle
                 else:
-                    # enclosing <div>...</div> for admonitions suppresses Obsidian formatting
-                    # replace some formatting inside admonitions w/ html
-                    #line = re.sub(r"_([^_]+?)_", r"<i>\1</i>", line)
-                    #line = re.sub(r"\*\*([^*]+?)\*\*", r"<b>\1</b>", line)
-
+                    # enclosing <div>...</div> for admonitions suppresses Obsidian formatting, including links
+                    # => replace some formatting inside admonitions w/ html
                     ml = MarkdownLine(line)
                     ml.convertFormattingToHtml()
                     ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filter=None)}")
