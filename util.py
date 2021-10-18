@@ -423,7 +423,7 @@ def matchedObsidianLinkToString(match: re.Match, newNote: str=None, retainShown:
     return s + ']]'
 
 
-def convertMatchedObsidianLink(match, root, filter=None):
+def convertMatchedObsidianLink(match, root, css=None, filter=None):
 
     # print(match.group(0))
 
@@ -453,14 +453,19 @@ def convertMatchedObsidianLink(match, root, filter=None):
     else:
         assert False
     
-    if not shownLink:
+    if shownLink:
+        aria = f'aria-label-position="top" aria-label="{note}" '
+    else:
+        aria = ""
         shownLink = note
 
     from html import escape
     shownLink = escape(shownLink)
 
+    # ((DFMYOIR))
     # h.obsidian.md/rob-burbea/2020+Vajra+Music/Transcript+pages/0301+Preliminaries+Regarding+Voice%2C+Movement%2C+and+Gesture+-+Part+1#^1-1
-    return f'<a data-href="{link}" href="{root}{encodedNote}{encodedTarget}" class="internal-link" target="_blank" rel="noopener">{shownLink}</a>'
+    a = '<a ' + aria + f'data-href="{link}" href="{root}{encodedNote}{encodedTarget}" class="internal-link" target="_blank" rel="noopener">{shownLink}' + '</a>'
+    return f'<span class="{css}">{a}</span>' if css else a
 
 
 def parseParagraph(paragraphOnPage: str):

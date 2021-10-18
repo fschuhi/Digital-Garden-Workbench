@@ -20,8 +20,10 @@ from HAFEnvironment import HAFEnvironment, talknameFromFilename
 def applySpacyToTranscriptParagraphsForPage(haf: HAFEnvironment, sfnTranscriptMd, transcriptModel: TranscriptModel, mode: SpacyMode):
     markdownName = basenameWithoutExt(sfnTranscriptMd)
     if re.match(r'[0-9][0-9][0-9][0-9] ', markdownName):
+        # we can assume it's a transcript
         transcript = loadStringFromTextFile(sfnTranscriptMd)
         if re.search(r'#Transcript', transcript):
+            # better be sure that it really is a transcript
             page = TranscriptPage(sfnTranscriptMd)
             page.applySpacy(transcriptModel, mode, force=False)
             page.save(sfnTranscriptMd)

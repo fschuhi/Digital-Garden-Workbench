@@ -74,6 +74,10 @@ class HAFEnvironment():
         return self.vault.folderNotes(os.path.join(retreat if retreat else '', 'Lists'))
 
 
+    def collectIndexEntryFilenames(self):
+        return self.vault.pathnames('Index/*.md')
+
+
     def collectTranscriptTalknames(self, retreat=None):
         return [talknameFromFilename(filename) for filename in self.collectTranscriptFilenames(retreat)]
 

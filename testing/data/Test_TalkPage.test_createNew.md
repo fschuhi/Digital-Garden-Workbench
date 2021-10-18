@@ -1,6 +1,6 @@
 ---
 obsidianUIMode: preview
-ParagraphsListPage: false
+ParagraphsListPage: true
 Series: 2020 Vajra Music
 ---
 #Talk
@@ -18,7 +18,9 @@ Transcript PDF: [[2020_0301 Preliminaries Regarding Voice, Movement, and Gesture
 <br/>
 
 ## Paragraphs
+[[Preliminaries Regarding Voice, Movement, and Gesture - Part 1 -|plain list]]
 
+---
 ##### ...
 **[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^1-1|1-1]]**
 

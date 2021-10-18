@@ -200,7 +200,7 @@ Could that be a routine agenda topic in the HAF yogis meetings?<br/>
 <span class="counts">**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^7-1|7-1]]**: _[[Dharma]] (2) · [[Seeing That Frees]] · [[Conceptual Framework]] (7) · [[Insight]] · [[Soulmaking]] · [[Emptiness]]_</span>
 
 <div class="admonition quote"><div class="title">❝</div><div class="content">
-What would it be to listen or read _for_ and _from_ the whole conceptual framework? I'm listening _for_, or I'm reading _for_, to get a sense of, what is the whole conceptual framework. And then, when I think I have that, I'm listening _from_ the perspective of the whole conceptual framework. And that listening _from_ an understanding of the whole conceptual framework, holding it there, it frames my listening...<br/>
+What would it be to listen or read <i>for</i> and <i>from</i> the whole conceptual framework? I'm listening <i>for</i>, or I'm reading <i>for</i>, to get a sense of, what is the whole conceptual framework. And then, when I think I have that, I'm listening <i>from</i> the perspective of the whole conceptual framework. And that listening <i>from</i> an understanding of the whole conceptual framework, holding it there, it frames my listening...<br/>
 </div></div>
 
 ---
@@ -216,7 +216,7 @@ What would it be to listen or read _for_ and _from_ the whole conceptual framewo
 <span class="counts">**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^7-3|7-3]]**: _[[Inertia]] (6) · [[Meditation]] · [[Steadiness]]_</span>
 
 <div class="admonition quote"><div class="title">❝</div><div class="content">
-Now, I would say that that inquiry into inertia, even though we're not really going into it at the moment [laughs] - again, I'm postponing it, or just mentioning it; I don't know if I'll ever get back to it - I would actually say that's _more_ important as a teaching, as an inquiry, structurally it's more important, at the meta-level it's more important than anything else that I might say in this set of talks about movement and gesture or anything else.<br/>
+Now, I would say that that inquiry into inertia, even though we're not really going into it at the moment [laughs] - again, I'm postponing it, or just mentioning it; I don't know if I'll ever get back to it - I would actually say that's <i>more</i> important as a teaching, as an inquiry, structurally it's more important, at the meta-level it's more important than anything else that I might say in this set of talks about movement and gesture or anything else.<br/>
 </div></div>
 
 ---
@@ -292,7 +292,7 @@ Now, I would say that that inquiry into inertia, even though we're not really go
 <span class="counts">**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^11-4|11-4]]**: _[[Nondualism]] · [[Conceptual Framework]] · [[Spirituality]]_</span>
 
 <div class="admonition quote"><div class="title">❝</div><div class="content">
-Then out of that comes a kind of mode of practising - effectively a technique (although one tries to think of it as _not_ a technique, because one isn't struggling, or supposedly not struggling and doing, and not thinking, etc., and it's non-dual). The idea is that it's open, but actually, it ends up being very closed, because we've cut off a bunch of possibilities...<br/>
+Then out of that comes a kind of mode of practising - effectively a technique (although one tries to think of it as <i>not</i> a technique, because one isn't struggling, or supposedly not struggling and doing, and not thinking, etc., and it's non-dual). The idea is that it's open, but actually, it ends up being very closed, because we've cut off a bunch of possibilities...<br/>
 </div></div>
 
 ---
@@ -310,7 +310,7 @@ Then out of that comes a kind of mode of practising - effectively a technique (a
 <span class="counts">**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^12-2|12-2]]**: _[[Four Noble Truths]] (2) · [[Dukkha]] (5) · [[Rebirth]]_</span>
 
 <div class="admonition quote"><div class="title">❝</div><div class="content">
-what does a reduction in suffering actually _mean_? And what does it look like? And how noticeable is it at different levels?<br/>
+what does a reduction in suffering actually <i>mean</i>? And what does it look like? And how noticeable is it at different levels?<br/>
 </div></div>
 
 ---
@@ -482,7 +482,7 @@ Is this excercise compatible with a all-around-the-day practice? What would be n
 <span class="counts">**[[0301 Preliminaries Regarding Voice, Movement, and Gesture - Part 1#^18-6|18-6]]**: _[[Energy Body]] (3) · [[Embodiment]] · [[Centre]] (4)_</span>
 
 <div class="admonition quote"><div class="title">❝</div><div class="content">
-... the whole range becomes more evenly available, that the sound that you're sounding, that the body is sounding, can emanate full-bloodedly, full-bodiedly, with full presence and full _oomph_ from any place in the body, and you're comfortable.<br/>
+... the whole range becomes more evenly available, that the sound that you're sounding, that the body is sounding, can emanate full-bloodedly, full-bodiedly, with full presence and full <i>oomph</i> from any place in the body, and you're comfortable.<br/>
 </div></div>
 
 ---

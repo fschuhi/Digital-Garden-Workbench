@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from MarkdownLine import MarkdownLine
+from ObsidianNote import ObsidianNote, ObsidianNoteType
 from TranscriptPage import TranscriptPage
 from TalkPage import TalkPage
 from util import *
@@ -21,15 +22,22 @@ class Publishing:
         self.hafWork = HAFEnvironment(HAF_YAML)
         self.hafPublish = HAFEnvironment(HAF_PUBLISH_YAML)
 
+        self.indexEntryNameSet = self.hafPublish.collectIndexEntryNameSet()
+        self.transcriptNameSet = self.hafPublish.collectTranscriptNameSet()
 
-# mirroring
 
-    def transferFilesToPublish(self):
+
+# creating files
+    def createSynopses(self):
         # we need to recreate all synopses, because the headers might have changed
         from synopsis import createSynopsis
         createSynopsis(self.hafWork, "The Place of Samadhi in Metta Practice", "Samadhi in Metta Practice", "data/Synopsis 1/2008 vs 2007.csv", r"M:\2008 Lovingkindness and Compassion As a Path to Awakening\Synopsis 1.md")
         createSynopsis(self.hafWork, "Exploring the World of Loving Kindness", "Expressions of Metta", "data/Synopsis 2/2008 vs 2007.csv", r"M:\2008 Lovingkindness and Compassion As a Path to Awakening\Synopsis 2.md")
-        
+
+
+# mirroring
+
+    def transferFilesToPublish(self):
         self.mirrorRetreatFiles()
 
         #print("2")
@@ -47,15 +55,6 @@ class Publishing:
         mirrorDir(os.path.join(self.hafWork.root, "Images/Digital Garden"), os.path.join(self.hafPublish.root, "Images"))
         mirrorDir(os.path.join(self.hafWork.root, "css-snippets"), os.path.join(self.hafPublish.root, "css-snippets"))
         self.copyFile("css-snippets/publish.css", "/")
-        
-
-        self.modifyFullstops()
-
-        # we do not touch publish.css
-        #print("4")
-        # now all files are exact copies of the _Markdown vault
-        # need to convert audio links and admonitions
-        self.convertAllMarkdownFiles()
 
 
     def mirrorRetreatFiles(self):
@@ -176,7 +175,7 @@ class Publishing:
                     # => replace some formatting inside admonitions w/ html
                     ml = MarkdownLine(line)
                     ml.convertFormattingToHtml()
-                    ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filter=None)}")
+                    ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website)}")
                     admonitionLines.append(ml.text + '<br/>')
                 continue
             
@@ -186,7 +185,7 @@ class Publishing:
 
 # fullstops in transcripts
 
-    def modifyFullstops(self):
+    def modifyFullstopsInTranscripts(self):
         talkFilenames = self.hafWork.collectTalkFilenames()
         for talkFilename in talkFilenames:
             talk = TalkPage(talkFilename)
@@ -227,45 +226,80 @@ class Publishing:
 
 # cut off internal links by converting them to html
 
-    def __replaceLinks(self, filenames, replaceIndex):
-        website = self.hafPublish.website()
-        
-        indexEntryNameSet = self.hafPublish.collectIndexEntryNameSet()
-        transcriptNameSet = self.hafPublish.collectTranscriptNameSet()
+    def __replaceLinks(self, filenames, css, filterFunc):
+        website = self.hafPublish.website()        
+        for filename in filenames:
+            # text = loadStringFromTextFile(filename)
+            # markdown = MarkdownLine(text)
+            # markdown.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, css, filterFunc)}")            
+            # saveStringToTextFile(filename, markdown.text)
 
-        def filterLinks(match):
+            # newlines = []
+            # lines = loadLinesFromTextFile(filename)
+            # for line in lines:
+            #     ml = MarkdownLine(line)
+            #     ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, css, filterFunc)}")
+            #     newlines.append(ml.text)
+            # saveLinesToTextFile(filename, newlines)
+
+            note = ObsidianNote(ObsidianNoteType.UNKNOWN, filename)
+            for ml in note.markdownLines:
+                ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, css, filterFunc)}")
+            note.save()
+
+
+
+    def replaceLinksInTalkPages(self):
+
+        def filterLinksOnTalkPage(match):
             note = match.group('note')
-            assert note
-            target = match.group('target')
-            
-            # convert links on talk to transcript
-            if target and target.startswith('#^') and note in transcriptNameSet:
+            target = match.group('target')                                    
+            if target and target.startswith('#^') and note in self.transcriptNameSet:
+                # convert all links to blockid targets on transcripts
+                return True            
+            if note in self.indexEntryNameSet:
+                # convert any index entry
                 return True
-
-            # convert any index entry
-            if replaceIndex and (note in indexEntryNameSet):
-                return True
-
             return False
 
-        for filename in filenames:
-            text = loadStringFromTextFile(filename)
-            markdown = MarkdownLine(text)
-            markdown.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filterLinks)}")
-            saveStringToTextFile(filename, markdown.text)
-
-
-    def replaceLinksInAllTalks(self):
         filenames = self.hafPublish.collectTalkFilenames()
-        self.__replaceLinks(filenames, True)
+        self.__replaceLinks(filenames, css=None, filterFunc=filterLinksOnTalkPage)
 
-    def replaceLinksInAllRootFilenames(self):
-        filenames = self.hafPublish.collectNotesInRetreatsFolders()
-        self.__replaceLinks(filenames, False)
 
-    def replaceLinksInSpecialFiles(self):
+    def replaceLinksOnSpecialPages(self):
         index = os.path.join(self.hafPublish.root, 'Index.md')
         assert os.path.exists(index)
-        self.__replaceLinks([index], True)
+        self.__replaceLinks([index], css=None, filterFunc=lambda match: match.group('note') in self.indexEntryNameSet)
+
+    def replaceLinksOnIndexEntryPages(self):
+        filenames = self.hafPublish.collectIndexEntryFilenames()
+        self.__replaceLinks(filenames, css=None, filterFunc=lambda match: match.group('note') not in self.indexEntryNameSet)
+
+
+    def replaceLinksOnTranscriptPages(self):
+
+        lastString = None
+        notes = set()
+
+        def filterLinksOnTranscriptPage(match):
+            nonlocal lastString
+            nonlocal notes
+
+            note = match.group('note')
+            if (match.string == lastString) and (note in notes):
+                # recurring occurrences in the same paragraph will be filtered (i.e. have a special css class)
+                return True
+                
+            if match.string != lastString:
+                # next paragraph, next first occurrences will be shown as regular links
+                notes = set()
+                lastString = match.string
+
+            # remember first note link and other "firsts" in the paragraph
+            notes.add(note)
+            return False
+
+        filenames = self.hafPublish.collectTranscriptFilenames()
+        self.__replaceLinks(filenames, css="transcript", filterFunc=filterLinksOnTranscriptPage)
 
 

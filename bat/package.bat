@@ -7,8 +7,8 @@ if not "%doit%"=="do it" (
 )
 echo.
 
-rem onlyFirst, not allLinks
-python transcripts.py reindex
+rem before onlyFirst, not allLinks, from 19.10.21 on allLinks
+python transcripts.py reindex -allLinks
 echo.
 
 python talks.py update

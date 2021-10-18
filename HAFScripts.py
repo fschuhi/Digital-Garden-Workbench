@@ -63,10 +63,24 @@ if __name__ == "__main__":
 
     elif isScript('transferFilesToPublish'):
         publishing = Publishing()
+
+        # we need to recreate all synopses, because the headers might have changed
+        publishing.createSynopses()
+
+        # nothing more to create or modify in work, so copy to publish
         publishing.transferFilesToPublish()
-        publishing.replaceLinksInAllTalks()
-        publishing.replaceLinksInAllRootFilenames()
-        publishing.replaceLinksInSpecialFiles()
+
+        # link fullstops in transcript paragraphs to the paragraph infos on talk pages
+        publishing.modifyFullstopsInTranscripts()
+
+        # now all files are exact copies of the _Markdown vault
+        # need to convert audio links and admonitions
+        publishing.convertAllMarkdownFiles()
+
+        publishing.replaceLinksInTalkPages()
+        publishing.replaceLinksOnSpecialPages()
+        publishing.replaceLinksOnIndexEntryPages()
+        publishing.replaceLinksOnTranscriptPages()
         print("files transferred to publish vault")
 
 

@@ -199,12 +199,12 @@ class TalkPage(ObsidianNote):
 # factory
 # *********************************************
 
-def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn: str = None):
-    sfnTranscriptMd = haf.getTranscriptFilename(talkName)    
+def createNewTalkPage(talkname, haf: HAFEnvironment, model: TranscriptModel, sfn: str = None):
+    sfnTranscriptMd = haf.getTranscriptFilename(talkname)    
     transcriptPage = TranscriptPage(sfnTranscriptMd)
     transcriptPage.applySpacy(model, mode=SpacyMode.ONLY_FIRST, force=False)
 
-    sfnPdf = haf.getPDFFilename(talkName)
+    sfnPdf = haf.getPDFFilename(talkname)
 
     pdfName = basenameWithoutExt(sfnPdf)
     transcriptName = basenameWithoutExt(sfnTranscriptMd)
@@ -219,7 +219,7 @@ def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn
     newLines.extend([ \
         "---", \
         "obsidianUIMode: preview", \
-        "ParagraphsListPage: false", \
+        "ParagraphsListPage: true", \
         f"Series: {retreatName}", \
         "---", \
         "#Talk", \
@@ -236,7 +236,9 @@ def createNewTalkPage(talkName, haf: HAFEnvironment, model: TranscriptModel, sfn
         "<span class=\"counts\">_[[some keyword]] (99)_</span>", \
         "<br/>\n", \
         "## Paragraphs", \
+        f"[[{talkname} -|plain list]]", \
         "", \
+        "---", \
         ])
         
     for markdownLine  in markdownLines:
