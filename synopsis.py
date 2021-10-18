@@ -62,27 +62,26 @@ if __name__ == "__main__":
     # synopsis
 
     elif isScript('writeCsv'):
-        assert talkname
-        talkname = "Samadhi in Metta Practice"
+        exitIfNone(talkname, "talkname (-t)")
         talk = TalkPage(haf.getTalkFilename(talkname))
-        aTranscript = TranscriptPage(haf.getTranscriptFilename(talkname))
-        import csv
+        transcript = TranscriptPage(haf.getTranscriptFilename(talkname))
         tuples = []
-        tuples.append(('bla', 'heul'))
+        tuples.append(('description', 'paragraph'))
         aSections = talk.collectSections()
         for section in aSections:
-            ml = aTranscript.findParagraph(section.pageNr, section.paragraphNr)
+            ml = transcript.findParagraph(section.pageNr, section.paragraphNr)
             assert ml
             ml.removeAllLinks()
             tuples.append((section.headerText, ml.text))
-        saveTuplesToCsv("tmp/bla.csv", tuples)
+        outpath = out if out else f"tmp/{talkname}.csv"
+        saveTuplesToCsv(outpath, tuples)
 
 
     elif isScript('readCsv'):
         # synopsis readCsv -left "The Place of Samadhi in Metta Practice" -right "Samadhi in Metta Practice" -p "data/2008 vs 2007.csv"
-        assert talknameLeft
-        assert talknameRight
-        assert path
+        exitIfNone(talknameLeft, "talk on the left (-left)")
+        exitIfNone(talknameRight, "talk on the right (-right)")
+        exitIfNone(path, "path to synopsis csv (-p)")
 
         tuples = []
         import csv
@@ -112,10 +111,10 @@ if __name__ == "__main__":
         lines.append("")
         lines.append("## Synopsis")
         lines.append("")
-        lines.append(f"left:\t[[{aTranscript[2008].notename}]] (==[[{aTranscript[2008].retreatname}|{aTranscript[2008].retreatname[:4]}]]==)")
-        lines.append(f"right:\t[[{aTranscript[2007].notename}]] ([[{aTranscript[2007].retreatname}|{aTranscript[2007].retreatname[:4]}]])")
+        lines.append(f"left: [[{aTranscript[2008].notename}]] (==[[{aTranscript[2008].retreatname}|{aTranscript[2008].retreatname[:4]}]]==)")
+        lines.append(f"right: [[{aTranscript[2007].notename}]] ([[{aTranscript[2007].retreatname}|{aTranscript[2007].retreatname[:4]}]])")
         lines.append("")
-        lines.append(f"==[[{aTranscript[2008].notename}\\|[2008]]]== | [[{aTranscript[2007].notename}\\|[2007]]]")
+        lines.append(f"==[[{aTranscript[2008].notename}\\|2008]]== | [[{aTranscript[2007].notename}\\|2007]]")
         lines.append("- | -")
 
         sectionRef = headerTextRef = talkLinkRef = {}
@@ -132,27 +131,28 @@ if __name__ == "__main__":
 
         for tuple in tuples:
             (aBlockid[2008], aBlockid[2007], ref2007, comment) = tuple                        
+            if aBlockid[2008] or aBlockid[2007]:
 
-            # initialize the two cells in the row
-            aCell[2008] = aCell[2007] = ""
+                # initialize the two cells in the row
+                aCell[2008] = aCell[2007] = ""
 
-            # 2008 and comments on the left
-            if aBlockid[2008] or comment:
-                if aBlockid[2008]:
-                    aCell[2008] = generateCellText(2008)
-                if comment:
-                    aCell[2008] = f"{aCell[2008]}<br/><hr class=\"cell\"><span style=\"color:red\">{comment}</span>"
+                # 2008 and comments on the left
+                if aBlockid[2008] or comment:
+                    if aBlockid[2008]:
+                        aCell[2008] = generateCellText(2008)
+                    if comment:
+                        aCell[2008] = f"{aCell[2008]}<br/><hr class=\"cell\"><span style=\"color:red\">{comment}</span>"
 
-            # 2007 and ref2007 on the right
-            if aBlockid[2007] or ref2007:
-                if aBlockid[2007]:
-                    aCell[2007] = generateCellText(2007)
-                if ref2007:
-                    sectionRef = aSections[2007].findParagraph(*parseBlockId(ref2007))
-                    headerTextRef = sectionRef.headerText
-                    talkLinkRef = f"<span style=\"color:red\">also</span> [[{aTalkname[2007]}#{determineHeaderTarget(headerTextRef)}\\|{headerTextRef}]]"
-                    aCell[2007] = f"{aCell[2007]}<br/><hr class=\"cell\">{talkLinkRef}"
-            lines.append(f"| {aCell[2008]} | {aCell[2007]} |")
+                # 2007 and ref2007 on the right
+                if aBlockid[2007] or ref2007:
+                    if aBlockid[2007]:
+                        aCell[2007] = generateCellText(2007)
+                    if ref2007:
+                        sectionRef = aSections[2007].findParagraph(*parseBlockId(ref2007))
+                        headerTextRef = sectionRef.headerText
+                        talkLinkRef = f"<span style=\"color:red\">also</span> [[{aTalkname[2007]}#{determineHeaderTarget(headerTextRef)}\\|{headerTextRef}]]"
+                        aCell[2007] = f"{aCell[2007]}<br/><hr class=\"cell\">{talkLinkRef}"
+                lines.append(f"| {aCell[2008]} | {aCell[2007]} |")
 
         outpath = out if out else "M:/Brainstorming/Untitled.md"
         saveLinesToTextFile(outpath, lines)

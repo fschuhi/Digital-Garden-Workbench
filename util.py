@@ -44,6 +44,15 @@ def dumpScripts(py):
             print('  ' + script)
 
 
+def exitError(err: str):
+    print(err)
+    exit()
+
+def exitIfNone(o, what):
+    if not o:
+        exitError("missing " + what)
+
+
 # *********************************************
 # deitalizise
 # *********************************************

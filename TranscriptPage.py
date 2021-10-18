@@ -27,7 +27,7 @@ class TranscriptPage(ObsidianNote):
 
     @property
     def talkname(self):
-        return re.match(r"^([0-9]+ )?(.+)", self.filename).group(2)
+        return re.match(r"^([0-9]+ )?(.+)", self.notename).group(2)
 
 
     @classmethod
@@ -143,7 +143,7 @@ class TranscriptPage(ObsidianNote):
         links = []
         for pageNr, paragraphNr, count in counts:
             blockId = f"{pageNr}-{paragraphNr}"
-            linkTarget = f"{self.filename}{targetType}{blockId}"
+            linkTarget = f"{self.notename}{targetType}{blockId}"
             link = f"[[{linkTarget}|{blockId}]]"
             if boldLinkTargets and linkTarget in boldLinkTargets:
                 link = '**' + link + '**'
@@ -182,6 +182,6 @@ def createTranscriptsDictionary(filenames: list[str], transcriptModel: Transcrip
     for filename in filenames:
         transcriptPage = TranscriptPage(filename)
         transcriptPage.applySpacy(transcriptModel, mode=SpacyMode.ONLY_FIRST, force=False)
-        transcripts[transcriptPage.filename] = transcriptPage
+        transcripts[transcriptPage.notename] = transcriptPage
     return transcripts
 

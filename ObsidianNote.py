@@ -30,9 +30,10 @@ class ObsidianNote:
     def __init__(self, type: ObsidianNoteType, path):
         self.type = type # type: ObsidianNoteType
 
-        self.path = path
-        self.filename = os.path.splitext(os.path.basename(path))[0]
-        self.notename = basenameWithoutExt(self.filename)
+        self.path = path        
+        self.basename = os.path.basename(path)
+        self.basenameWithoutExt = os.path.splitext(os.path.basename(path))[0]
+        self.notename = basenameWithoutExt(self.basenameWithoutExt)
 
         textLines = loadLinesFromTextFile(path)
 

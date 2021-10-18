@@ -381,7 +381,7 @@ if __name__ == "__main__":
         parser = TalkPageLineParser()
         for fnTalk in haf.collectTalkFilenames():
             talk = TalkPage(fnTalk)
-            print(talk.filename)
+            print(talk.notename)
             for ml in talk.markdownLines:
                 match = parser.match(ml)
                 if match == TalkPageLineMatch.PARAGRAPH_COUNTS:                    

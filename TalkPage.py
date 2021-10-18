@@ -34,7 +34,7 @@ class TalkPage(ObsidianNote):
         try:
             for index, ml in enumerate(self.markdownLines):
                 if (match := parser.match(ml)) == TalkPageLineMatch.PARAGRAPH_COUNTS:
-                    assert parser.transcriptName == transcriptPage.filename
+                    assert parser.transcriptName == transcriptPage.notename
                     # headers on a talk page refer to paragraphs in the transcript
                     pageNr = parser.pageNr
                     paragraphNr = parser.paragraphNr

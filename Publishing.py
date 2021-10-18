@@ -131,6 +131,7 @@ class Publishing:
         lines = loadLinesFromTextFile(sfn)
         inAdmonition = False
         admonitionLines = []
+        website = self.hafPublish.website()
         for line in lines:
             # ![[20200301-Rob_Burbea-GAIA-preliminaries_regarding_voice_movement_and_gesture_part_1-62452.mp3#t=13:09]]
             match = parseAudioLink(line)
@@ -175,7 +176,15 @@ class Publishing:
                     if pluginTitle:
                         title = pluginTitle
                 else:
-                    admonitionLines.append(line + '<br/>')
+                    # enclosing <div>...</div> for admonitions suppresses Obsidian formatting
+                    # replace some formatting inside admonitions w/ html
+                    #line = re.sub(r"_([^_]+?)_", r"<i>\1</i>", line)
+                    #line = re.sub(r"\*\*([^*]+?)\*\*", r"<b>\1</b>", line)
+
+                    ml = MarkdownLine(line)
+                    ml.convertFormattingToHtml()
+                    ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, filter=None)}")
+                    admonitionLines.append(ml.text + '<br/>')
                 continue
             
             newLines.append(line)

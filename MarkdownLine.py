@@ -79,7 +79,14 @@ class MarkdownLine:
         matches = self.collectLinkMatches()
         self.replaceMatches(matches, func)
         if ignoreFootnotes:
-            self.restoreFootnotes() # not necessary because replaceMatches() also does it, but it doesn't hurt
+            self.restoreFootnotes() # not necessary because replaceMatches() also does it, but it doesn't hurt            
+
+
+# html conversion (other than links)
+
+    def convertFormattingToHtml(self):
+        self.text = re.sub(r"_([^_]+?)_", r"<i>\1</i>", self.text)
+        self.text = re.sub(r"\*\*([^*]+?)\*\*", r"<b>\1</b>", self.text)
 
 
 # cut, insert, replace
