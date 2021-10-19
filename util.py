@@ -438,25 +438,40 @@ def convertMatchedObsidianLink(match, root, css=None, filter=None):
     target = match.group('target')
     shownLink = match.group('shown')
 
+    # pipe | in links in tables have to be escaped
+    if link and link.endswith("\\"): link = link[:-1]
+    if target and target.endswith("\\"): target = target[:-1]
+
+    # ((TVPBHSJ)) need to make sure that we don't mess up a's attributes
+    link = link.replace("'", "")
+    link = link.replace('"', '')
+
     encodedNote = urllib.parse.quote_plus(note)
 
     if not target:
         encodedTarget = ''
+        ariaLabel = note
     elif target.startswith('#^'):
-        blockId = target[2:]
-        encodedTarget = '#^' + urllib.parse.quote_plus(blockId)
+        blockid = target[2:]
+        encodedTarget = '#^' + urllib.parse.quote_plus(blockid)
         shownLink = shownLink if shownLink else note
+        ariaLabel = f"{note} > ^{blockid}"
     elif target.startswith('#'):
         header = target[1:]
         encodedTarget = '#' + urllib.parse.quote_plus(header)
-        shownLink = shownLink if shownLink else f"{note} > {header}"
+        ariaLabel = f"{note} > {header}"
+        shownLink = shownLink if shownLink else ariaLabel
     else:
         assert False
     
     if shownLink:
-        aria = f'aria-label-position="top" aria-label="{note}" '
+        assert ariaLabel
+        # see ((TVPBHSJ)) above
+        ariaLabel = ariaLabel.replace("'", "")
+        ariaLabel = ariaLabel.replace('"', '')
+        ariaAttributes = f'aria-label-position="top" aria-label="{ariaLabel}" '
     else:
-        aria = ""
+        ariaAttributes = ""
         shownLink = note
 
     from html import escape
@@ -464,7 +479,7 @@ def convertMatchedObsidianLink(match, root, css=None, filter=None):
 
     # ((DFMYOIR))
     # h.obsidian.md/rob-burbea/2020+Vajra+Music/Transcript+pages/0301+Preliminaries+Regarding+Voice%2C+Movement%2C+and+Gesture+-+Part+1#^1-1
-    a = '<a ' + aria + f'data-href="{link}" href="{root}{encodedNote}{encodedTarget}" class="internal-link" target="_blank" rel="noopener">{shownLink}' + '</a>'
+    a = '<a ' + ariaAttributes + f'data-href="{link}" href="{root}{encodedNote}{encodedTarget}" class="internal-link" target="_blank" rel="noopener">{shownLink}' + '</a>'
     return f'<span class="{css}">{a}</span>' if css else a
 
 

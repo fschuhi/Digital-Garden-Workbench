@@ -229,19 +229,6 @@ class Publishing:
     def __replaceLinks(self, filenames, css, filterFunc):
         website = self.hafPublish.website()        
         for filename in filenames:
-            # text = loadStringFromTextFile(filename)
-            # markdown = MarkdownLine(text)
-            # markdown.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, css, filterFunc)}")            
-            # saveStringToTextFile(filename, markdown.text)
-
-            # newlines = []
-            # lines = loadLinesFromTextFile(filename)
-            # for line in lines:
-            #     ml = MarkdownLine(line)
-            #     ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, css, filterFunc)}")
-            #     newlines.append(ml.text)
-            # saveLinesToTextFile(filename, newlines)
-
             note = ObsidianNote(ObsidianNoteType.UNKNOWN, filename)
             for ml in note.markdownLines:
                 ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website, css, filterFunc)}")
