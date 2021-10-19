@@ -18,6 +18,14 @@ ignored:
   - love the
 
 Persons:
+  - Ronald Fairbairn:
+      - Fairbairn, Ronald
+      - Fairbairn
+  - Sigmund Freud:
+      - /Freud, Sigmund
+      - Freud
+  - James Hillman:
+      - /Hillman, James
   - Jose Ortega y Gasset:
       - /Ortega y Gasset, José
   - Werner Heisenberg:
@@ -51,6 +59,7 @@ Persons:
   - Carl Gustav Jung:
       - /Jung, Carl Gustav
       - Jungian
+      - Jung
   - Catherine McGee:
       - /McGee, Catherine
       - Catherine
@@ -129,8 +138,12 @@ Persons:
       - /Sellars, Wilfrid
   - William Blake:
       - /Blake, William
+  - William James:
+      - James, William
 
 Buddhology:
+  - Shentong:
+      - shentong tradition
   - stream-entry
   - Kalyanamittata:
       - kalyāṇamittatā
@@ -1089,6 +1102,7 @@ Robology:
       - soul-sense
       - soul-stretch
       - soul-style
+      - soul-styles
       - soul-territory
       - soul-territories
       - soul may want
