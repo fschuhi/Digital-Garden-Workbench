@@ -89,7 +89,7 @@ class TranscriptIndex:
             self.pagesSet.update(self.pages)
 
 
-    def createObsidianIndexEntryFiles(self, path):
+    def createObsidianIndexEntryFiles(self, path, exclude=None):
         # iterate through dictionary keys, check if page exists in _Markdown, if not create it
 
         import os.path
@@ -104,10 +104,13 @@ class TranscriptIndex:
                         # TODO: could check for ignored index entry files if they exist and delete it, or it least print the name to stdout
                         pass
                     else:
-                        print(f"creating page {page}...")
-                        f = open(fname, 'w', encoding='utf8', newline='\n')
-                        # ((XMWFBBI)) tag immediately after the IndexEntry is the section
-                        f.write(f"#IndexEntry #{section}\n")
-                        f.close()
+                        if exclude and page in exclude:
+                            print(f"exclude {page}")
+                        else:
+                            print(f"creating page {page}...")
+                            f = open(fname, 'w', encoding='utf8', newline='\n')
+                            # ((XMWFBBI)) tag immediately after the IndexEntry is the section
+                            f.write(f"#IndexEntry #{section}\n")
+                            f.close()
 
 

@@ -443,7 +443,7 @@ def convertMatchedObsidianLink(match, root, css=None, filter=None):
     if target and target.endswith("\\"): target = target[:-1]
 
     # ((TVPBHSJ)) need to make sure that we don't mess up a's attributes
-    link = link.replace("'", "")
+    # note: only "", not '' (Perfection and Christ's Blessing)
     link = link.replace('"', '')
 
     encodedNote = urllib.parse.quote_plus(note)

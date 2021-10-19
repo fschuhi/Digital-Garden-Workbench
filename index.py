@@ -307,7 +307,8 @@ if __name__ == "__main__":
         print("sorted and saved")
 
     elif isScript('createIndexEntryFiles'):
-        transcriptIndex.createObsidianIndexEntryFiles(haf.dirIndex)
+        exclude = haf.collectTalknameSet()
+        transcriptIndex.createObsidianIndexEntryFiles(haf.dirIndex, exclude)
         updateAlphabeticalIndex(haf, transcriptIndex)
     
     elif isScript('showOrphansInIndexFolder'):
