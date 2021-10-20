@@ -183,26 +183,6 @@ class MarkdownLine:
                 self.replace(start, end, linkText)
                 lenDelta += len(linkText) - len(matchText)
                     
-                # if link in self.termCounts:                
-                #     self.termCounts[link] += 1
-                #     # only link once to a particular page/heading on page
-                # else:
-                #     self.termCounts[link] = 1
-                #     self.shownLinks.append(link)
-                    
-                #     if matchText.lower() == link.lower():
-                #         # no need to have a piped link, because Obsidian is case insensitive for links
-                #         linkText = "[[" + matchText + "]]"
-                #     else:
-                #         # NOTE: the link can contain a #, i.e. point to a heading on the page
-                #         linkText = "[[" + link + "|" + matchText + "]]"
-
-                #     # sync the position in the original text and the text with the links
-                #     start = doc[span.start].idx + lenDelta
-                #     end = start + len(matchText)
-                #     self.replace(start, end, linkText)
-                #     lenDelta += len(linkText) - len(matchText)
-
         # ((PWECFSR)) from above
         # The paragraph now contains links, but not yet footnotes =>  add footnotes to the paragraph
         # NOTE: character position of the footnotes will have changed, due to inserting links; see ((XYYSBMS))

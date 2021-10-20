@@ -361,27 +361,7 @@ if __name__ == "__main__":
             for (talkname, headerText, blockid, count, date) in topMentions:
                 # enforced by caller
                 assert headerText != '...'
-
-                (pageNr, paragraphNr) = parseBlockId(blockid)
-
-                if False:
-
-                    # ((KJQBZMS)) get the transcript w/o going via the filesystem
-                    transcript = transcriptByTalkname[talkname]
-                    thisParagraph = f"[[{transcript.notename}#^{blockid}\\|•]]"
-
-                    # determine previous and next paragraphs, if there are any
-                    (prevPageNr, prevParagraphNr) = transcript.prevParagraph(pageNr, paragraphNr)
-                    (nextPageNr, nextParagraphNr) = transcript.nextParagraph(pageNr, paragraphNr)
-                    prevParagraph = '' if prevPageNr == None else f"[[{transcript.notename}#^{prevPageNr}-{prevParagraphNr}\|◀]]"
-                    nextParagraph = '' if nextPageNr == None else f"[[{transcript.notename}#^{nextPageNr}-{nextParagraphNr}\|▶]]"
-
-                    # 3 dots (or 2, if first or last paragraph), with the actual one in the list in bold
-                    # paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph} &nbsp; **{thisParagraph}** &nbsp; {nextParagraph}"
-                    paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]] &nbsp;&nbsp;{prevParagraph}**{thisParagraph}**{nextParagraph}"
-                else:
-                    paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]]"
-
+                paragraphLink = f"[[{talkname}#{determineHeaderTarget(headerText)}\\|{headerText}]]"
                 section.append( f"{paragraphLink} | {count} | [[{talkname}]]" )
             return True
 
