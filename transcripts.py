@@ -65,22 +65,6 @@ def firstIndexingOfRetreatFolder(haf: HAFEnvironment, retreatName):
                 page.save(sfnTranscriptMd)
 
 
-def deitalicizeTranscript(haf: HAFEnvironment, talkName):
-    assert False, "we do not deitalicize anymore"
-    sfnTranscriptMd = haf.getTranscriptFilename(talkName)
-    transcript = loadStringFromTextFile(sfnTranscriptMd)
-    transcript = deitalicizeTermsWithDiacritics(transcript)
-    saveStringToTextFile(sfnTranscriptMd, transcript)
-
-
-def canonicalizeTranscript(haf: HAFEnvironment, talkName):
-    sfnTranscriptMd = haf.getTranscriptFilename(talkName)
-    lines = loadLinesFromTextFile(sfnTranscriptMd)
-    newLines = [(line if line.strip() == '---' else canonicalizeText(line)) for line in lines]
-    saveLinesToTextFile(sfnTranscriptMd, newLines)
-
-
-
 # *********************************************
 # main
 # *********************************************
@@ -89,6 +73,7 @@ def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('script')
+    parser.add_argument('-help', dest='scriptHelp', action='store_true')
     parser.add_argument('-r')
     parser.add_argument('-t')
     parser.add_argument('-p')
@@ -106,6 +91,7 @@ if __name__ == "__main__":
     haf = HAFEnvironment(HAF_YAML)
 
     script = args.script
+    scriptHelp = args.scriptHelp
     retreatName = args.r
     talkname = args.t
     path = args.p
@@ -120,6 +106,14 @@ if __name__ == "__main__":
     # reindexing, updating
 
     elif isScript('reindex'):
+        if scriptHelp: exitHelp([
+            "-noLinks / -allLinks: reindex without any links / with all links in transcripts; default (i.e. neither switch passed): only first link, rest suppressed",
+            "-talkname: single talk (NOT transcript) to reindex, note: w/o trailing .md",
+            "-r: only reindex talks from a particular retreat\n",
+            "If neither talkname or retreat given, then reindex all transcripts across all retreats.",
+            "NOTE that this changes the transcripts in place."
+        ])
+
         transcriptIndex = TranscriptIndex(RB_YAML)
         transcriptModel = TranscriptModel(transcriptIndex)
         if noLinks:
@@ -148,20 +142,24 @@ if __name__ == "__main__":
         publishing.convertAllMarkdownFiles()
         print("converted")
 
-    elif isScript("canonicalize"):
-        assert talkname
-        canonicalizeTranscript(haf, talkname)
-        print("canonicalized")
 
-    elif isScript("deitalicize"):
+    elif isScript("canonicalize"):
+        if scriptHelp: exitHelp([
+            "-t: name of talk or transcript to run canonicalizeText() on\n",
+            "DANGER: replaces file with canonicalized text, without creating a backup"
+        ])
         assert talkname
-        deitalicizeTranscript(haf, talkname)
-        print("deitalizised")
+        sfnTranscriptMd = haf.getTranscriptFilename(talkname)
+        lines = loadLinesFromTextFile(sfnTranscriptMd)
+        newLines = [(line if line.strip() == '---' else canonicalizeText(line)) for line in lines]
+        saveLinesToTextFile(sfnTranscriptMd, newLines)
+        print("canonicalized")
 
 
     # creating files
 
     elif isScript('firstIndexingOfRetreatFolder'):
+        exitError("not used anymore, do the creation of the files one by one")
         assert retreatName
         firstIndexingOfRetreatFolder(haf, retreatName)
         print("first reindexing done")
@@ -170,6 +168,7 @@ if __name__ == "__main__":
     # Shannon's feedback
 
     elif isScript('removeLevel6Headers'):
+        exitError("temporary function")
         #fn = r"m:\2007 New Years Retreat Insight Meditation\Transcripts\1229 What is Insight.md"
         fn = r"m:\Untitled.md"
         lines = loadLinesFromTextFile(fn)
@@ -182,6 +181,11 @@ if __name__ == "__main__":
 
     elif isScript('createNewTranscript'):
         # see bat/createNewTranscript.bat
+        if scriptHelp: exitHelp([
+            "-p: path to the raw transcript md, i.e. a plain md with additional '#' pagination markers\n",
+            "Created full transcript file has yaml frontmatter, link to talk page, and correct page/paragraph info in headers and blockids.",
+            "Saves the transcript with the same filename in tmp/"
+        ])
         assert path
         lines = loadLinesFromTextFile(path)
         talkname = talknameFromFilename(path)
@@ -192,6 +196,11 @@ if __name__ == "__main__":
 
 
     elif isScript('changeParagraphIds'):
+        if scriptHelp: exitHelp([
+            "-t: talk or transcript name (without md)\n",
+            "Looks for a csv with talk name in data/, then replaces the tuples across all notes in the vault.",
+            "DANGER: this is obviously a dangerous operation, so prepare to rollback with git."
+        ])
         assert talkname
         transcriptName = basenameWithoutExt(haf.getTranscriptFilename(talkname))
         import csv
@@ -217,7 +226,6 @@ if __name__ == "__main__":
                         newLine = newLine.replace(strand, f"[[{transcriptName}#^{new}|{new}]]")
                     pass2.append(newLine)
                 saveLinesToTextFile(md, pass2)
-
 
     # misc
 

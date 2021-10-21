@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from posixpath import basename
 import re
 import os
 import pyperclip
@@ -12,8 +11,6 @@ from consts import HAF_PUBLISH_YAML, HAF_YAML, RB_YAML
 from TranscriptIndex import TranscriptIndex
 from util import *
 from HAFEnvironment import HAFEnvironment
-from TalkPage import TalkPage
-from TranscriptPage import TranscriptPage
 
 
 # *********************************************
@@ -24,6 +21,7 @@ def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('script')
+    parser.add_argument('-help', dest='scriptHelp', action='store_true')
     parser.add_argument('-old')
     parser.add_argument('-n')
     parser.add_argument('-s')
@@ -42,17 +40,19 @@ if __name__ == "__main__":
     haf_publish = HAFEnvironment(HAF_PUBLISH_YAML)
 
     script = args.script
+    scriptHelp = args.scriptHelp
     old = args.old
     new = args.new
     pattern = args.s
     note = args.n
     path = args.p
-    
-    transcriptIndex = TranscriptIndex(RB_YAML)
-    if isScript(['transferFilesToPublish', 'top10']):
-        transcriptModel = TranscriptModel(transcriptIndex)
-    if isScript(['replaceNoteLink']):
-        network = LinkNetwork(haf)
+
+    if not scriptHelp:
+        transcriptIndex = TranscriptIndex(RB_YAML)
+        if isScript(['transferFilesToPublish', 'top10']):
+            transcriptModel = TranscriptModel(transcriptIndex)
+        if isScript(['replaceNoteLink']):
+            network = LinkNetwork(haf)
 
     if isScript('scripts'):
         dumpScripts(__file__)
@@ -62,6 +62,17 @@ if __name__ == "__main__":
     # publish
 
     elif isScript('transferFilesToPublish'):
+        if scriptHelp: exitHelp([
+            "has no parameters\n",
+            "Operations:",
+            "- createSynopses()",
+            "- transferFilesToPublish()",
+            "- modifyFullstopsInTranscripts()",
+            "- replaceLinksInTalkPages()",
+            "- replaceLinksOnSpecialPages()",
+            "- replaceLinksOnTranscriptPages()",
+        ])
+
         publishing = Publishing()
 
         # we need to recreate all synopses, because the headers might have changed
@@ -87,6 +98,10 @@ if __name__ == "__main__":
     # search & replace
 
     elif isScript('replaceNoteLink'): 
+        if scriptHelp: exitHelp([
+            "-old: note (name) to replace",
+            "-new: new note name",
+        ])
 
         def replaceNoteLink(network: LinkNetwork, oldNote, newNote):
             oldNote = old
@@ -125,6 +140,10 @@ if __name__ == "__main__":
 
 
     elif isScript('replace'):
+        if scriptHelp: exitHelp([
+            "-old: regex pattern to search for, across all notes",
+            "-new: replacement string",
+        ])
         assert old and new
         print("old", old)
         print("new", new)
@@ -140,6 +159,7 @@ if __name__ == "__main__":
 
 
     elif isScript('search'):
+        if scriptHelp: exitHelp("-s: regex pattern to search for, across all notes")
         assert pattern
         print("pattern: " + pattern)
 
@@ -160,20 +180,26 @@ if __name__ == "__main__":
     # misc
 
     elif isScript('count'):
+        if scriptHelp: exitHelp([
+            "-n: note name",
+            "-s: regex pattern to search for\n",
+            "Prints number of found occurences of pattern in note.",
+        ])
         assert note
         assert pattern
         note = note if note.endswith('.md') else note + '.md'
         path = haf.vault.findFile(note)
-        print(path)
+        # print(path)
         lines = loadLinesFromTextFile(path)
         n = 0
         for line in lines:
             if re.search(pattern, line):
                 n += 1
-        print(n)
+        print(f"{n} occurrences in {path}")
 
 
     elif isScript('delLF'):
+        if scriptHelp: exitHelp("takes clipboard content, removes CRLF and does canonicalizeText(), result replaces clipboard content")
         clp = pyperclip.paste()
         clp = re.sub(r"\n|\r\n", " ", clp)
         clp = canonicalizeText(clp)
@@ -181,6 +207,11 @@ if __name__ == "__main__":
 
 
     elif isScript('canonicalUnderline'):
+        if scriptHelp: exitHelp([
+            "-p: any markdown file\n"
+            "Tries to remove certain spurious markdown formattings (from copying from Word in Obsidian).",
+            "Result is saved w/ same filename to tmp/",
+        ])
         # Usually applied to Brainstorming/Untitled.md, which we use to set up a new talk by copying from a Word document.
         # Some docs throw Obsidian off-track with regard to underlines (which have to be paired in Obsidian), so this tries to rectify that.
         assert path
@@ -198,7 +229,8 @@ if __name__ == "__main__":
             newline = newline.replace("_.’_", ".’")
             newline = newline.replace("__", "")
             newline = newline.replace("** **", " ")
-            print(newline)
+            newline = newline.replace("****", "")
+            # print(newline)
             newlines.append(newline)
         saveLinesToTextFile("tmp/" + basenameWithoutExt(path) + '.md', newlines)
 

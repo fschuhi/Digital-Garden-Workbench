@@ -48,6 +48,18 @@ def exitError(err: str):
     print(err)
     exit()
 
+def exitHelp(help):
+    if type(help) is str:
+        print(help)
+    elif type(help) is list:
+        for line in help:
+            if type(line) is str:
+                print(line)
+            elif type(line) is list:
+                for subline in line:
+                    print(subline)
+    exit()
+
 def exitIfNone(o, what):
     if not o:
         exitError("missing " + what)

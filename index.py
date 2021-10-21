@@ -12,8 +12,8 @@ from TranscriptIndex import TranscriptIndex
 from TranscriptPage import createTranscriptsDictionary
 from IndexEntryPage import IndexEntryPage
 from util import *
-from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
-from TalkParagraph import TalkParagraph, TalkParagraphs, ParagraphTuple
+from HAFEnvironment import HAFEnvironment
+from TalkParagraph import TalkParagraphs, ParagraphTuple
 from collections import defaultdict
 
 
@@ -262,6 +262,7 @@ def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('script', nargs='?')
+    parser.add_argument('-help', dest='scriptHelp', action='store_true')
     parser.add_argument('-i')
     parser.add_argument("-sectionsort", action='store_true')
     return parser.parse_args()
@@ -275,13 +276,15 @@ if __name__ == "__main__":
     haf = HAFEnvironment(HAF_YAML)
 
     script = args.script
+    scriptHelp = args.scriptHelp
     indexEntry = args.i
 
-    transcriptIndex = TranscriptIndex(RB_YAML)
-    if isScript(['addMissingCitations', 'top10']):
-        transcriptModel = TranscriptModel(transcriptIndex)
-    if isScript(['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml']):
-        network = LinkNetwork(haf)
+    if not scriptHelp:
+        transcriptIndex = TranscriptIndex(RB_YAML)
+        if isScript(['addMissingCitations', 'top10']):
+            transcriptModel = TranscriptModel(transcriptIndex)
+        if isScript(['createIndexEntryFiles', 'showOrphansInIndexFolder', 'showOrphansInRBYaml']):
+            network = LinkNetwork(haf)
 
     if isScript('scripts'):
         dumpScripts(__file__)
@@ -291,11 +294,13 @@ if __name__ == "__main__":
     # index stuff
 
     elif isScript('addMissingCitations'):
+        if scriptHelp: exitHelp("-i\tindex entry (note name) where to add citations")
         assert indexEntry
         addMissingCitations(haf, indexEntry, transcriptModel)
         print(f"added citations to '{indexEntry}'")
 
     elif isScript('updateAlphabeticalIndex'):
+        if scriptHelp: exitHelp("script takes no parameters")
         updateAlphabeticalIndex(haf, transcriptIndex)
         print("updated")
 
@@ -303,24 +308,29 @@ if __name__ == "__main__":
     # RB.yaml
 
     elif isScript('sortRBYaml'):
+        if scriptHelp: exitHelp("script takes no parameters")
         sortRBYaml(transcriptIndex, args)
         print("sorted and saved")
 
     elif isScript('createIndexEntryFiles'):
+        if scriptHelp: exitHelp("script takes no parameters")
         exclude = haf.collectTalknameSet()
         transcriptIndex.createObsidianIndexEntryFiles(haf.dirIndex, exclude)
         updateAlphabeticalIndex(haf, transcriptIndex)
     
     elif isScript('showOrphansInIndexFolder'):
+        if scriptHelp: exitHelp("script takes no parameters\n\nresult copied to clipboard")
         showOrphansInIndexFolder(haf, network, transcriptIndex, haf.dirIndex)
         print("copied to clipboard")
 
     elif isScript('showOrphansInRBYaml'):
+        if scriptHelp: exitHelp("script takes no parameters\n\nresult copied to clipboard")
         showOrphansInRBYaml(haf, network, transcriptIndex, haf.dirIndex)
         print("copied to clipboard")
 
 
     elif isScript('topParagraphs'):
+        if scriptHelp: exitHelp("script takes no parameters")
         nTopDefault = 4
 
         # we need to access previous and next paragraphs of the ones shown in the rows
@@ -337,10 +347,12 @@ if __name__ == "__main__":
             section.append("description | count | talk")
             section.append(":- | : - | :-")
 
+            if term == "Spaciousness": print(len(occurrences))
+
             # prune if necessary
             if len(occurrences) > 10:
                 prunedOccurrences = [o for o in occurrences if o.count >= nTop]
-                if prunedOccurrences:
+                if prunedOccurrences and len(prunedOccurrences) > 10:
                     occurrences = prunedOccurrences
                 else:
                     occurrences = occurrences[:10]
@@ -374,6 +386,7 @@ if __name__ == "__main__":
 
 
     elif isScript('topTalks'):
+        if scriptHelp: exitHelp("script takes no parameters")
         nTopDefault = 10
 
         # occurrences neither have retreats nor dates

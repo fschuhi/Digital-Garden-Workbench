@@ -5,7 +5,6 @@ from ObsidianNote import ObsidianNote, ObsidianNoteType
 import re
 import os
 
-from LinkNetwork import LinkNetwork
 from TranscriptModel import TranscriptModel
 from consts import HAF_YAML, RB_YAML
 from KanbanNote import KanbanNote
@@ -264,6 +263,7 @@ def get_arguments():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('script')
+    parser.add_argument('-help', dest='scriptHelp', action='store_true')
     parser.add_argument('-r')
     parser.add_argument('-t')
     return parser.parse_args()
@@ -285,12 +285,14 @@ if __name__ == "__main__":
     haf = HAFEnvironment(HAF_YAML)
 
     script = args.script
+    scriptHelp = args.scriptHelp
     retreatName = args.r
     talkname = args.t
 
-    transcriptIndex = TranscriptIndex(RB_YAML)
-    if isScript(['update', 'createNewTalks']):
-        transcriptModel = TranscriptModel(transcriptIndex)
+    if not scriptHelp:
+        transcriptIndex = TranscriptIndex(RB_YAML)
+        if isScript(['update', 'createNewTalks']):
+            transcriptModel = TranscriptModel(transcriptIndex)
 
     if isScript('scripts'):
         dumpScripts(__file__)
@@ -300,6 +302,9 @@ if __name__ == "__main__":
     # Kanban stuff
 
     elif isScript('updateKanban'):
+        if scriptHelp: exitHelp([
+            "-r\tadd and update cards on 'Talks (Kanban).md' for the particular retreat"
+        ])
         assert retreatName
         sfnKanban = haf.vault.findFile('Talks (Kanban).md')
         addMissingTranscriptParagraphHeaderTextCardsForTalksInRetreat(sfnKanban, haf, retreatName)
@@ -309,6 +314,13 @@ if __name__ == "__main__":
     # updating
 
     elif isScript('update'):
+        if scriptHelp: exitHelp([
+            "-t\tupdate a particular talk",
+            "-r\tupdate all talks in the retreat\n",
+            "If called w/o -t and -r, updates all talks across all retreats.\n",
+            "The script updates the counts in the 'Index' section as well as for all sections in 'Paragraphs'.",
+            "NOTE that updating is done in place.",
+        ])
         if talkname:
             updateTalk(haf, talkname, transcriptModel)
             print(f"updated talk")
@@ -322,6 +334,9 @@ if __name__ == "__main__":
             print(f"updated all talks")
 
     elif isScript('unspan'):
+        if scriptHelp: exitHelp([
+            "-t\ttalk page where to remove the <span> around the counts"
+        ])
         assert talkname
         sfn = haf.getTalkFilename(talkname)
         lines = loadLinesFromTextFile(sfn)
@@ -336,6 +351,9 @@ if __name__ == "__main__":
     # creating files
 
     elif isScript('createNewTalks'):
+        if scriptHelp: exitHelp([
+            "-r\tretreat to create new talk pages for"
+        ])
         assert retreatName
         createNewTalkPagesForRetreat(haf, retreatName)
         updateBreadcrumbsInTalks()
@@ -345,6 +363,10 @@ if __name__ == "__main__":
     # modifiying talks
 
     elif isScript('handleDecorations'):
+        if scriptHelp: exitHelp([
+            "-t\ttalk for which to transfer the audio timestamp and paragraph descriptions from the transcript to the talk\n",
+            "DANGER: done in place, i.e. transcript loses the decorations, so create bak and prepare git."
+        ])
         assert talkname
         transcript = TranscriptPage(haf.getTranscriptFilename(talkname))
         talk = TalkPage(haf.getTalkFilename(talkname))
@@ -354,16 +376,19 @@ if __name__ == "__main__":
 
 
     elif isScript('updateBreadcrumbs'):
+        if scriptHelp: exitHelp("no parameters")
         updateBreadcrumbsInTalks()
         print("updated")
 
     elif isScript('updateParagraphsLists'):
+        if scriptHelp: exitHelp("no parameters")
         updateParagraphsListPages(haf)
 
 
     # top 10 backlinks (not used)
 
     elif isScript('Top10SecondTryWithParagrapCounts'):
+        if scriptHelp: exitHelp("no parameters")
 
         def collectCounts(countsString: str) -> dict[str,int]:
             counts = {}
