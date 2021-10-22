@@ -216,6 +216,36 @@ class Test_MarkdownSnippet(unittest.TestCase):
         self.assertEqual(markdown.termCounts['Tibetan Buddhism'], 1)
 
 
+    # reindex problem
+
+    def test_reindexProblem1(self):
+        #print("")
+        #print("0         1         2         3         4")
+        #print("01234567890123456789012345678901234567890")
+        bla = 'bla^[asdf] and heul^[3] bla [[desire]] in'
+        #print(bla, '\n')
+
+        ml = MarkdownLine(bla)
+
+        ml.removeFootnotes()
+        self.assertEqual(ml.text, "bla and heul bla [[desire]] in")
+        self.assertListEqual(ml.footnotes, [('^[asdf]', 3), ('^[3]', 12)])
+
+        ml.removeAllLinks()
+        self.assertEqual(ml.text, "bla and heul bla desire in")
+        self.assertListEqual(ml.footnotes, [('^[asdf]', 3), ('^[3]', 12)])
+
+        ml.restoreFootnotes()
+        self.assertEqual(ml.text, "bla^[asdf] and heul^[3] bla desire in")
+
+    def test_reindexProblem2(self):
+        bla = loadStringFromTextFile("testing/data/Test_MarkdownSnippet.test_reindexProblem2.md")
+        ml = MarkdownLine(bla)
+        ml.applySpacy(self.transcriptModel, mode=SpacyMode.ALL_LINKS, force=True)
+        saveStringToTextFile("tmp/tmp.md", ml.text)
+        # output = input
+        self.assertTrue(filecmp.cmp("tmp/tmp.md", "testing/data/Test_MarkdownSnippet.test_reindexProblem2.md"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -112,6 +112,7 @@ class MarkdownLine:
 
 
     def replace(self, start, end, textToInsert):
+        #print("replace", start, end, textToInsert)
         self.text = self.text[:start] + textToInsert + self.text[end:]
         if self.footnotes:
             # (end-start) == len(self.text[start:end])
@@ -228,7 +229,8 @@ class MarkdownLine:
             (match, replacement, start) = self._hideFirstFootnote()
             if start == -1:
                 break        
-            self.footnotes.append( (match, start + lenDelta) )
+            #self.footnotes.append( (match, start + lenDelta) )
+            self.footnotes.append( (match, start) )
             lenDelta += len(match)
             self.text = replacement
 
@@ -258,9 +260,15 @@ class MarkdownLine:
                 self.footnotes[index] = (text, pos+lenDelta)
 
 
-    def __unhideFootnotes(self):
+    # def __unhideFootnotes(self):        
+    #     for (match, start) in self.footnotes:
+    #         self.text = self.text[:start] + match + self.text[start:]
+
+    def __unhideFootnotes(self):        
+        lenDelta = 0
         for (match, start) in self.footnotes:
-            self.text = self.text[:start] + match + self.text[start:]
+            self.text = self.text[:start+lenDelta] + match + self.text[start+lenDelta:]
+            lenDelta += len(match)
 
 
 # tags

@@ -235,5 +235,17 @@ if __name__ == "__main__":
         saveLinesToTextFile("tmp/" + basenameWithoutExt(path) + '.md', newlines)
 
 
+    elif isScript('changeJournalBreadcrumbs'):
+        exitError("temporary")
+        journals = haf.vault.folderNotes('Journal')
+        for journal in journals:
+            text = loadStringFromTextFile(journal)
+            match = re.search(r"<< \[\[(?P<prevdate>[^|]+)\|(?P<prevday>[^]]+)\]\] \| \[\[(?P<nextdate>[^|]+)\|(?P<nextday>[^]]+)\]\] >>", text) # type: re.Match
+            if match:
+                (start, end) = match.span()
+                new = f"[[{match.group('prevdate')}|{match.group('prevday')} 🡄]] | [[{match.group('nextdate')}|🡆 {match.group('nextday')}]]"
+                text = text[:start] + new + text[end:]
+                saveStringToTextFile(journal, text)
+
     else:
         print("unknown script")
