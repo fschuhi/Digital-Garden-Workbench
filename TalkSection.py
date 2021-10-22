@@ -25,7 +25,7 @@ class TalkSection():
         # make sure we conform to a section: header and counts
         parser = TalkPageLineParser()        
         
-        assert parser.matchText(textLines[0]) == TalkPageLineMatch.HEADER
+        assert parser.matchText(textLines[0]) == TalkPageLineMatch.DESCRIPTION
         self.headerText = parser.headerText
         self.level = parser.level
         

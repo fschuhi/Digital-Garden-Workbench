@@ -46,7 +46,7 @@ class Test_TalkPageLineParser(unittest.TestCase):
 
     def test_TalkPageLineParser1a(self):
         parser = TalkPageLineParser()
-        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.HEADER)
+        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.DESCRIPTION)
         self.assertEqual(parser.matchText(self.countsLine1a), TalkPageLineMatch.PARAGRAPH_COUNTS)
 
         self.assertEqual(parser.headerText, "It's going to be about movement, gesture, and voice") # ((ATRDIWI))
@@ -61,7 +61,7 @@ class Test_TalkPageLineParser(unittest.TestCase):
 
     def test_TalkPageLineParser1b(self):
         parser = TalkPageLineParser()
-        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.HEADER)
+        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.DESCRIPTION)
         self.assertEqual(parser.matchText(self.countsLine1a), TalkPageLineMatch.PARAGRAPH_COUNTS)
         self.assertEqual(parser.canonicalParagraphCounts(targetType='#'), self.countsLine1b)
 
@@ -80,7 +80,7 @@ class Test_TalkPageLineParser(unittest.TestCase):
 
     def test_TalkPageLineParser3(self):
         parser = TalkPageLineParser()
-        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.HEADER)
+        self.assertEqual(parser.matchText(self.headerLine1), TalkPageLineMatch.DESCRIPTION)
         self.assertEqual(parser.matchText(self.countsLine3), TalkPageLineMatch.PARAGRAPH_COUNTS)
 
         self.assertEqual(parser.headerText, "It's going to be about movement, gesture, and voice") # ((ATRDIWI))
@@ -97,7 +97,7 @@ class Test_TalkPageLineParser(unittest.TestCase):
         parser = TalkPageLineParser()
 
         # must be either 5 or 6 '#'
-        self.assertEqual(parser.matchText(self.headerLine2), TalkPageLineMatch.NONE)
+        self.assertEqual(parser.matchText(self.headerLine2), TalkPageLineMatch.HEADER)
         
         self.assertEqual(parser.matchText(self.keywordsLine4), TalkPageLineMatch.INDEX_COUNTS)
 

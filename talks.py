@@ -117,7 +117,7 @@ def addAudioLinksToTalkWithDecoratedTranscript(talk: TalkPage, transcript: Trans
 
         # other matchers which manipulate timestampTranscript go here
 
-        if talkPageLineParser.match(ml) == TalkPageLineMatch.HEADER:
+        if talkPageLineParser.match(ml) == TalkPageLineMatch.DESCRIPTION:
             # collect for ((WMZAZUR)) below
             mlTranscriptHeader = ml
 
@@ -217,27 +217,62 @@ def updateBreadcrumbsInTalks():
 # List folder
 # *********************************************
 
+# def collectParagraphsListPage(haf, talkname) -> list[str]:
+#     paragraphs = []
+#     paragraphs.append("---")
+#     paragraphs.append("obsidianUIMode: preview")
+#     paragraphs.append("---")
+#     paragraphs.append(f"## Paragraphs in [[{talkname}]]")
+#     fnTalk = haf.getTalkFilename(talkname)
+#     talk = TalkPage(fnTalk)
+#     for ml in talk.markdownLines:
+#         if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", ml.text)):
+#             description = match.group("description") # type: str
+#             headerLink = determineHeaderTarget(description)
+#             level = match.group('level')
+#             if len(level) == 5:
+#                 fullstop = '' if re.search(r"[.?!)]$",description) else '.'
+#                 link = f"- [[{talkname}#{headerLink}|{description}{fullstop}]]"
+#                 paragraphs.append(link)
+#             elif len(level) >= 3:
+#                 paragraphs.append(ml.text)
+#             else:
+#                 pass    
+#     return paragraphs
+
+
 def collectParagraphsListPage(haf, talkname) -> list[str]:
     paragraphs = []
     paragraphs.append("---")
     paragraphs.append("obsidianUIMode: preview")
     paragraphs.append("---")
-    paragraphs.append(f"## Paragraphs in [[{talkname}]]")
+    # paragraphs.append(f"## Paragraphs in [[{talkname}]]")
+    paragraphs.append(f"Paragraph descriptions in **[[{talkname}]]**:")
     fnTalk = haf.getTalkFilename(talkname)
     talk = TalkPage(fnTalk)
+    parser = TalkPageLineParser()
+    lastHeaderText = None
+
+    def addLinkToHeader(description):
+        headerLink = determineHeaderTarget(description)                
+        fullstop = '' if re.search(r"[.?!)]$",description) else '.'
+        linkToHeader = f"- [[{talkname}#{headerLink}|{description}{fullstop}]]"
+        paragraphs.append(linkToHeader)
+
     for ml in talk.markdownLines:
-        if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", ml.text)):
-            description = match.group("description") # type: str
-            headerLink = determineHeaderTarget(description)
-            level = match.group('level')
-            if len(level) == 5:
-                fullstop = '' if re.search(r"[.?!)]$",description) else '.'
-                link = f"- [[{talkname}#{headerLink}|{description}{fullstop}]]"
-                paragraphs.append(link)
-            elif len(level) >= 3:
+        match = parser.match(ml)
+        if match == TalkPageLineMatch.DESCRIPTION:
+            description = parser.headerText
+            addLinkToHeader(description)
+            lastHeaderText = None
+        elif match == TalkPageLineMatch.PARAGRAPH_COUNTS:
+            if lastHeaderText:
+                addLinkToHeader(lastHeaderText)
+                lastHeaderText = None
+        elif match == TalkPageLineMatch.HEADER:
+            if parser.level >= 3:
                 paragraphs.append(ml.text)
-            else:
-                pass    
+                lastHeaderText = parser.headerText
     return paragraphs
 
 

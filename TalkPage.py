@@ -17,7 +17,6 @@ import re
 
 # *********************************************
 # class TalkPage
-
 # *********************************************
 
 class TalkPage(ObsidianNote):
@@ -110,7 +109,7 @@ class TalkPage(ObsidianNote):
         sectionsSpans = []
         start = None
         for index, ml in enumerate(self.markdownLines):
-            if parser.match(ml) == TalkPageLineMatch.HEADER:
+            if parser.match(ml) == TalkPageLineMatch.DESCRIPTION:
                 # close the previous section and start new one
                 if start:
                     #print(ml.text)
