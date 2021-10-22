@@ -217,30 +217,6 @@ def updateBreadcrumbsInTalks():
 # List folder
 # *********************************************
 
-# def collectParagraphsListPage(haf, talkname) -> list[str]:
-#     paragraphs = []
-#     paragraphs.append("---")
-#     paragraphs.append("obsidianUIMode: preview")
-#     paragraphs.append("---")
-#     paragraphs.append(f"## Paragraphs in [[{talkname}]]")
-#     fnTalk = haf.getTalkFilename(talkname)
-#     talk = TalkPage(fnTalk)
-#     for ml in talk.markdownLines:
-#         if (match := re.match(r"(?P<level>#+) *(?P<description>.+)", ml.text)):
-#             description = match.group("description") # type: str
-#             headerLink = determineHeaderTarget(description)
-#             level = match.group('level')
-#             if len(level) == 5:
-#                 fullstop = '' if re.search(r"[.?!)]$",description) else '.'
-#                 link = f"- [[{talkname}#{headerLink}|{description}{fullstop}]]"
-#                 paragraphs.append(link)
-#             elif len(level) >= 3:
-#                 paragraphs.append(ml.text)
-#             else:
-#                 pass    
-#     return paragraphs
-
-
 def collectParagraphsListPage(haf, talkname) -> list[str]:
     paragraphs = []
     paragraphs.append("---")
@@ -254,7 +230,7 @@ def collectParagraphsListPage(haf, talkname) -> list[str]:
     lastHeaderText = None
 
     def addLinkToHeader(description):
-        headerLink = determineHeaderTarget(description)                
+        headerLink = determineHeaderTarget(description)
         fullstop = '' if re.search(r"[.?!)]$",description) else '.'
         linkToHeader = f"- [[{talkname}#{headerLink}|{description}{fullstop}]]"
         paragraphs.append(linkToHeader)

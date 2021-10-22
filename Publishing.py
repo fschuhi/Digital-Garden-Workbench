@@ -7,6 +7,7 @@ from TalkPage import TalkPage
 from util import *
 from HAFEnvironment import HAFEnvironment, talknameFromFilename
 from consts import HAF_PUBLISH_YAML, HAF_YAML
+from TalkPageLineParser import TalkPageLineMatch, TalkPageLineParser
 
 import os
 import re
@@ -26,6 +27,59 @@ class Publishing:
         self.transcriptNameSet = self.hafPublish.collectTranscriptNameSet()
 
 
+# quote of the day
+    def quoteOfTheDay(self):
+        filenames = self.hafWork.collectTalkFilenames()
+        parser = TalkPageLineParser()
+        quotes = [] # type: Tuple[str, list[str]]
+        for filename in filenames:
+            talk = TalkPage(filename)
+            inQuote = False
+            quote = []
+            lastHeaderText = None
+            for ml in talk.markdownLines:
+                match = parser.match(ml)
+                if match in [TalkPageLineMatch.DESCRIPTION, TalkPageLineMatch.HEADER]:
+                    lastHeaderText = parser.headerText
+                else:
+                    if ml.text == "```ad-quote":
+                        inQuote = True
+                    elif ml.text == "```":
+                        if inQuote:
+                            description = lastHeaderText
+                            headerLink = determineHeaderTarget(description)
+                            linkToHeader = f"[[{talk.notename}#{headerLink}|{talk.notename}]]"
+                            quotes.append((linkToHeader, quote))
+                        inQuote = False
+                        quote = []
+                    elif inQuote:
+                        quote.append(ml.text)
+        import random
+        r = random.randint(0, len(quotes)-1)        
+        (link, lines) = quotes[r]
+        quoteText = '\n'.join(lines)
+        match = re.search(r"[A-Za-z]", quoteText)
+        firstChar = match.group(0)
+        if firstChar == firstChar.lower():
+            (start, end) = match.span()
+            quoteText = quoteText[:start] + f"[{firstChar.upper()}]" + quoteText[end:]
+        if not re.search(r"[.?!)]$", quoteText):
+            quoteText += '...'
+        admonitionLines = []
+        admonitionLines.append("```ad-quote")
+        admonitionLines.append(quoteText)
+        admonitionLines.append('')
+        admonitionLines.append(f"_quote of the day, from the talk {link}_")
+        admonitionLines.append("```")
+        
+        retreatsMd = self.hafWork.vault.findFile("Retreats.md")
+        retreats = loadStringFromTextFile(retreatsMd)
+        match = re.search(r"```ad-quote([^`]+)```", retreats, re.MULTILINE)
+        assert match
+        (start, end) = match.span()
+        retreats = retreats[:start] + '\n'.join(admonitionLines) + retreats[end:]
+        saveStringToTextFile(retreatsMd, retreats)
+
 
 # creating files
     def createSynopses(self):
@@ -37,7 +91,7 @@ class Publishing:
 
 # mirroring
 
-    def transferFilesToPublish(self):
+    def transferFilesToPublish(self):        
         self.mirrorRetreatFiles()
 
         #print("2")
@@ -45,7 +99,9 @@ class Publishing:
         self.mirrorHelp()
 
         #print("3")
+        self.quoteOfTheDay()
         self.copyFile("Rob Burbea/Retreats.md", "/")
+
         self.copyFile("Rob Burbea/Index.md", "/")
         self.copyFile("Brainstorming/NoteStar.md", "/")
         self.copyFile("Rob Burbea/Gardening.md", "/")

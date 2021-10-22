@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 
+from argparse import HelpFormatter
 import re
 import os
 import pyperclip
 
 from LinkNetwork import LinkNetwork
 from Publishing import Publishing
+from TalkPageLineParser import TalkPageLineMatch, TalkPageLineParser
 from TranscriptModel import TranscriptModel
 from consts import HAF_PUBLISH_YAML, HAF_YAML, RB_YAML
 from TranscriptIndex import TranscriptIndex
 from util import *
 from HAFEnvironment import HAFEnvironment
+from TalkPage import TalkPage
+from typing import Tuple
 
 
 # *********************************************
@@ -246,6 +250,59 @@ if __name__ == "__main__":
                 new = f"[[{match.group('prevdate')}|{match.group('prevday')} 🡄]] | [[{match.group('nextdate')}|🡆 {match.group('nextday')}]]"
                 text = text[:start] + new + text[end:]
                 saveStringToTextFile(journal, text)
+
+
+    elif isScript('bla'):
+        filenames = haf.collectTalkFilenames()
+        parser = TalkPageLineParser()
+        quotes = [] # type: Tuple[str, list[str]]
+        for filename in filenames:
+            talk = TalkPage(filename)
+            inQuote = False
+            quote = []
+            lastHeaderText = None
+            for ml in talk.markdownLines:
+                match = parser.match(ml)
+                if match in [TalkPageLineMatch.DESCRIPTION, TalkPageLineMatch.HEADER]:
+                    lastHeaderText = parser.headerText
+                else:
+                    if ml.text == "```ad-quote":
+                        inQuote = True
+                    elif ml.text == "```":
+                        if inQuote:
+                            description = lastHeaderText
+                            headerLink = determineHeaderTarget(description)
+                            linkToHeader = f"[[{talk.notename}#{headerLink}|{talk.notename}]]"
+                            quotes.append((linkToHeader, quote))
+                        inQuote = False
+                        quote = []
+                    elif inQuote:
+                        quote.append(ml.text)
+        import random
+        r = random.randint(0, len(quotes)-1)        
+        (link, lines) = quotes[r]
+        quoteText = '\n'.join(lines)
+        match = re.search(r"[A-Za-z]", quoteText)
+        firstChar = match.group(0)
+        if firstChar == firstChar.lower():
+            (start, end) = match.span()
+            quoteText = quoteText[:start] + f"[{firstChar.upper()}]" + quoteText[end:]
+        if not re.search(r"[.?!)]$", quoteText):
+            quoteText += '...'
+        admonitionLines = []
+        admonitionLines.append("```ad-quote")
+        admonitionLines.append(quoteText)
+        admonitionLines.append('')
+        admonitionLines.append(f"_from the talk {link}_")
+        admonitionLines.append("```")
+        
+        retreatsMd = haf.vault.findFile("Retreats.md")
+        retreats = loadStringFromTextFile(retreatsMd)
+        match = re.search(r"```ad-quote([^`]+)```", retreats, re.MULTILINE)
+        assert match
+        (start, end) = match.span()
+        retreats = retreats[:start] + '\n'.join(admonitionLines) + retreats[end:]
+        print(retreats)
 
     else:
         print("unknown script")
