@@ -93,6 +93,7 @@ class TalkPage(ObsidianNote):
                 targets[blockid] = header
         return targets
 
+
     def collectParagraphHeaderTargets(self) -> dict[str,str]:
         targets = {}
         parser = TalkPageLineParser()
@@ -104,25 +105,65 @@ class TalkPage(ObsidianNote):
         return targets
 
 
+    # def collectSectionSpans(self) -> list[Tuple[int,int]]:
+    #     parser = TalkPageLineParser()
+    #     sectionsSpans = []
+    #     start = None
+    #     for index, ml in enumerate(self.markdownLines):
+    #         if parser.match(ml) == TalkPageLineMatch.DESCRIPTION:
+    #             # close the previous section and start new one
+    #             if start:
+    #                 #print(ml.text)
+    #                 sectionsSpans.append((start, index))
+    #             start = index
+    #         elif ml.text.startswith('#'):
+    #             # close the not-yet-closed section
+    #             if start:
+    #                 sectionsSpans.append((start, index))
+    #                 start = None
+    #     if start:
+    #         # including very last line
+    #         sectionsSpans.append((start, index+1))
+    #     return sectionsSpans
+
+
     def collectSectionSpans(self) -> list[Tuple[int,int]]:
         parser = TalkPageLineParser()
         sectionsSpans = []
-        start = None
+        lastHeaderIndex = None
+        nextCountsFound = None
+        lastSectionHeaderIndex = None
         for index, ml in enumerate(self.markdownLines):
-            if parser.match(ml) == TalkPageLineMatch.DESCRIPTION:
-                # close the previous section and start new one
-                if start:
-                    #print(ml.text)
-                    sectionsSpans.append((start, index))
-                start = index
+            if parser.match(ml) == TalkPageLineMatch.PARAGRAPH_COUNTS:
+                # we never have 2 counts after the other
+                assert not nextCountsFound
+                nextCountsFound = True
+
+                # there is always a header with the description (usually level 5, but can also be lower)
+                # assume this header is the last encountered header before the counts
+                lastSectionHeaderIndex = lastHeaderIndex
+
             elif ml.text.startswith('#'):
-                # close the not-yet-closed section
-                if start:
-                    sectionsSpans.append((start, index))
-                    start = None
-        if start:
-            # including very last line
-            sectionsSpans.append((start, index+1))
+                # regardless of the header's function (description or structuring header), note that we've encountered one
+                lastHeaderIndex = index
+
+                if nextCountsFound:
+                    # section is still "open", i.e. we've found the counts but not the end of the section yet
+                    # when encountering the counts we had also found the header
+                    assert lastSectionHeaderIndex
+
+                    # current header line is not part of the section, but part of the span
+                    sectionsSpans.append((lastSectionHeaderIndex, index))
+
+                    # reset for the next section
+                    lastSectionHeaderIndex = None
+                    nextCountsFound = None 
+
+        # quite likely that the last section is terminated not by a header but by the end of the file
+        if nextCountsFound:
+            # close the section
+            assert lastSectionHeaderIndex
+            sectionsSpans.append((lastSectionHeaderIndex, index+1))
         return sectionsSpans
 
 

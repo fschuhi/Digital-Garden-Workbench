@@ -428,6 +428,15 @@ if __name__ == "__main__":
             exit()
 
 
+    elif isScript('bla'):
+        assert talkname
+        talk = TalkPage(haf.getTalkFilename(talkname))
+        spans = talk.collectSectionSpans()
+        print(spans)
+        #for (start, end) in spans:
+        #    print(start, talk.markdownLines[start].text)
+
+
     # misc
 
     else:
