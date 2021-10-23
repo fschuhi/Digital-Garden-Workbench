@@ -57,6 +57,7 @@ class TalkParagraphs():
     def __init__(self, haf: HAFEnvironment):
         self.haf = haf
         self.paragraphs = [] # type: list[TalkParagraph]
+        self._occurrences = None
 
         for filename in haf.collectTalkFilenames():
             talk = TalkPage(filename)
@@ -64,7 +65,7 @@ class TalkParagraphs():
             for ml in talk.markdownLines:
                 match = parser.match(ml)
                 if match == TalkPageLineMatch.PARAGRAPH_COUNTS:
-                    self.paragraphs.append( TalkParagraph(parser))
+                    self.paragraphs.append(TalkParagraph(parser))
 
     @property
     def occurrences(self) -> list[ParagraphTuple]:
@@ -82,14 +83,34 @@ class TalkParagraphs():
         return occurrences
         
     def collectTermOccurrences(self, term) -> list[ParagraphTuple]:
-        return [o for o in self.collectOccurrences() if o.term == term]
+        #return [o for o in self.collectOccurrences() if o.term == term]
+        return [o for o in self.occurrences if o.term == term]
         
     def createOccurrencesByTermDict(self) -> dict[str,list[ParagraphTuple]]:
         from collections import defaultdict
         dict = defaultdict(list)
-        descendingOccurrences = sorted(self.collectOccurrences(), key=lambda o: o.count, reverse=True)
+        #descendingOccurrences = sorted(self.collectOccurrences(), key=lambda o: o.count, reverse=True)
+        descendingOccurrences = sorted(self.occurrences, key=lambda o: o.count, reverse=True)
         for o in descendingOccurrences:
             dict[o.term].append(o)
         return dict
+
+
+    def collectCooccurringParagraphs(self) -> dict[str,dict[str,list[TalkParagraph]]]:
+        from itertools import combinations
+        cooccurrences = {} # type: dict[str,dict[str,list[TalkParagraph]]]
+        for paragraph in self.paragraphs:
+            combos = list(combinations(paragraph.countByTerm.keys(), 2))
+            for (term1, term2) in combos:
+                if term1 in cooccurrences:
+                    dict2 = cooccurrences[term1]
+                else:
+                    dict2 = {}
+                    cooccurrences[term1] = dict2
+                if not term2 in dict2:
+                    dict2[term2] = []
+                dict2[term2].append(paragraph)
+
+        return cooccurrences
 
 

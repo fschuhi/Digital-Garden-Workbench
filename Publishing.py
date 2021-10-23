@@ -69,7 +69,7 @@ class Publishing:
         admonitionLines.append("```ad-quote")
         admonitionLines.append(quoteText)
         admonitionLines.append('')
-        admonitionLines.append(f"_quote of the day, from the talk {link}_")
+        admonitionLines.append(f"_(a quote from the talk {link})_")
         admonitionLines.append("```")
         
         retreatsMd = self.hafWork.vault.findFile("Retreats.md")
