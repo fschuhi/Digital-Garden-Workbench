@@ -223,26 +223,27 @@ def changeTopReferrersSection(dictByTerm, patternStart, yamlKey, func, nTopDefau
             nTop = nTopDefault
 
             # will be added at the end, not just replaced -> have an empty line before the new last section of the page
-            section.append("")
+            # 24.10.21 suspicion: doesn't need the empty line
+            # section.append("")
             insert = len(indexEntry.markdownLines)
 
         showTop = value if ((value := indexEntry.getYamlValue(yamlKey)) is not None) else True
         if showTop:
 
-            # now we definitely know that we have changed
-            changed = True
-
             # get all occurrences for the term
-            # those are paragraphs, i.e. multiple mentions for a talk            
-            occurrences = dictByTerm[term] # type: list[ParagraphTuple]
+            # those are paragraphs, i.e. multiple mentions for a talk
+            if term in dictByTerm:
+                # now we definitely know that we have changed
+                changed = True
 
-            func(term, occurrences, section, nTop)
+                occurrences = dictByTerm[term] # type: list[ParagraphTuple]
+                func(term, occurrences, section, nTop)
 
-            # empty line ends the section
-            section.append("")
+                # empty line ends the section
+                section.append("")
 
-            # insert or append the section
-            indexEntry.markdownLines.insert(insert, section)
+                # insert or append the section
+                indexEntry.markdownLines.insert(insert, section)
 
         if changed:
             indexEntry.save()
@@ -336,12 +337,6 @@ if __name__ == "__main__":
         dateByTalkname = haf.createDateByTalknameLookup()
 
         def func(term, occurrences, section, nTop):
-
-            # Obsidian table
-            section.append(f"### Paragraphs with {nTop}+ mentions")
-            section.append("description | count | talk")
-            section.append(":- | : - | :-")
-
             # we don't even send the paragraphs which do not have a description yet
             occurrences = [o for o in occurrences if o.headerText != '...']
 
@@ -366,6 +361,10 @@ if __name__ == "__main__":
             # main sort by count, descending
             topMentions = sorted(topMentions, key=lambda x: x[3], reverse=True)
 
+            # Obsidian table
+            section.append(f"### Paragraphs with {nTop}+ mentions")
+            section.append("description | count | talk")
+            section.append(":- | : - | :-")
             for (talkname, headerText, blockid, count, date) in topMentions:
                 # enforced by caller
                 assert headerText != '...'
@@ -391,11 +390,6 @@ if __name__ == "__main__":
         dateByTalkname = haf.createDateByTalknameLookup()
 
         def func(term, occurrences, section, nTop):
-            # Obsidian table
-            section.append(f"### Top {nTop} referring talks")
-            section.append("talk | count | series")
-            section.append(":- | - |: -")
-
             # sum the multiple mentions for each talk
             dictCounts = defaultdict(int) # dict[talkname, count]
             for pt in occurrences:
@@ -414,6 +408,10 @@ if __name__ == "__main__":
             # main sort by count, descending
             topMentions = sorted(topMentions, key=lambda x: x[1], reverse=True)
 
+            # Obsidian table
+            section.append(f"### Top {nTop} referring talks")
+            section.append("talk | count | series")
+            section.append(":- | - |: -")
             for (talkname, count, retreatName, date) in topMentions:
                 section.append(f"[[{talkname}]] | {count} | [[{retreatName}]]")
 
@@ -430,60 +428,64 @@ if __name__ == "__main__":
         import operator
         import time
 
+        def func(term, occurrences, section, nTop):
+
+            #dict2 = cooc['Love'] # type: dict[str,list[TalkParagraph]]
+
+            # sort by name first, so that later outer sorts are inner-sorted by name
+            l = sorted(occurrences.items(), key=itemgetter(0))
+
+            # extend 2-tuple from the dict with how many co-occurrences we found
+            l = [(term, len(paragraphs), paragraphs) for (term, paragraphs) in l]
+
+            # outer sort: longest list of paragraphs first
+            l = sorted(l, key=itemgetter(1), reverse=True)
+
+            cooccurrenceCounts = []
+            for (term, count, paragraphs) in l:
+                # same talk can have multiple co-occurrences
+                talknames = [paragraph.talkname for paragraph in paragraphs]
+
+                # group by talknames, sorted descending by count, in the same counts alphabetically
+                counter = collections.Counter(talknames)
+                talknameCounts = [(talkname, count) for (talkname, count) in dict(counter).items()] 
+                talknameCounts = sorted(talknameCounts, key=operator.itemgetter(0)) # inner
+                talknameCounts = sorted(talknameCounts, key=operator.itemgetter(1), reverse=True) # outer
+                cooccurrenceCounts.append((term, count, talknameCounts))
+
+            minCount = nTop
+            minLines = 10
+            minTalkCount = 2
+            minTalks = 4
+
+            pruned = [t for t in cooccurrenceCounts if t[1] >= minCount]
+            used = pruned if len(pruned) >= minLines else cooccurrenceCounts[:minLines]
+            
+            section.append(f"### Terms with {nTop}+ co-occurrences")
+            section.append("term | count | talks")
+            section.append("-|-|-")
+            for (term, count, talknameCounts) in used:
+                prunedTalknames = [(talkname, count) for (talkname, count) in talknameCounts if count >= minTalkCount]
+                usedTalknames = prunedTalknames if len(prunedTalknames) >= minTalks else talknameCounts[:minTalks]
+                l = [f"[[{talkname}]] ({count})" for (talkname, count) in usedTalknames]
+                #s = '<br/>'.join(l)
+                #s = ' · '.join(l)
+                s = '<span class="counts">' + ' · '.join(l) + "</span>"                
+                section.append(f"[[{term}]] | {count} | {s} ")
+
         paragraphs = TalkParagraphs(haf)
         cooc = paragraphs.collectCooccurringParagraphs()
 
+        patternStart = r"^#+ Terms with ([0-9]+)\+ co-occurrences"
+        yamlKey = 'showTopCooccurrences'
+        nTopDefault = 20
+
         tic = time.perf_counter()
-        dict2 = cooc['Love'] # type: dict[str,list[TalkParagraph]]
-
-        # sort by name first, so that later outer sorts are inner-sorted by name
-        l = sorted(dict2.items(), key=itemgetter(0))
-
-        # extend 2-tuple from the dict with how many co-occurrences we found
-        l = [(term, len(paragraphs), paragraphs) for (term, paragraphs) in l]
-
-        # outer sort: longest list of paragraphs first
-        l = sorted(l, key=itemgetter(1), reverse=True)
-
-        cooccurrenceCounts = []
-        for (term, count, paragraphs) in l:
-            # same talk can have multiple co-occurrences
-            talknames = [paragraph.talkname for paragraph in paragraphs]
-
-            # group by talknames, sorted descending by count, in the same counts alphabetically
-            counter = collections.Counter(talknames)
-            talknameCounts = [(talkname, count) for (talkname, count) in dict(counter).items()] 
-            talknameCounts = sorted(talknameCounts, key=operator.itemgetter(0)) # inner
-            talknameCounts = sorted(talknameCounts, key=operator.itemgetter(1), reverse=True) # outer
-            cooccurrenceCounts.append((term, count, talknameCounts))
-
-        minCount = 20
-        minLines = 10
-
-        pruned = [t for t in cooccurrenceCounts if t[1] >= minCount]
-        used = pruned if len(pruned) >= minLines else cooccurrenceCounts[:minLines]
-        
-        lines = []
-        lines.append("term | count | talks")
-        lines.append("-|-|-")
-        for (term, count, talknameCounts) in used:
-            prunedTalknames = [(talkname, count) for (talkname, count) in talknameCounts if count >= 2]
-            usedTalknames = prunedTalknames if len(prunedTalknames) >= 4 else talknameCounts[:4]
-            l = [f"[[{talkname}]] ({count})" for (talkname, count) in usedTalknames]
-
-            #s = '<br/>'.join(l)
-            #s = ' · '.join(l)
-            s = '<span class="counts">' + ' · '.join(l) + "</span>"
-            
-            lines.append(f"[[{term}]] | {count} | {s} ")
-
+        changeTopReferrersSection(cooc, patternStart, yamlKey, func, nTopDefault)
         toc = time.perf_counter()
         print(toc-tic)
-        saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", lines)
 
 
     else:
         print("unknown script")
 
-
-    
