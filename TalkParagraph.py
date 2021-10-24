@@ -99,17 +99,22 @@ class TalkParagraphs():
     def collectCooccurringParagraphs(self) -> dict[str,dict[str,list[TalkParagraph]]]:
         from itertools import combinations
         cooccurrences = {} # type: dict[str,dict[str,list[TalkParagraph]]]
+
+        def add(term1, term2):
+            if term1 in cooccurrences:
+                dict2 = cooccurrences[term1]
+            else:
+                dict2 = {}
+                cooccurrences[term1] = dict2
+            if not term2 in dict2:
+                dict2[term2] = []
+            dict2[term2].append(paragraph)
+
         for paragraph in self.paragraphs:
             combos = list(combinations(paragraph.countByTerm.keys(), 2))
             for (term1, term2) in combos:
-                if term1 in cooccurrences:
-                    dict2 = cooccurrences[term1]
-                else:
-                    dict2 = {}
-                    cooccurrences[term1] = dict2
-                if not term2 in dict2:
-                    dict2[term2] = []
-                dict2[term2].append(paragraph)
+                add(term1, term2)
+                add(term2, term1)
 
         return cooccurrences
 

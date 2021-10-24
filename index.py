@@ -3,6 +3,7 @@
 import re
 import os
 
+from operator import itemgetter
 from LinkNetwork import LinkNetwork
 from TranscriptPage import TranscriptPage
 from TranscriptModel import TranscriptModel
@@ -13,7 +14,7 @@ from TranscriptPage import createTranscriptsDictionary
 from IndexEntryPage import IndexEntryPage
 from util import *
 from HAFEnvironment import HAFEnvironment
-from TalkParagraph import TalkParagraphs, ParagraphTuple
+from TalkParagraph import TalkParagraph, TalkParagraphs, ParagraphTuple
 from collections import defaultdict
 
 
@@ -188,9 +189,7 @@ def showOrphansInRBYaml(haf: HAFEnvironment, network: LinkNetwork, transcriptInd
 # top referrers section builder
 # *********************************************
 
-def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeNoDescriptions):
-    paragraphs = TalkParagraphs(haf)
-    dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
+def changeTopReferrersSection(dictByTerm, patternStart, yamlKey, func, nTopDefault):
 
     # vertical span for the section
     # markdown lines in the section will be replaced (with bigger or smaller number or rows
@@ -230,17 +229,12 @@ def changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeN
         showTop = value if ((value := indexEntry.getYamlValue(yamlKey)) is not None) else True
         if showTop:
 
-            # now we definitely now that we have changed
+            # now we definitely know that we have changed
             changed = True
 
             # get all occurrences for the term
             # those are paragraphs, i.e. multiple mentions for a talk            
-            occurrences = dict[term] # type: list[ParagraphTuple]
-
-            if excludeNoDescriptions:
-                # we don't even send the paragraphs which do not have a description yet
-                # NOTE: this changes the behaviour for "show at least 10"
-                occurrences = [o for o in occurrences if o.headerText != '...']
+            occurrences = dictByTerm[term] # type: list[ParagraphTuple]
 
             func(term, occurrences, section, nTop)
 
@@ -331,6 +325,7 @@ if __name__ == "__main__":
 
     elif isScript('topParagraphs'):
         if scriptHelp: exitHelp("script takes no parameters")
+        print("topParagraphs")
         nTopDefault = 4
 
         # we need to access previous and next paragraphs of the ones shown in the rows
@@ -347,7 +342,8 @@ if __name__ == "__main__":
             section.append("description | count | talk")
             section.append(":- | : - | :-")
 
-            if term == "Spaciousness": print(len(occurrences))
+            # we don't even send the paragraphs which do not have a description yet
+            occurrences = [o for o in occurrences if o.headerText != '...']
 
             # prune if necessary
             if len(occurrences) > 10:
@@ -380,13 +376,14 @@ if __name__ == "__main__":
         # now delete, add or replace the section
         yamlKey = 'showTopReferringParagraphs'
         patternStart = r"^#+ Paragraphs with ([0-9]+)\+ mentions"
-        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeNoDescriptions=True)
-
-        print("done")
+        paragraphs = TalkParagraphs(haf)
+        dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
+        changeTopReferrersSection(dict, patternStart, yamlKey, func, nTopDefault)
 
 
     elif isScript('topTalks'):
         if scriptHelp: exitHelp("script takes no parameters")
+        print("topTalks")
         nTopDefault = 10
 
         # occurrences neither have retreats nor dates
@@ -423,9 +420,67 @@ if __name__ == "__main__":
         # now delete, add or replace the section
         yamlKey = 'showTopReferringTalks'
         patternStart = r"^#+ Top ([0-9]+) referring talks"
-        changeTopReferrersSection(patternStart, yamlKey, func, nTopDefault, excludeNoDescriptions=False)
+        paragraphs = TalkParagraphs(haf)
+        dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
+        changeTopReferrersSection(dict, patternStart, yamlKey, func, nTopDefault)
 
-        print("done")
+
+    elif isScript('bla'):
+        import collections
+        import operator
+        import time
+
+        paragraphs = TalkParagraphs(haf)
+        cooc = paragraphs.collectCooccurringParagraphs()
+
+        tic = time.perf_counter()
+        dict2 = cooc['Love'] # type: dict[str,list[TalkParagraph]]
+
+        # sort by name first, so that later outer sorts are inner-sorted by name
+        l = sorted(dict2.items(), key=itemgetter(0))
+
+        # extend 2-tuple from the dict with how many co-occurrences we found
+        l = [(term, len(paragraphs), paragraphs) for (term, paragraphs) in l]
+
+        # outer sort: longest list of paragraphs first
+        l = sorted(l, key=itemgetter(1), reverse=True)
+
+        cooccurrenceCounts = []
+        for (term, count, paragraphs) in l:
+            # same talk can have multiple co-occurrences
+            talknames = [paragraph.talkname for paragraph in paragraphs]
+
+            # group by talknames, sorted descending by count, in the same counts alphabetically
+            counter = collections.Counter(talknames)
+            talknameCounts = [(talkname, count) for (talkname, count) in dict(counter).items()] 
+            talknameCounts = sorted(talknameCounts, key=operator.itemgetter(0)) # inner
+            talknameCounts = sorted(talknameCounts, key=operator.itemgetter(1), reverse=True) # outer
+            cooccurrenceCounts.append((term, count, talknameCounts))
+
+        minCount = 20
+        minLines = 10
+
+        pruned = [t for t in cooccurrenceCounts if t[1] >= minCount]
+        used = pruned if len(pruned) >= minLines else cooccurrenceCounts[:minLines]
+        
+        lines = []
+        lines.append("term | count | talks")
+        lines.append("-|-|-")
+        for (term, count, talknameCounts) in used:
+            prunedTalknames = [(talkname, count) for (talkname, count) in talknameCounts if count >= 2]
+            usedTalknames = prunedTalknames if len(prunedTalknames) >= 4 else talknameCounts[:4]
+            l = [f"[[{talkname}]] ({count})" for (talkname, count) in usedTalknames]
+
+            #s = '<br/>'.join(l)
+            #s = ' · '.join(l)
+            s = '<span class="counts">' + ' · '.join(l) + "</span>"
+            
+            lines.append(f"[[{term}]] | {count} | {s} ")
+
+        toc = time.perf_counter()
+        print(toc-tic)
+        saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", lines)
+
 
     else:
         print("unknown script")

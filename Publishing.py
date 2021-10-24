@@ -6,7 +6,8 @@ from TranscriptPage import TranscriptPage
 from TalkPage import TalkPage
 from util import *
 from HAFEnvironment import HAFEnvironment, talknameFromFilename
-from consts import HAF_PUBLISH_YAML, HAF_YAML
+import consts
+#from consts import HAF_PUBLISH_YAML, HAF_YAML, long_a_attributes
 from TalkPageLineParser import TalkPageLineMatch, TalkPageLineParser
 
 import os
@@ -20,11 +21,13 @@ import shutil
 class Publishing:
 
     def __init__(self) -> None:
-        self.hafWork = HAFEnvironment(HAF_YAML)
-        self.hafPublish = HAFEnvironment(HAF_PUBLISH_YAML)
+        self.hafWork = HAFEnvironment(consts.HAF_YAML)
+        self.hafPublish = HAFEnvironment(consts.HAF_PUBLISH_YAML)
 
         self.indexEntryNameSet = self.hafPublish.collectIndexEntryNameSet()
         self.transcriptNameSet = self.hafPublish.collectTranscriptNameSet()
+
+        consts.long_a_attributes = False
 
 
 # quote of the day
@@ -83,6 +86,7 @@ class Publishing:
 
 # creating files
     def createSynopses(self):
+        print("createSynopses")
         # we need to recreate all synopses, because the headers might have changed
         from synopsis import createSynopsis
         createSynopsis(self.hafWork, "The Place of Samadhi in Metta Practice", "Samadhi in Metta Practice", "data/Synopsis 1/2008 vs 2007.csv", r"M:\2008 Lovingkindness and Compassion As a Path to Awakening\Synopsis 1.md")
@@ -92,6 +96,7 @@ class Publishing:
 # mirroring
 
     def transferFilesToPublish(self):        
+        print("transferFilesToPublish")
         self.mirrorRetreatFiles()
 
         #print("2")
@@ -171,6 +176,7 @@ class Publishing:
 # audio, admonitions
 
     def convertAllMarkdownFiles(self):
+        print("convertAllMarkdownFiles")
         filenames = filterExt(self.hafPublish.allFiles(), '.md')
         for filename in filenames:
             convertedLines = self.convertMarkdownFile(filename)
@@ -242,6 +248,7 @@ class Publishing:
 # fullstops in transcripts
 
     def modifyFullstopsInTranscripts(self):
+        print("modifyFullstopsInTranscripts")
         talkFilenames = self.hafWork.collectTalkFilenames()
         for talkFilename in talkFilenames:
             talk = TalkPage(talkFilename)
@@ -249,7 +256,7 @@ class Publishing:
             talkname = talknameFromFilename(talkFilename)
 
             # intentionally from the publish 
-            print(talkname)
+            #print(talkname)
             transcriptFilename = self.hafPublish.getTranscriptFilename(talkname)
             assert transcriptFilename
 
@@ -293,6 +300,7 @@ class Publishing:
 
 
     def replaceLinksInTalkPages(self):
+        print("replaceLinksOnTalkPages")
 
         def filterLinksOnTalkPage(match):
             note = match.group('note')
@@ -310,16 +318,19 @@ class Publishing:
 
 
     def replaceLinksOnSpecialPages(self):
+        print("replaceLinksOnSpecialPages")
         index = os.path.join(self.hafPublish.root, 'Index.md')
         assert os.path.exists(index)
         self.__replaceLinks([index], css=None, filterFunc=lambda match: match.group('note') in self.indexEntryNameSet)
 
     def replaceLinksOnIndexEntryPages(self):
+        print("replaceLinksOnIndexEntryPages")
         filenames = self.hafPublish.collectIndexEntryFilenames()
         self.__replaceLinks(filenames, css=None, filterFunc=lambda match: match.group('note') not in self.indexEntryNameSet)
 
 
     def replaceLinksOnTranscriptPages(self):
+        print("replaceLinksOnTranscriptPages")
 
         lastString = None
         notes = set()
@@ -330,7 +341,8 @@ class Publishing:
 
             note = match.group('note')
             if (match.string == lastString) and (note in notes):
-                # recurring occurrences in the same paragraph will be filtered (i.e. have a special css class)
+                # returning True indicates to translate the link into html
+                # recurring link, use css class "otherLink"
                 return True
                 
             if match.string != lastString:
@@ -340,9 +352,17 @@ class Publishing:
 
             # remember first note link and other "firsts" in the paragraph
             notes.add(note)
+
+            # returning False usuualy indicates to convertMatchedObsidianLink that it should not convert the link, but ...
+            # ... we'll use a special css class for this link ("firstClass"), so it will convert the link
             return False
 
         filenames = self.hafPublish.collectTranscriptFilenames()
-        self.__replaceLinks(filenames, css="transcript", filterFunc=filterLinksOnTranscriptPage)
+
+        # paragraph on transcript page has ALL_LINKS, where the first is styled firstLink and the others otherLink
+        # ((BADXOEH))
+        cssFunc = lambda filterResult: "otherLink" if filterResult else "firstLink"
+
+        self.__replaceLinks(filenames, css=cssFunc, filterFunc=filterLinksOnTranscriptPage)
 
 

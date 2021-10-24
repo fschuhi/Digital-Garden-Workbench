@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-from operator import itemgetter
 from MarkdownLine import SpacyMode
 from ObsidianNote import ObsidianNote, ObsidianNoteType
 import re
 import os
-from TalkParagraph import TalkParagraph, TalkParagraphs
 
 from TranscriptModel import TranscriptModel
 from consts import HAF_YAML, RB_YAML
@@ -429,54 +427,6 @@ if __name__ == "__main__":
                     pass
             exit()
 
-
-    elif isScript('bla'):
-        import collections
-        import operator
-
-        paragraphs = TalkParagraphs(haf)
-        print("1")
-        cooc = paragraphs.collectCooccurringParagraphs()
-
-        dict2 = cooc['Dukkha'] # type: dict[str,list[TalkParagraph]]
-
-        # sort by name first, so that later outer sorts are inner-sorted by name
-        l = sorted(dict2.items(), key=itemgetter(0))
-
-        # extend 2-tuple from the dict with how many co-occurrences we found
-        l = [(term, len(paragraphs), paragraphs) for (term, paragraphs) in l]
-
-        # outer sort: longest list of paragraphs first
-        l = sorted(l, key=itemgetter(1), reverse=True)
-
-        cooccurrenceCounts = []
-        for (term, count, paragraphs) in l:
-            # same talk can have multiple co-occurrences
-            talknames = [paragraph.talkname for paragraph in paragraphs]
-
-            # group by talknames, sorted descending by count
-            counter = collections.Counter(talknames)
-            talknameCounts = [(talkname, count) for (talkname, count) in dict(counter).items()]
-            talknameCounts = sorted(talknameCounts, key=operator.itemgetter(1), reverse=True)
-            cooccurrenceCounts.append((term, count, talknameCounts))
-
-        minCount = 20
-        minLines = 10
-
-        pruned = [t for t in cooccurrenceCounts if t[1] >= minCount]
-        used = pruned if len(pruned) >= minLines else cooccurrenceCounts[:minLines]
-        
-        lines = []
-        lines.append("term | count | talks")
-        lines.append("-|-|-")
-        for (term, count, talknameCounts) in used:
-            prunedTalknames = [(talkname, count) for (talkname, count) in talknameCounts if count >= 2]
-            usedTalknames = prunedTalknames if len(prunedTalknames) >= 4 else talknameCounts[:4]
-            l = [f"[[{talkname}]] ({count})" for (talkname, count) in usedTalknames]
-            s = '<br/>'.join(l)
-            lines.append(f"[[{term}]] | {count} | {s} ")
-
-        saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", lines)
 
     # misc
 

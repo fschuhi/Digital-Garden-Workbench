@@ -5,6 +5,7 @@ import re
 import shutil
 import yaml
 import csv
+import consts
 
 # *********************************************
 # shared types
@@ -437,12 +438,17 @@ def matchedObsidianLinkToString(match: re.Match, newNote: str=None, retainShown:
 
 def convertMatchedObsidianLink(match, root, css=None, filter=None):
 
-    # print(match.group(0))
+    # ugly but pragmatic: pass either None or string or lambda as css
+    # ((BADXOEH))
+    isSimpleCss = (not css) or isinstance(css, str)
 
-    if filter and not filter(match):
-        return match.group(0)
-
-    # print("aaaaaaaaaaaaaaaa")
+    if filter and not (filterResult:=filter(match)):        
+        if isSimpleCss:
+            # links
+            return match.group(0)
+    
+    if not isSimpleCss:
+        css = css(filterResult)
 
     import urllib.parse
     link = match.group('link')
@@ -491,7 +497,15 @@ def convertMatchedObsidianLink(match, root, css=None, filter=None):
 
     # ((DFMYOIR))
     # h.obsidian.md/rob-burbea/2020+Vajra+Music/Transcript+pages/0301+Preliminaries+Regarding+Voice%2C+Movement%2C+and+Gesture+-+Part+1#^1-1
-    a = '<a ' + ariaAttributes + f'data-href="{link}" href="{root}{encodedNote}{encodedTarget}" class="internal-link" target="_blank" rel="noopener">{shownLink}' + '</a>'
+
+    # 24.10.21 target="_blank" and rel="noopener" are added by Obsidian Publish to all links, so we don't have to add it manually (except for the test cases)
+    # https://stackoverflow.com/questions/50709625/link-with-target-blank-and-rel-noopener-noreferrer-still-vulnerable
+    # href is *also* not necessary, because that's also generated on the fly => we only need the data-href and the class
+    if consts.long_a_attributes:
+        a = '<a ' + ariaAttributes + f'data-href="{link}" href="{root}{encodedNote}{encodedTarget}" class="internal-link" target="_blank" rel="noopener">{shownLink}' + '</a>'
+    else:
+        a = '<a ' + ariaAttributes + f'data-href="{link}" class="internal-link">{shownLink}' + '</a>'
+
     return f'<span class="{css}">{a}</span>' if css else a
 
 

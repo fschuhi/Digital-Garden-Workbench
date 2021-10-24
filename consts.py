@@ -10,3 +10,5 @@ VAJRA_MUSIC_TESTING = "testing/data/_Markdown/2020 Vajra Music"
 RB_YAML_TESTING = "testing/data/RB.yaml"
 HAF_YAML_TESTING = "testing/data/HAF.yaml"
 
+global long_a_attributes
+long_a_attributes = True
