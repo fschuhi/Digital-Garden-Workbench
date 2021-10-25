@@ -18,6 +18,14 @@ ignored:
   - love the
 
 Persons:
+  - St John of the Cross
+  - Damien the Leper
+  - Maximilian Kolbe:
+      - /Kolbe, Maximilian
+  - Rainer Maria Rilke:
+      - /Rilke, Rainer Maria
+  - Santideva:
+      - Śāntideva
   - Narayan Helen Liebenson:
       - /Liebenson, Narayan Helen
       - Narayan
@@ -148,6 +156,13 @@ Persons:
       - James, William
 
 Buddhology:
+  - Bodhisattvacaryavatara:
+      - Bodhisattvacaryāvatāra
+  - Rigpa
+  - Dharmadhatu:
+      - dharmadhātu
+      - cosmic consciousness
+      - infinite consciousness
   - Shentong:
       - shentong tradition
   - stream-entry
@@ -534,7 +549,11 @@ Buddhology:
       - holding back of
   - Satipatthana Sutta:
       - Satipaṭṭhāna Sutta
-  - Seed Syllables:
+  - Metta Sutta:
+      - Mettā Sutta
+  - Lonaphala Sutta:
+      - Loṇaphala Sutta
+  - Seed syllables:
       - seed syllable
   - Shingon
   - Sila:
@@ -564,8 +583,10 @@ Buddhology:
   - Tibetan Buddhism:
       - Tibetan Buddhist
       - Tibetan tradition
+      - Tibetan traditions
+      - Tibetans
   - Tonglen
-  - Ultimate Truth:
+  - Ultimate truth:
       - ultimate truths
       - the ultimate
       - universal truths
@@ -663,7 +684,7 @@ Philosophy:
       - social dynamics
       - social injustice
       - racial injustice
-  - Via negativa:
+  - Via Negativa:
       - apophatic tradition
       - apophatic
       - neti neti
@@ -839,6 +860,7 @@ Robology:
       - present culture
       - in our culture
       - contemporary culture
+      - modern culture
   - Duty:
       - one\'s duty
       - sense of duty
@@ -1136,7 +1158,7 @@ Robology:
       - soulmaking teachings
       - soulmaking tradition
       - poise of soulmaking
-  - Soulmaking Dynamic:
+  - Soulmaking dynamic:
       - eros-psyche-logos dynamic
       - eros psyche logos dynamic
       - eros-psyche-logos
@@ -1193,6 +1215,7 @@ Robology:
   - Tiredness
   - Unfabricated:
       - nirvana
+      - nirvāṇa
       - nibbana
       - timelessness
       - The Deathless
@@ -1216,6 +1239,7 @@ Robology:
       - ways of seeing
       - ways of looking
       - ways of knowing
+      - the way we are looking
       - some kind of knowing
       - modes of seeing
       - as a lense
@@ -1265,7 +1289,7 @@ Practices:
       - dyadic excercise
       - dyadic relationship
       - dyad partner
-  - Mantra Practice:
+  - Mantra practice:
       - chanting of the mantra
       - reciting of the mantra
       - incantation

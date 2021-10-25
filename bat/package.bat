@@ -23,6 +23,12 @@ echo.
 python index.py topParagraphs
 echo.
 
+python index.py topCooccurrences
+echo.
+
+python index.py updateAlphabeticalIndex
+echo.
+
 python HAFScripts.py transferFilesToPublish
 echo.
 

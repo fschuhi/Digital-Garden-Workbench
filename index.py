@@ -423,7 +423,7 @@ if __name__ == "__main__":
         changeTopReferrersSection(dict, patternStart, yamlKey, func, nTopDefault)
 
 
-    elif isScript('bla'):
+    elif isScript('topCooccurrences'):
         import collections
         import operator
         import time
