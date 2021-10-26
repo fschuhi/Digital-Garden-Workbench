@@ -69,7 +69,7 @@ def createSynopsis(haf: HAFEnvironment, talknameLeft, talknameRight, path, out):
 
     for tuple in tuples:
         (aBlockid[2008], aBlockid[2007], ref2007, comment) = tuple                        
-        if aBlockid[2008] or aBlockid[2007]:
+        if aBlockid[2008] or aBlockid[2007] or comment:
 
             # initialize the two cells in the row
             aCell[2008] = aCell[2007] = ""
