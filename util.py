@@ -277,6 +277,13 @@ def extractYaml(lines: list[str]) -> dict[str,str]:
     import yaml
     dictYaml = yaml.load(file_like_io, Loader=yaml.FullLoader)
     return dictYaml
+
+
+def firstKey(dict):
+    return list(dict.keys())[0]
+    
+def firstValue(dict):
+    return dict[firstKey(dict)]
     
 
 # *********************************************

@@ -1,11 +1,46 @@
 Root: M:\
 
 Retreats:
-  - 2006 New Year's Retreat
-  - 2007 Lovingkindness and Compassion As a Path to Awakening
-  - 2007 New Years Retreat Insight Meditation
-  - 2008 Lovingkindness and Compassion As a Path to Awakening
-  - 2014 November Solitary - Questioning Awakening
-  - 2017 Eros Unfettered
-  - 2019 Practising the Jhanas
-  - 2020 Vajra Music
+    - 2006 New Year's Retreat
+    - 2007 Lovingkindness and Compassion As a Path to Awakening
+    - 2007 New Years Retreat Insight Meditation
+    - 2008 Lovingkindness and Compassion As a Path to Awakening
+    - 2014 November Solitary - Questioning Awakening
+    - 2017 Eros Unfettered
+    - 2019 Practising the Jhanas
+    - 2020 Vajra Music
+    
+CopyFile:
+    - Rob Burbea/Retreats.md: /
+    - Rob Burbea/Index.md: /
+    - Brainstorming/NoteStar.md: /
+    - Rob Burbea/Gardening.md: /
+    - Rob Burbea/Diacritics.md: /
+    - Rob Burbea/Rob Burbea.md: /
+    - Rob Burbea/Guided meditations.md: /
+
+Synopses:
+    Path: data/synopses
+    Retreats:
+        - 2008 Lovingkindness and Compassion As a Path to Awakening:
+            - Synopsis 1:
+                  left: The Place of Samadhi in Metta Practice
+                  right: Samadhi in Metta Practice
+            - Synopsis 2:
+                  left: Exploring the World of Loving Kindness
+                  right: Expressions of Metta
+            - Synopsis 3:
+                  left: Using Insight to Deepen Love and Compassion
+                  right: From Insight to Love
+            - Synopsis 4:
+                  left: Compassion (talk)
+                  right: The Practice of Compassion
+            - Synopsis 5:
+                  left: Compassion Part Two - Compassion for Ourselves
+                  right: The Practice of Compassion
+            - Synopsis 6:
+                  left: Love and the Emptiness of Things
+                  right: Love and Emptiness
+            - Synopsis 7:
+                  left: The Birth of a Bodhisattva
+                  right: Equanimity in Compassion

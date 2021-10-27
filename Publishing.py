@@ -6,7 +6,7 @@ from TranscriptPage import TranscriptPage
 from TalkPage import TalkPage
 from util import *
 from HAFEnvironment import HAFEnvironment, talknameFromFilename
-import consts
+from consts import *
 #from consts import HAF_PUBLISH_YAML, HAF_YAML, long_a_attributes
 from TalkPageLineParser import TalkPageLineMatch, TalkPageLineParser
 
@@ -89,8 +89,19 @@ class Publishing:
         print("createSynopses")
         # we need to recreate all synopses, because the headers might have changed
         from synopsis import createSynopsis
-        createSynopsis(self.hafWork, "The Place of Samadhi in Metta Practice", "Samadhi in Metta Practice", "data/Synopsis 1/2008 vs 2007.csv", r"M:\2008 Lovingkindness and Compassion As a Path to Awakening\Synopsis 1.md")
-        createSynopsis(self.hafWork, "Exploring the World of Loving Kindness", "Expressions of Metta", "data/Synopsis 2/2008 vs 2007.csv", r"M:\2008 Lovingkindness and Compassion As a Path to Awakening\Synopsis 2.md")
+        yamlSynopses = self.hafWork.yaml[SYNOPSES]
+        pSynopsesRoot = yamlSynopses[PATH]
+        retreats = yamlSynopses[RETREATS]
+        for retreat in retreats:
+            retreatName = firstKey(retreat)
+            synopses = firstValue(retreat)
+            for synopsis in synopses:
+                synopsisName = firstKey(synopsis)
+                leftTalkname = firstValue(synopsis)[LEFT]
+                rightTalkname = firstValue(synopsis)[RIGHT]
+                pCsv = os.path.join(pSynopsesRoot, retreatName, synopsisName + '.csv')
+                pOut = os.path.join(self.hafWork.retreatFolder(retreatName), synopsisName + '.md')
+                createSynopsis(self.hafWork, leftTalkname, rightTalkname, pCsv, pOut)
 
 
 # mirroring
@@ -105,17 +116,21 @@ class Publishing:
 
         #print("3")
         self.quoteOfTheDay()
-        self.copyFile("Rob Burbea/Retreats.md", "/")
 
-        self.copyFile("Rob Burbea/Index.md", "/")
-        self.copyFile("Brainstorming/NoteStar.md", "/")
-        self.copyFile("Rob Burbea/Gardening.md", "/")
-        self.copyFile("Rob Burbea/Diacritics.md", "/")
-        self.copyFile("Rob Burbea/Rob Burbea.md", "/")
+        self.copyFiles()
 
         mirrorDir(os.path.join(self.hafWork.root, "Images/Digital Garden"), os.path.join(self.hafPublish.root, "Images"))
         mirrorDir(os.path.join(self.hafWork.root, "css-snippets"), os.path.join(self.hafPublish.root, "css-snippets"))
         self.copyFile("css-snippets/publish.css", "/")
+
+
+    def copyFiles(self):
+        copyFileYaml = self.hafWork.yaml[COPYFILE]
+        for file in copyFileYaml:
+            source = firstKey(file)
+            target = firstValue(file)
+            print(source, target)
+            self.copyFile(source, target)
 
 
     def mirrorRetreatFiles(self):
