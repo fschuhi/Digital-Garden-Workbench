@@ -142,7 +142,9 @@ class Publishing:
                 if not os.path.isdir(source):
                     continue
                 target = funcTarget(retreatName)
-                assert os.path.isdir(target)
+                if not os.path.isdir(target):
+                    print(target)
+                    assert os.path.isdir(target)
                 nAdded += mirrorDir(source, target, ext)
             return nAdded
 
@@ -273,7 +275,9 @@ class Publishing:
             # intentionally from the publish 
             #print(talkname)
             transcriptFilename = self.hafPublish.getTranscriptFilename(talkname)
-            assert transcriptFilename
+            if not transcriptFilename:
+                print(talkname)
+                assert transcriptFilename
 
             transcript = TranscriptPage(transcriptFilename)
             for markdownLine in transcript.markdownLines: # type: MarkdownLine
@@ -295,7 +299,7 @@ class Publishing:
                                 # probably ... (yet-missing paragraph description)
                                 pass
                             else:
-                                match = re.match(r'(.+)([.?!"]) \^' + blockid + "$", markdownLine.text)
+                                match = re.match(r'(.+)([.?!")\]]) \^' + blockid + "$", markdownLine.text)
                                 if match:
                                     linkToTalk = f"[[{talkname}#{headerTarget}|{match.group(2)}]]"  # ∘∙⦿꘎᙮
                                     markdownLine.text = f"{match.group(1)}{linkToTalk} ^{blockid}"
@@ -355,15 +359,15 @@ class Publishing:
             nonlocal notes
 
             note = match.group('note')
-            if (match.string == lastString) and (note in notes):
+            if (match.string.lower() == lastString) and (note in notes):
                 # returning True indicates to translate the link into html
                 # recurring link, use css class "otherLink"
                 return True
                 
-            if match.string != lastString:
+            if match.string.lower() != lastString:
                 # next paragraph, next first occurrences will be shown as regular links
                 notes = set()
-                lastString = match.string
+                lastString = match.string.lower()
 
             # remember first note link and other "firsts" in the paragraph
             notes.add(note)

@@ -83,7 +83,7 @@ class TalkPage(ObsidianNote):
         return len(pageNrs)
 
 
-    def collectParagraphHeaderTexts(self) -> list[Tuple[int, int, str]]:
+    def collectParagraphHeaderTexts(self) -> dict[str,str]:
         targets = {}
         parser = TalkPageLineParser()
         for ml in self.markdownLines:
@@ -196,6 +196,9 @@ class TalkPage(ObsidianNote):
         for section in sections:
             # each section has an associated transcript paragraph, determined from the counts line
             mlTranscript = transcript.findParagraph(section.pageNr, section.paragraphNr)
+            if mlTranscript is None:
+                print(section.pageNr, section.paragraphNr)
+                assert mlTranscript is not None
 
             # handle prepended timestamp and/or header
             while True:

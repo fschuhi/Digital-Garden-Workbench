@@ -6,7 +6,6 @@ ignored:
   - centre the
   - do wonder
   - freedom from remorse
-  - love the
   - mixed blessing
   - music concert
   - not - self
@@ -16,8 +15,68 @@ ignored:
   - we are calling
   - what I'm calling
   - would wonder
+  - love the
 
 Persons:
+  - Igor Strawinsky:
+      - /Strawinsky, Igor
+  - Robert Craft:
+      - /Craft, Robert
+  - Etienne Souriau:
+      - /Soriau, Étienne
+      - Étienne Souriau
+  - Oscar Wilde:
+      - /Wilde, Oscar
+  - Peter Maxwell Davies:
+      - /Davies, Peter Maxwell
+  - Etty Hillesum:
+      - /Hillesum, Etty
+  - John Coltrane:
+      - /Coltrane, John
+  - Jimi Hendrix:
+      - /Hendrix, Jimi
+  - George W. Bush:
+      - /Bush, George W.
+      - George Bush
+  - St John of the Cross
+  - Damien the Leper
+  - Maximilian Kolbe:
+      - /Kolbe, Maximilian
+  - Rainer Maria Rilke:
+      - /Rilke, Rainer Maria
+  - Santideva:
+      - Śāntideva
+  - Narayan Helen Liebenson:
+      - /Liebenson, Narayan Helen
+      - Narayan
+  - Ronald Fairbairn:
+      - Fairbairn, Ronald
+      - Fairbairn
+  - Sigmund Freud:
+      - /Freud, Sigmund
+      - Freud
+  - James Hillman:
+      - /Hillman, James
+  - Jose Ortega y Gasset:
+      - /Ortega y Gasset, José
+      - Ortega y Gasset
+  - Werner Heisenberg:
+      - /Heisenberg, Werner
+  - Kahlil Gibran:
+      - /Gibran, Kahlil
+  - Pablo Neruda:
+      - /Neruda, Pablo
+  - Dionysius the Areopagite:
+      - Dionysius
+      - Pseudo-Dionysius the Areopagite
+  - Manjushri:
+      - Mañjuśrī
+  - Shantideva:
+      - Śāntideva
+  - Chandrakirti:
+      - Chandrakīrti
+  - Nagarjuna:
+      - Nāgārjuna
   - Abraham:
       - The Hospitality of Abraham
       - Abraham's hospitality to the angels
@@ -36,32 +95,16 @@ Persons:
   - Catherine McGee:
       - /McGee, Catherine
       - Catherine
-  - Chandrakirti:
-      - Chandrakīrti
   - Charles Tart:
       - /Tart, Charles
   - Chogyam Trungpa:
       - Chögyam Trungpa
   - Dalai Lama
-  - Damien the Leper
-  - David Beckham:
-      - /Beckham, David
-  - Dionysius the Areopagite:
-      - Dionysius
-      - Pseudo-Dionysius the Areopagite
   - Dwight Eisenhower:
       - /Eisenhower, Dwight
       - General Eisenhower
   - Emmett Till:
       - /Till, Emmet
-  - Etienne Souriau:
-      - /Soriau, Étienne
-      - Étienne Souriau
-  - Etty Hillesum:
-      - /Hillesum, Etty
-  - George W. Bush:
-      - /Bush, George W.
-      - George Bush
   - Gertrude Stein:
       - /Stein, Gertrude
   - Goenka:
@@ -72,10 +115,6 @@ Persons:
       - /Gadamer, Hans Georg
   - Henry Corbin:
       - /Corbin, Henry
-  - Igor Strawinsky:
-      - /Strawinsky, Igor
-  - James Hillman:
-      - /Hillman, James
   - Jeffrey J Kripal:
       - /Kripal, Jeffrey J
   - Jesus:
@@ -84,18 +123,9 @@ Persons:
   - Jiddu Krishnamurti:
       - /Krishnamurti, Juddi
       - Krishnamurti
-  - Jimi Hendrix:
-      - /Hendrix, Jimi
-  - John Coltrane:
-      - /Coltrane, John
-  - Jose Ortega y Gasset:
-      - /Ortega y Gasset, José
-      - Ortega y Gasset
   - Julian of Norwich
   - Kaccayana:
       - Kaccāyana
-  - Kahlil Gibran:
-      - /Gibran, Kahlil
   - Ludwig van Beethoven:
       - /Beethoven, Ludwig van
       - Beethoven
@@ -107,51 +137,23 @@ Persons:
   - Mahatma Gandhi:
       - /Gandhi, Mahatma
       - Gandhi
-  - Manjushri:
-      - Mañjuśrī
   - Mary
-  - Maximilian Kolbe:
-      - /Kolbe, Maximilian
   - Mother Teresa:
       - Mother Theresa
-  - Nagarjuna:
-      - Nāgārjuna
+  - David Beckham:
+      - /Beckham, David
   - Naomi Shihab Nye:
       - /Nye, Naomi Shibab
-  - Narayan Helen Liebenson:
-      - /Liebenson, Narayan Helen
-      - Narayan
-  - Oscar Wilde:
-      - /Wilde, Oscar
-  - Pablo Neruda:
-      - /Neruda, Pablo
   - Payutto
-  - Peter Maxwell Davies:
-      - /Davies, Peter Maxwell
   - Pontius Pilate
-  - Rainer Maria Rilke:
-      - /Rilke, Rainer Maria
   - Ram Dass
   - Richard Rorty:
       - /Rorty, Richard
-  - Robert Craft:
-      - /Craft, Robert
-  - Ronald Fairbairn:
-      - Fairbairn, Ronald
-      - Fairbairn
   - Rosa Parks:
       - /Parks, Rosa
   - Rumi
-  - Santideva:
-      - Śāntideva
   - Sariputta:
       - Sāriputta
-  - Shantideva:
-      - Śāntideva
-  - Sigmund Freud:
-      - /Freud, Sigmund
-      - Freud
-  - St John of the Cross
   - St. Paul:
       - Paul
   - Stephen Batchelor:
@@ -166,8 +168,6 @@ Persons:
       - /Quine, W.V.O.
   - Walt Whitman:
       - /Whitman, Walt
-  - Werner Heisenberg:
-      - /Heisenberg, Werner
   - Wilfrid Sellars:
       - /Sellars, Wilfrid
   - William Blake:
@@ -176,6 +176,32 @@ Persons:
       - James, William
 
 Buddhology:
+  - Bodhisattvacaryavatara:
+      - Bodhisattvacaryāvatāra
+  - Rigpa
+  - Dharmadhatu:
+      - dharmadhātu
+      - cosmic consciousness
+      - infinite consciousness
+  - Shentong:
+      - shentong tradition
+  - stream-entry
+  - Kalyanamittata:
+      - kalyāṇamittatā
+      - spiritual friendship
+  - Rupa:
+      - rūpa
+  - Aruparaga:
+      - arūparāga
+  - Asavas:
+      - āsavas
+  - Samsara:
+      - saṃsāra
+  - Fetters:
+      - saṃyojanāni
+      - fetter
+  - Commentaries:
+      - commentarial
   - Aksayamati Sutra:
       - Akṣayamati Sūtra
   - Anatta:
@@ -187,10 +213,6 @@ Buddhology:
       - anattā practice
       - anatta practice
       - first characteristic
-  - Aruparaga:
-      - arūparāga
-  - Asavas:
-      - āsavas
   - Asavas
   - Attention:
       - bare attention
@@ -225,8 +247,6 @@ Buddhology:
   - Birth
   - Bodhi Tree
   - Bodhisattva
-  - Bodhisattvacaryavatara:
-      - Bodhisattvacaryāvatāra
   - Brahman
   - Brahmaviharas:
       - brahmavihara
@@ -260,8 +280,6 @@ Buddhology:
       - lobha
       - cling
       - clingings
-  - Commentaries:
-      - commentarial
   - Compassion:
       - karuṇā
       - karunā
@@ -322,10 +340,6 @@ Buddhology:
       - dharma circles
       - dharma circle
       - dharma 101
-  - Dharmadhatu:
-      - dharmadhātu
-      - cosmic consciousness
-      - infinite consciousness
   - Dharmakaya:
       - Dharmakāya
   - Dukkha:
@@ -354,20 +368,27 @@ Buddhology:
       - upekkha
   - Eternality
   - Fetters:
-      - saṃyojanāni
-      - fetter
-  - Fetters:
       - samyojanani
-  - Four Noble Truths:
-      - First Noble Truth
-      - Second Noble Truth
-      - Third Noble Truth
-      - Fourth Noble Truth
+  - Samyutta Nikaya:
+      - Saṃyutta Nikāya
   - Four bases of power:
       - Four bases
       - Four bases of success
       - Four bases of accomplishment
   - Four elements
+  - Mamaki:
+      - Māmakī
+  - Locana:
+      - Locanā
+  - Pandara:
+      - Paṇḍara
+  - Tara:
+      - Tārā
+  - Four Noble Truths:
+      - First Noble Truth
+      - Second Noble Truth
+      - Third Noble Truth
+      - Fourth Noble Truth
   - Freedom:
       - deep freedom
       - true peace
@@ -440,9 +461,6 @@ Buddhology:
       - fourth jhāna
       - realm of nothingness
       - realm of neither perception nor non-perception
-  - Kalyanamittata:
-      - kalyāṇamittatā
-      - spiritual friendship
   - Kama:
       - kāma
   - Kamacchanda:
@@ -458,10 +476,6 @@ Buddhology:
       - let go of everything
       - just let go
       - illusion of non-doing
-  - Locana:
-      - Locanā
-  - Lonaphala Sutta:
-      - Loṇaphala Sutta
   - Lotus Sutra
   - Love:
       - sense of connection
@@ -471,8 +485,6 @@ Buddhology:
       - Mahāmudrā
   - Mahayana:
       - Mahāyāna
-  - Mamaki:
-      - Māmakī
   - Mara:
       - māra
       - amāra
@@ -481,8 +493,6 @@ Buddhology:
       - loving-kindness
       - kindness
       - goodwill
-  - Metta Sutta:
-      - Mettā Sutta
   - Middle Way
   - Mindfulness:
       - mindful
@@ -519,8 +529,6 @@ Buddhology:
       - dissolving into oneness
   - Pali Canon:
       - Pāli Canon
-  - Pandara:
-      - Paṇḍara
   - Papanca:
       - papañca
       - proliferation
@@ -546,9 +554,6 @@ Buddhology:
       - group retreats
   - Right speech:
       - commitment to honesty
-  - Rigpa
-  - Rupa:
-      - rūpa
   - Samadhi:
       - samādhi
       - concentration
@@ -558,10 +563,6 @@ Buddhology:
       - unawakened mind
   - Samatha:
       - Śamatha
-  - Samsara:
-      - saṃsāra
-  - Samyutta Nikaya:
-      - Saṃyutta Nikāya
   - Sangha:
       - saṅgha
   - Sankhara:
@@ -578,10 +579,12 @@ Buddhology:
       - holding back of
   - Satipatthana Sutta:
       - Satipaṭṭhāna Sutta
+  - Metta Sutta:
+      - Mettā Sutta
+  - Lonaphala Sutta:
+      - Loṇaphala Sutta
   - Seed syllables:
       - seed syllable
-  - Shentong:
-      - shentong tradition
   - Shingon
   - Sila:
       - sīla
@@ -602,8 +605,6 @@ Buddhology:
       - suttas
   - Tantra:
       - tantric
-  - Tara:
-      - Tārā
   - Theravada:
       - Theravāda
       - Theravādan
@@ -633,9 +634,9 @@ Buddhology:
   - Zen:
       - Soto Zen
       - Rinzai Zen
-  - stream-entry
 
 Philosophy:
+  - Eclecticism
   - Anthropology
   - Christianity:
       - New Testament: .
@@ -649,7 +650,6 @@ Philosophy:
       - cosmopoesis
       - cosmos
   - Dogma
-  - Eclecticism
   - Empiricism
   - Epistemology:
       - epistemicide: .
@@ -747,6 +747,7 @@ Psychology:
   - Shame
 
 Robology:
+  - Nature 
   - Acceptance
   - Active listening:
       - receptive listening
@@ -763,7 +764,6 @@ Robology:
   - Anger
   - Antinomy
   - Appreciation
-  - Artificial intelligence
   - Beauty:
       - possibilities for beauty
       - beauties
@@ -889,9 +889,9 @@ Robology:
       - cultural icon
       - present culture
       - our culture
-      - in our culture
+      - in our culture      
       - contemporary culture
-      - modern culture
+      - modern culture      
   - Duty:
       - one\'s duty
       - sense of duty
@@ -992,7 +992,6 @@ Robology:
       - world of our feelings
   - Fullness of intention:
       - one\'s fullness of intention
-  - Future thinking
   - Gaia House
   - Generosity
   - Global warming
@@ -1056,21 +1055,20 @@ Robology:
   - Inertia
   - Infinity:
       - the infinite
-  - Juiciness:
-      - juicy
   - Kabbala:
       - kabbalistic
+  - Sefirot
   - Logos
   - Manifestations
   - Meaningfulness:
       - imaginal meaningfulness
+  - Mind state:
+      - mind states
+      - present mind state
   - Mind:
       - world of our mind
       - measuring mind
       - comparing mind
-  - Mind state:
-      - mind states
-      - present mind state
   - Mode of mind:
       - modes of mind
   - Music:
@@ -1080,7 +1078,6 @@ Robology:
       - jazz guitar: Jazz
   - Mystical opening:
       - mystical openings
-  - Nature
   - Nobility:
       - ennobling quality
   - Pain:
@@ -1107,6 +1104,8 @@ Robology:
       - pleasant quality
       - well-being
       - okayness
+  - Juiciness:
+      - juicy
   - Poetry:
       - psychology without poetry
   - Preliminaries:
@@ -1128,7 +1127,6 @@ Robology:
       - world of our relationships
   - Romantic love
   - Seeing That Frees
-  - Sefirot
   - Sexuality
   - Simplification:
       - oversimplification
@@ -1282,6 +1280,8 @@ Robology:
       - wonders
       - wonder in being
       - cultivating wonder
+  - Future thinking
+  - Artificial intelligence
 
 Retreats:
   - Eros Unfettered
@@ -1311,7 +1311,6 @@ Talks:
   - Wise Relationship to Practice
 
 Practices:
-  - Big Bang
   - Borne Aloft By Angels
   - Dyad:
       - dyad practice
@@ -1347,6 +1346,7 @@ Practices:
       - sense/see other as angel
   - Supernova:
       - supernova explosion
+  - Big Bang
   - The Hospitality to the Angels
   - The Immovable Protector:
       - the immovable guardian

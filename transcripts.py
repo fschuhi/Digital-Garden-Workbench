@@ -5,6 +5,7 @@ import os
 from MarkdownLine import SpacyMode
 
 from Publishing import Publishing
+from TalkPage import TalkPage
 from TranscriptModel import TranscriptModel
 from consts import HAF_YAML, RB_YAML
 from TranscriptIndex import TranscriptIndex
@@ -77,6 +78,7 @@ def get_arguments():
     parser.add_argument('-r')
     parser.add_argument('-t')
     parser.add_argument('-p')
+    parser.add_argument('-out')
     parser.add_argument('-allLinks', dest='allLinks', action='store_true')
     parser.add_argument('-noLinks', dest='noLinks', action='store_true')
     return parser.parse_args()
@@ -95,6 +97,7 @@ if __name__ == "__main__":
     retreatName = args.r
     talkname = args.t
     path = args.p
+    out = args.out
     allLinks = args.allLinks
     noLinks = args.noLinks
 
@@ -229,6 +232,36 @@ if __name__ == "__main__":
 
     # misc
 
+
+    elif isScript('collectFootnotes'):
+        lines = []
+        lines.append('transcript | id | footnote')
+        lines.append('-|-|-')
+        filenames = haf.collectTranscriptFilenames()
+        for filename in filenames:
+            transcript = TranscriptPage(filename)
+            pTalk = haf.getTalkFilename(transcript.talkname)
+            if not pTalk:
+                continue
+            talk = TalkPage(pTalk)
+            headerTexts = talk.collectParagraphHeaderTexts()
+            for ml in transcript.markdownLines:
+                ml.removeFootnotes()
+                for (footnote, pos) in ml.footnotes:
+                    assert (match := re.match(r"\^\[(.+)\]$", footnote))
+                    footnoteText = match.group(1)
+                    blockid = ml.getBlockId()
+                    if (blockid in headerTexts) and (headerText := headerTexts[blockid]):
+                        headerTarget = determineHeaderTarget(headerText)
+                        linkToTalk = f"[[{transcript.talkname}#{headerTarget} \| {headerText}]]"
+                        line = f"[[{transcript.notename}]] | {linkToTalk} | {footnoteText}"
+                    else:
+                        linkToTranscript = f"[[{transcript.notename}#^{blockid} \| ({blockid})]]"
+                        line = f"[[{transcript.notename}]] | {linkToTranscript} | {footnoteText}"
+                    lines.append(line)
+
+        pOut = out if out else r"M:\Brainstorming\Unassinged.md"
+        saveLinesToTextFile(pOut, lines)
 
     else:
         print("unknown script")

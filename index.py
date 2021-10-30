@@ -259,6 +259,7 @@ def get_arguments():
     parser.add_argument('script', nargs='?')
     parser.add_argument('-help', dest='scriptHelp', action='store_true')
     parser.add_argument('-i')
+    parser.add_argument('-out')
     parser.add_argument("-sectionsort", action='store_true')
     return parser.parse_args()
 
@@ -273,6 +274,7 @@ if __name__ == "__main__":
     script = args.script
     scriptHelp = args.scriptHelp
     indexEntry = args.i
+    out = args.out
 
     if not scriptHelp:
         transcriptIndex = TranscriptIndex(RB_YAML)
