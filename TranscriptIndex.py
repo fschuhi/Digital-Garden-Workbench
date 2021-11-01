@@ -80,8 +80,6 @@ class TranscriptIndex:
                     # just a list entry (pattern), without multiple patterns
                     patternsInSection.append(pageListEntry)
                     pagesInSection.append(pageListEntry)
-                    if "Four Circles, Four Parables of Stone and Light" == pageListEntry:
-                        print(section)
 
                     self.sectionFromPage[pageListEntry] = section
                     self.patternLinks[pageListEntry.lower()] = pageListEntry                    

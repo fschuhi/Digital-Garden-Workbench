@@ -32,6 +32,7 @@ class TalkSection():
         assert parser.matchText(textLines[1]) == TalkPageLineMatch.PARAGRAPH_COUNTS
         self.pageNr = parser.pageNr
         self.paragraphNr = parser.paragraphNr
+        self.countInfos = parser.counts
 
         # an hr is nice to have but it can be missing
         if textLines[-1] != '---':
@@ -39,13 +40,83 @@ class TalkSection():
 
         # create the copy    
         self.markdownLines = MarkdownLines(textLines)
-        self.header = self.markdownLines[0]
-        self.counts = self.markdownLines[1]
+
+        self.headerLine = self.markdownLines[0]
+        self.countsLine = self.markdownLines[1]
+
+        # see parseLines()
+        self.counts = None
+        self.audioLinks = None
+        self.admonitions = None
+
+
+    def parseLines(self):
+        countInfoPattern = r"\[\[([^\]]+)\]\]( \(([0-9]+)\))?"
+
+        self.counts = {}
+        self.audioLinks = []
+        self.admonitions = []
+
+        admonitionTitle = None
+        inAdmonition = False
+        for index, ml in enumerate(self.markdownLines):
+
+            if index == 1:
+                # count lines always start w/ the block id, which we don't need here
+                countLineParts = ml.text.split(': ')
+                if len(countLineParts) == 2:
+                    # if there are counts then extract them, w/o spans and leading/trailing _
+                    match = re.search(r"_([^_]+?)_", countLineParts[1])
+                    assert match
+                    countLineText = match.group(1)
+
+                    # all count texts have the term, but only some have a count (if >1)
+                    countInfos = countLineText.split(' · ')
+                    for countInfo in countInfos:                
+                        match = re.match(countInfoPattern, countInfo)
+                        assert match
+                        keyword = match.group(1)
+                        countText = match.group(3)
+                        count = int(countText) if countText else 1                    
+                        self.counts[keyword] = count
+
+            match = parseAudioLink(ml.text)
+            if match:
+                date = match.group('date')
+                middle = match.group('middle')
+                audioid = match.group('audioid')
+                timestamp = canonicalTimestamp(match.group('timestamp'))
+                self.audioLinks.append( (index, date, audioid, timestamp) )
+                continue
+
+            match = re.match(r"```ad-(?P<admonition>.+)", ml.text)
+            if match:
+                admonitionType = match.group('admonition')
+                inAdmonition = True
+                startAdmonition = index
+                continue
+
+            if inAdmonition:
+                if ml.text == "```":
+                    # DO SOMETHING WITH THE COLLECTED ADMONITION
+                    endAdmonition = index
+                    self.admonitions.append( (startAdmonition, endAdmonition+1, admonitionType, admonitionTitle))
+                    inAdmonition = False
+                elif ml.text.startswith('title:'):
+                    admonitionTitle = (pluginTitle := ml.text[7:].strip()) if pluginTitle else None
+                else:
+                    pass
+                    # admonitionLines.append(ml)
+                    # ml = MarkdownLine(line)
+                    # ml.convertFormattingToHtml()
+                    # ml.replaceLinks(lambda match: f"{convertMatchedObsidianLink(match, website)}")
+                    # admonitionLines.append(ml.text + '<br/>')
+                continue
 
 
     def changeHeader(self, newHeader):
         self.headerText = f"{self.level * '#'} {newHeader}"
-        self.header.text = self.headerText
+        self.headerLine.text = self.headerText
 
 
     def firstAudioLink(self):

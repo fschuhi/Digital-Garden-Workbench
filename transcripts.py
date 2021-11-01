@@ -205,9 +205,9 @@ if __name__ == "__main__":
             "DANGER: this is obviously a dangerous operation, so prepare to rollback with git."
         ])
         assert talkname
-        transcriptName = basenameWithoutExt(haf.getTranscriptFilename(talkname))
+        talkname = basenameWithoutExt(haf.getTranscriptFilename(talkname))
         import csv
-        tuples = loadTuplesFromCsv(f'data/{transcriptName}.csv')
+        tuples = loadTuplesFromCsv(f'data/{talkname}.csv')
         del tuples[0]
 
         # first pass
@@ -218,7 +218,7 @@ if __name__ == "__main__":
             for line in lines:
                 newLine = line
                 for old, strand, new in tuples:
-                    newLine = newLine.replace(f"[[{transcriptName}#^{old}|{old}]]", strand)
+                    newLine = newLine.replace(f"[[{talkname}#^{old}|{old}]]", strand)
                     changed = changed or (newLine != line)
                 pass1.append(newLine)
             if changed:
@@ -226,7 +226,7 @@ if __name__ == "__main__":
                 for line in pass1:
                     newLine = line
                     for old, strand, new in tuples:
-                        newLine = newLine.replace(strand, f"[[{transcriptName}#^{new}|{new}]]")
+                        newLine = newLine.replace(strand, f"[[{talkname}#^{new}|{new}]]")
                     pass2.append(newLine)
                 saveLinesToTextFile(md, pass2)
 
@@ -262,6 +262,28 @@ if __name__ == "__main__":
 
         pOut = out if out else r"M:\Brainstorming\Unassinged.md"
         saveLinesToTextFile(pOut, lines)
+
+
+    elif isScript('next'):
+        assert retreatName
+
+        pdfs = haf.vault.folderFiles(haf.pdfFolder(retreatName), 'pdf')
+        transcripts = haf.vault.folderFiles(haf.transcriptsFolder(retreatName), 'md') 
+
+        pdfTuples = [(match.group(2), match.group(3)) for p in pdfs if (match := re.match(r"(20[0-9]+)_([0-9]+) (.+)", basenameWithoutExt(p)))]
+        transcriptTuples = [(match.group(1), match.group(2)) for p in transcripts if (match := re.match(r"([0-9]+) (.+)", basenameWithoutExt(p)))]
+
+        delta = sorted(list(set(pdfTuples) - set(transcriptTuples)), key=lambda tuple: (tuple[0], tuple[1]))
+        if not delta:
+            print("no next PDF found")
+        else:
+            if len(delta) > 1:
+                print("additional PDFs:")
+                for (date, talkname) in delta:
+                    print(f"{date} {talkname}")
+                print("")
+            (date, talkname) = delta[0]
+            print(f"{date} {talkname}")
 
     else:
         print("unknown script")
