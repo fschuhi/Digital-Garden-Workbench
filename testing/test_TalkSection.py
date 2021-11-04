@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
+from typing import Tuple
 import unittest
 import re
+from HAFEnvironment import HAFEnvironment
+from TalkSection import TalkSection
+from TranscriptIndex import TranscriptIndex
 from TranscriptPage import TranscriptPage
 from TalkPage import TalkPage
 import filecmp
+from consts import *
+from index import collectAdmonitionTuplesByTermForTalk, collectAdmonitionTuplesByTermForTalks, collectAlternativesByTerm
+from util import basenameWithoutExt, determineHeaderTarget, saveLinesToTextFile
+
 
 # *********************************************
 # TalkSection
@@ -46,31 +54,59 @@ class TestTalkSection(unittest.TestCase):
 
 
     def test_parseCounts(self):
-        #fnTalk = r"testing/data/Test_TalkSection.What is Insight (before).md"
-        fnTalk = r"m:\2019 Practising the Jhanas\Talks\Orienting to This Jhana Retreat.md"
-        talk = TalkPage(fnTalk)
-        sections = talk.collectSections()
-        admonitionTuplesByTerm = {}
-        for section in sections:
-            #section.parseCounts()
-            section.parseLines()
-            if section.counts:
-                for admonition in section.admonitions:
-                    (start, end, admonitionType, admonitionTitle) = admonition
-                    admonitionBody = "\n".join([ml.text for ml in section.markdownLines[start+1:end-1]])
-                    admonitionTuple = (section, admonitionType, admonitionBody)
-                    for term in section.counts.keys():
-                        if section.pageNr == 12 and section.paragraphNr == 1:
-                            print(term)
-                        if term in admonitionTuplesByTerm:
-                            l = admonitionTuplesByTerm[term]
-                        else:
-                            l = []
-                            admonitionTuplesByTerm[term] = l
-                        #if term == 'Awakening':
-                        #    print(admonitionTuple)
-                        l.append(admonitionTuple)
-        print(admonitionTuplesByTerm['Awakening'])
+        import time
+        transcriptIndex = TranscriptIndex(RB_YAML)
+        alternativesByTerm = collectAlternativesByTerm(transcriptIndex)
+
+        haf = HAFEnvironment(HAF_YAML)        
+        filenames = [fnTalk for p in haf.collectTranscriptFilenames() if (fnTalk := haf.getTalkFilename(basenameWithoutExt(p))) is not None]
+
+        tic = time.perf_counter()
+        mergedAdmonitionTuplesByTerm = collectAdmonitionTuplesByTermForTalks(filenames, alternativesByTerm, lambda section, type, title: type == 'quote')
+        toc = time.perf_counter()
+        print(100*(toc-tic))
+
+        #print(admonitionTuplesByTerm)
+
+        l = []
+
+        def outputQuoteRow(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+            (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
+            blockid = f"{section.pageNr}-{section.paragraphNr}"
+            headerText = section.headerText
+            headerTarget = determineHeaderTarget(headerText)
+            safeAdmonitionBody = admonitionBody.replace('|', '\|')
+            l.append(f"[[{talk.notename}]] | [[{talk.notename}#{headerTarget}\|{headerText}]] | {safeAdmonitionBody}")
+
+        lastTalk = None
+        def outputQuote(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+            (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
+
+            nonlocal lastTalk
+            if talk != lastTalk:
+                l.append(f"##### [[{talk.notename}]]")
+                retreatName = haf.retreatNameFromTalkname(talk.notename)
+                l.append(f'<span class="counts">[[{retreatName}]]</span>')
+                lastTalk = talk
+            headerText = section.headerText
+            headerTarget = determineHeaderTarget(headerText)
+            l.append(f'> {admonitionBody} &nbsp;&nbsp;<span class="counts">([[{talk.notename}#{headerTarget}|{headerText}]])</span>')
+            l.append("")
+
+        createTable = False
+
+        if createTable:
+            l.append("talk | paragraph | quote")
+            l.append("- | - | -")
+
+        lg = mergedAdmonitionTuplesByTerm['Love']
+        for quote in lg:
+            if createTable:
+                outputQuoteRow(quote)
+            else:
+                outputQuote(quote)
+        saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", l)
+        
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,6 +16,8 @@ from util import *
 from HAFEnvironment import HAFEnvironment
 from TalkParagraph import TalkParagraph, TalkParagraphs, ParagraphTuple
 from collections import defaultdict
+from TalkPage import TalkPage
+from TalkSection import TalkSection
 
 
 # *********************************************
@@ -247,6 +249,119 @@ def changeTopReferrersSection(dictByTerm, patternStart, yamlKey, func, nTopDefau
 
         if changed:
             indexEntry.save()
+
+
+# *********************************************
+# top referrers section builder
+# *********************************************
+
+def collectAlternativesByTerm(transcriptIndex: TranscriptIndex) -> dict[str,list[str]]:
+    alternativesByTerm = defaultdict(list)
+    for term, admonitionTuple in transcriptIndex.patternLinks.items():
+        alternativesByTerm[admonitionTuple].append(term)
+    return alternativesByTerm
+
+
+def collectAdmonitionTuplesByTermForTalk(fnTalk, alternativesByTerm: dict[str,list[str]], filter=None) -> dict[str,Tuple[TalkPage, TalkSection, str, str, str]]:
+    #fnTalk = r"m:\2019 Practising the Jhanas\Talks\Orienting to This Jhana Retreat.md"
+    talk = TalkPage(fnTalk)
+    sections = talk.collectSections()
+    admonitionTuplesByTerm = {}
+    for section in sections:
+        #section.parseCounts()
+        section.parseLines()
+        if section.counts:
+            for admonition in section.admonitions:
+                (start, end, admonitionType, admonitionTitle) = admonition
+                admonitionType = admonitionType.lower()
+                if (filter is None) or filter(section, admonitionType, admonitionTitle):
+                    assert admonitionType == 'quote'
+                    admonitionBody = "\n".join([ml.text for ml in section.markdownLines[start+1:end-1]])
+                    admonitionTuple = (talk, section, admonitionType, admonitionTitle, admonitionBody)
+                    compare = admonitionBody.lower()
+                    for term in section.counts.keys():
+                        found = False
+                        alternatives = alternativesByTerm[term]
+                        for alternative in alternatives:
+                            found = alternative in compare
+                            if found:
+                                break
+                        if found:
+                            if term in admonitionTuplesByTerm:
+                                l = admonitionTuplesByTerm[term]
+                            else:
+                                l = []
+                                admonitionTuplesByTerm[term] = l
+                            l.append(admonitionTuple)
+    return admonitionTuplesByTerm
+
+
+def collectAdmonitionTuplesByTermForTalks(filenames, alternativesByTerm: dict[str,list[str]], filter=None) -> dict[str,Tuple[TalkPage, TalkSection, str, str, str]]:
+    mergedAdmonitionTuplesByTerm = defaultdict(list)
+    for pTalk in filenames:
+        admonitionTuplesByTerm = collectAdmonitionTuplesByTermForTalk(pTalk, alternativesByTerm, lambda section, type, title: type == 'quote')
+        for term, admonitionTuple in admonitionTuplesByTerm.items():
+            mergedAdmonitionTuplesByTerm[term].extend(admonitionTuple)
+    return mergedAdmonitionTuplesByTerm
+
+
+def collectQuoteSection(term, mergedAdmonitionTuplesByTerm):
+    sectionLines = []
+
+    def outputQuoteRow(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+        (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
+        blockid = f"{section.pageNr}-{section.paragraphNr}"
+        headerText = section.headerText
+        headerTarget = determineHeaderTarget(headerText)
+        safeAdmonitionBody = admonitionBody.replace('|', '\|')
+        sectionLines.append(f"[[{talk.notename}]] | [[{talk.notename}#{headerTarget}\|{headerText}]] | {safeAdmonitionBody}")
+
+    lastTalk = None
+    def outputQuote(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+        (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
+        nonlocal lastTalk
+        if talk != lastTalk:
+            sectionLines.append(f"##### [[{talk.notename}]]")
+            retreatName = haf.retreatNameFromTalkname(talk.notename)
+            sectionLines.append(f'<span class="counts">[[{retreatName}]]</span>')
+            lastTalk = talk
+        headerText = section.headerText
+        headerTarget = determineHeaderTarget(headerText)
+        sectionLines.append(f'> {admonitionBody} &nbsp;&nbsp;<span class="counts">([[{talk.notename}#{headerTarget}|{headerText}]])</span>')
+        sectionLines.append("")
+
+    createTable = False
+
+    if createTable:
+        sectionLines.append("talk | paragraph | quote")
+        sectionLines.append("- | - | -")
+
+    lg = mergedAdmonitionTuplesByTerm[term]
+    for quote in lg:
+        if createTable:
+            outputQuoteRow(quote)
+        else:
+            outputQuote(quote)
+    
+    return sectionLines
+
+
+def doQuoteSection():
+    haf = HAFEnvironment(HAF_YAML)        
+    filenames = [fnTalk for p in haf.collectTranscriptFilenames() if (fnTalk := haf.getTalkFilename(basenameWithoutExt(p))) is not None]
+
+    #import time
+    #tic = time.perf_counter()
+    transcriptIndex = TranscriptIndex(RB_YAML)
+    alternativesByTerm = collectAlternativesByTerm(transcriptIndex)
+    mergedAdmonitionTuplesByTerm = collectAdmonitionTuplesByTermForTalks(filenames, alternativesByTerm, lambda section, type, title: type == 'quote')
+    #toc = time.perf_counter()
+    #print(100*(toc-tic))
+
+    #print(admonitionTuplesByTerm)
+
+    sectionLines = collectQuoteSection('Insight', mergedAdmonitionTuplesByTerm)
+    saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", sectionLines)
 
 
 # *********************************************
@@ -487,6 +602,9 @@ if __name__ == "__main__":
         toc = time.perf_counter()
         print(toc-tic)
 
+
+    elif isScript('quotes'):
+        doQuoteSection()
 
     else:
         print("unknown script")

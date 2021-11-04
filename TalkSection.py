@@ -103,7 +103,7 @@ class TalkSection():
                     self.admonitions.append( (startAdmonition, endAdmonition+1, admonitionType, admonitionTitle))
                     inAdmonition = False
                 elif ml.text.startswith('title:'):
-                    admonitionTitle = (pluginTitle := ml.text[7:].strip()) if pluginTitle else None
+                    admonitionTitle = pluginTitle if (pluginTitle := ml.text[7:].strip()) else None
                 else:
                     pass
                     # admonitionLines.append(ml)

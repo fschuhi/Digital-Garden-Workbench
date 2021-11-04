@@ -145,7 +145,7 @@ class IndexEntryPage(ObsidianNote):
                 continue
 
             if waitingForCounts:
-                match = re.match(r"(?P<head>(?P<spanStart><span class=\"(keywords|counts)\">)?_?(occurrences: )?)(?P<counts>[^_>]*)(?P<tail>_?(?P<spanEnd></span>)?)$", line)
+                match = re.match(r"(?P<head>(?P<spanStart><span class=\"(keywords|counts)\">)?_?(occurrences: )?)(?P<counts>[^_>]*)(?P<tail>_?(?P<spanEnd></span>)?)$", ml.text)
                 if match:
                     spanStart = match.group('spanStart')
                     if spanStart:
