@@ -516,6 +516,10 @@ def convertMatchedObsidianLink(match, root, css=None, filter=None):
     return f'<span class="{css}">{a}</span>' if css else a
 
 
+# *********************************************
+# parsing
+# *********************************************
+
 def parseParagraph(paragraphOnPage: str):
     match = re.search(r"^(.+) \^([0-9]+)-([0-9]+)$", paragraphOnPage)
     if not match:
@@ -526,14 +530,6 @@ def parseParagraph(paragraphOnPage: str):
     return pageNr, paragraphNr, paragraphText
 
 
-def determineHeaderTarget(header):
-    # IMPORTANT: the "..." for yet-missing paragraph description will be ''
-    header = re.sub(r"[./]", " ", header)
-    header = re.sub(r"[,:?=()]", "", header)
-    header = re.sub(r"  +", " ", header)
-    return header
-
-
 def parseBlockId(blockid) -> Tuple[int,int]:
     match = re.match(r"([0-9]+)-([0-9]+)", blockid)
     return (int(match.group(1)), int(match.group(2))) if match else None
@@ -541,6 +537,22 @@ def parseBlockId(blockid) -> Tuple[int,int]:
 
 def parseAudioLink(text) -> re.Match:
     return re.search(r"!\[\[(?P<filename>(?P<date>[0-9]+)-(?P<middle>.+)-(?P<audioid>[0-9]+).mp3)(#t=(?P<timestamp>[0-9:]+))?\]\]", text)
+
+def createAudioLink(date, middle, audioid, timestamp):
+    return f"![[{date}-{middle}-{audioid}.mp3#t={timestamp}]]"
+
+
+# *********************************************
+# canonicalize
+# *********************************************
+
+def determineHeaderTarget(header):
+    # IMPORTANT: the "..." for yet-missing paragraph description will be ''
+    header = re.sub(r"[./]", " ", header)
+    header = re.sub(r"[,:?=()]", "", header)
+    header = re.sub(r"  +", " ", header)
+    return header
+
 
 def canonicalTimestamp(timestamp: str):
     if not timestamp: 
@@ -550,6 +562,24 @@ def canonicalTimestamp(timestamp: str):
         canonicalParts = [part.rjust(2, '0') for part in parts]
         return ':'.join(canonicalParts)
 
-def createAudioLink(date, middle, audioid, timestamp):
-    return f"![[{date}-{middle}-{audioid}.mp3#t={timestamp}]]"
+def canonicalQuoteText1(quoteText: str):
+    match = re.search(r"[A-Za-z]", quoteText)
+    firstChar = match.group(0)
+    if firstChar == firstChar.lower():
+        (start, end) = match.span()
+        quoteText = quoteText[:start] + f"[{firstChar.upper()}]" + quoteText[end:]
+    if not re.search(r"[.?!)]$", quoteText):
+        quoteText += '...'
+    return quoteText
 
+def canonicalQuoteText2(quoteText: str):
+    if match := re.match(r"([_\"']?)([a-z])(.+)", quoteText):
+        quoteText = match.group(1) + f"[{match.group(2).upper()}]" + match.group(3)
+    if not re.search(r"[.\"'!?]$", quoteText):
+        if not re.match(r"[a-z_]", quoteText[-1]):
+            quoteText = quoteText[:-1]
+        quoteText += '...'
+    return quoteText
+
+def canonicalQuoteText(quoteText: str):
+    return canonicalQuoteText2(quoteText)

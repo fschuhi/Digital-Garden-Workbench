@@ -60,19 +60,12 @@ class Publishing:
         import random
         r = random.randint(0, len(quotes)-1)        
         (link, lines) = quotes[r]
-        quoteText = '\n'.join(lines)
-        match = re.search(r"[A-Za-z]", quoteText)
-        firstChar = match.group(0)
-        if firstChar == firstChar.lower():
-            (start, end) = match.span()
-            quoteText = quoteText[:start] + f"[{firstChar.upper()}]" + quoteText[end:]
-        if not re.search(r"[.?!)]$", quoteText):
-            quoteText += '...'
+        quoteText = canonicalQuoteText('\n'.join(lines))
         admonitionLines = []
         admonitionLines.append("```ad-quote")
         admonitionLines.append(quoteText)
         admonitionLines.append('')
-        admonitionLines.append(f"_(a quote from the talk {link})_")
+        admonitionLines.append(f"_a quote from the talk '{link}'_")
         admonitionLines.append("```")
         
         retreatsMd = self.hafWork.vault.findFile("Retreats.md")

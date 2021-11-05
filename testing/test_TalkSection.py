@@ -11,7 +11,7 @@ from TranscriptPage import TranscriptPage
 from TalkPage import TalkPage
 import filecmp
 from consts import *
-from index import collectAdmonitionTuplesByTermForTalk, collectAdmonitionTuplesByTermForTalks, collectAlternativesByTerm
+from index import buildAdmonitionInfosByTermForTalk, buildQuoteTuplesByTermForAllTalks, buildAlternativeSpellingsByTerm
 from util import basenameWithoutExt, determineHeaderTarget, saveLinesToTextFile
 
 
@@ -56,13 +56,13 @@ class TestTalkSection(unittest.TestCase):
     def test_parseCounts(self):
         import time
         transcriptIndex = TranscriptIndex(RB_YAML)
-        alternativesByTerm = collectAlternativesByTerm(transcriptIndex)
+        alternativesByTerm = buildAlternativeSpellingsByTerm(transcriptIndex)
 
         haf = HAFEnvironment(HAF_YAML)        
         filenames = [fnTalk for p in haf.collectTranscriptFilenames() if (fnTalk := haf.getTalkFilename(basenameWithoutExt(p))) is not None]
 
         tic = time.perf_counter()
-        mergedAdmonitionTuplesByTerm = collectAdmonitionTuplesByTermForTalks(filenames, alternativesByTerm, lambda section, type, title: type == 'quote')
+        mergedAdmonitionTuplesByTerm = buildQuoteTuplesByTermForAllTalks(filenames, alternativesByTerm, lambda section, type, title: type == 'quote')
         toc = time.perf_counter()
         print(100*(toc-tic))
 

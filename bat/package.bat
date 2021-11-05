@@ -17,6 +17,9 @@ echo.
 python talks.py updateParagraphsLists
 echo.
 
+python index.py updateAlphabeticalIndex
+echo.
+
 python index.py topTalks
 echo.
 
@@ -26,7 +29,7 @@ echo.
 python index.py topCooccurrences
 echo.
 
-python index.py updateAlphabeticalIndex
+python index.py allQuotes
 echo.
 
 python HAFScripts.py transferFilesToPublish

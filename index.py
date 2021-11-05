@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+from itertools import count
 import re
 import os
+import time
 
 from operator import itemgetter
 from LinkNetwork import LinkNetwork
@@ -15,9 +17,9 @@ from IndexEntryPage import IndexEntryPage
 from util import *
 from HAFEnvironment import HAFEnvironment
 from TalkParagraph import TalkParagraph, TalkParagraphs, ParagraphTuple
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from TalkPage import TalkPage
-from TalkSection import TalkSection
+from TalkSection import TalkSection, Admonition
 
 
 # *********************************************
@@ -191,18 +193,22 @@ def showOrphansInRBYaml(haf: HAFEnvironment, network: LinkNetwork, transcriptInd
 # top referrers section builder
 # *********************************************
 
-def changeTopReferrersSection(dictByTerm, patternStart, yamlKey, func, nTopDefault):
+def replaceIndexEntryPageSection(tuplesByTerm, patternStart, yamlKey, indexEntryPageHandler, nTopDefault=None):
 
     # vertical span for the section
     # markdown lines in the section will be replaced (with bigger or smaller number or rows
     # see ((UVLQMRI)) below
-    patternEnd = r"^#+"
+    patternEnd = r"^### "
 
-    for term in list(haf.collectIndexEntryNameSet()):
-        indexEntry = IndexEntryPage(haf.getIndexEntryFilename(term))
+    saves = 0
+
+    terms = list(haf.collectIndexEntryNameSet())
+    for term in terms:
+        pIndexEntry = haf.getIndexEntryFilename(term)
+        indexEntry = IndexEntryPage(pIndexEntry)
 
         # create the complete backlink section
-        section = []
+        sectionLines = []
 
         # index entry page can change either by deletion only (if the yaml flag was set to False) or w/ a replaced section
         changed = False
@@ -212,7 +218,7 @@ def changeTopReferrersSection(dictByTerm, patternStart, yamlKey, func, nTopDefau
         if start:
             # found it
             match = re.match(patternStart, indexEntry.markdownLines[start].text)
-            nTop = int(match.group(1))
+            nTop = int(match.group(1)) if match.groups() else None
 
             # there is already a backlink section - - delete it
             indexEntry.markdownLines.delete(start, end)
@@ -234,110 +240,111 @@ def changeTopReferrersSection(dictByTerm, patternStart, yamlKey, func, nTopDefau
 
             # get all occurrences for the term
             # those are paragraphs, i.e. multiple mentions for a talk
-            if term in dictByTerm:
+            if term in tuplesByTerm:
                 # now we definitely know that we have changed
                 changed = True
 
-                occurrences = dictByTerm[term] # type: list[ParagraphTuple]
-                func(term, occurrences, section, nTop)
+                tuples = tuplesByTerm[term] # type: list[ParagraphTuple]
+                indexEntryPageHandler(term, tuples, sectionLines, nTop)
 
                 # empty line ends the section
-                section.append("")
+                sectionLines.append("")
 
                 # insert or append the section
-                indexEntry.markdownLines.insert(insert, section)
+                indexEntry.markdownLines.insert(insert, sectionLines)
 
         if changed:
             indexEntry.save()
+            saves += 1
+
+    print(f"saved {saves} of {len(terms)} index entries")
 
 
 # *********************************************
 # top referrers section builder
 # *********************************************
 
-def collectAlternativesByTerm(transcriptIndex: TranscriptIndex) -> dict[str,list[str]]:
-    alternativesByTerm = defaultdict(list)
-    for term, admonitionTuple in transcriptIndex.patternLinks.items():
-        alternativesByTerm[admonitionTuple].append(term)
-    return alternativesByTerm
+# Tuple[TalkPage, TalkSection, str, str, str]
+AdmonitionInfo = namedtuple('AdmonitionInfo', 'talkPage talkSection admonitionType, admonitionTitle, admonitionBody')
 
+def buildAdmonitionInfosByTermForTalk(pTalkPage, spellingAlternativesByTerm: dict[str,list[str]], filterAdmonition=None) -> dict[str,list[AdmonitionInfo]]:
+    # filter(section, admonitionType, admonitionTitle)
 
-def collectAdmonitionTuplesByTermForTalk(fnTalk, alternativesByTerm: dict[str,list[str]], filter=None) -> dict[str,Tuple[TalkPage, TalkSection, str, str, str]]:
-    #fnTalk = r"m:\2019 Practising the Jhanas\Talks\Orienting to This Jhana Retreat.md"
-    talk = TalkPage(fnTalk)
+    # on demand, we can look at a page with a focus on the paragraph infos, "sections"
+    talk = TalkPage(pTalkPage)
     sections = talk.collectSections()
-    admonitionTuplesByTerm = {}
+    admonitionTuplesByTerm = defaultdict(list[AdmonitionInfo])
     for section in sections:
-        #section.parseCounts()
-        section.parseLines()
-        if section.counts:
+
+        # use section semantics to extract summary, counts, audio (?), admonitions
+        section.parse()
+        if not section.counts:
+            # there might be quotes, but we can't associate a particular term with it
+            pass
+        else:
             for admonition in section.admonitions:
                 (start, end, admonitionType, admonitionTitle) = admonition
-                admonitionType = admonitionType.lower()
-                if (filter is None) or filter(section, admonitionType, admonitionTitle):
-                    assert admonitionType == 'quote'
-                    admonitionBody = "\n".join([ml.text for ml in section.markdownLines[start+1:end-1]])
-                    admonitionTuple = (talk, section, admonitionType, admonitionTitle, admonitionBody)
-                    compare = admonitionBody.lower()
+                if (filterAdmonition is None) or filterAdmonition(section, admonition.type, admonition.title):
+
+                    # can be relaxed later, right now we're working on auto quotes
+                    assert admonition.type.lower() == 'quote'
+
+                    # provided tuple only has the span, not the body
+                    admonitionBody = "\n".join([ml.text for ml in section.markdownLines[admonition.start+1:admonition.end-1]])
+
+                    # admonitionBody stays raw, i.e. w/o changing e.g. the first letter (which could be part of a term)
+                    # quotes shown are canonical, i.e. leading [.] and trailing ...
+                    admonitionTuple = AdmonitionInfo(talk, section, admonition.type, admonition.title, canonicalQuoteText(admonitionBody))
+
+                    # case-insensitive
+                    admonitionBody = admonitionBody.lower()
+
+                    # we take the information in the counts line to be up-to-date
                     for term in section.counts.keys():
-                        found = False
-                        alternatives = alternativesByTerm[term]
-                        for alternative in alternatives:
-                            found = alternative in compare
-                            if found:
+                        for spellingAlternative in spellingAlternativesByTerm[term]:
+                            if spellingAlternative in admonitionBody:
+                                # at least one of the spellings of the term found in the quote
+                                admonitionTuplesByTerm[term].append(admonitionTuple)
                                 break
-                        if found:
-                            if term in admonitionTuplesByTerm:
-                                l = admonitionTuplesByTerm[term]
-                            else:
-                                l = []
-                                admonitionTuplesByTerm[term] = l
-                            l.append(admonitionTuple)
     return admonitionTuplesByTerm
 
 
-def collectAdmonitionTuplesByTermForTalks(filenames, alternativesByTerm: dict[str,list[str]], filter=None) -> dict[str,Tuple[TalkPage, TalkSection, str, str, str]]:
-    mergedAdmonitionTuplesByTerm = defaultdict(list)
-    for pTalk in filenames:
-        admonitionTuplesByTerm = collectAdmonitionTuplesByTermForTalk(pTalk, alternativesByTerm, lambda section, type, title: type == 'quote')
-        for term, admonitionTuple in admonitionTuplesByTerm.items():
-            mergedAdmonitionTuplesByTerm[term].extend(admonitionTuple)
-    return mergedAdmonitionTuplesByTerm
-
-
-def collectQuoteSection(term, mergedAdmonitionTuplesByTerm):
+def collectQuoteSectionLinesForTerm(tuplesForTerm, retreatByTalkname, createTable):
     sectionLines = []
 
-    def outputQuoteRow(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+    def outputQuoteRow(tuple: AdmonitionInfo):
         (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
         blockid = f"{section.pageNr}-{section.paragraphNr}"
         headerText = section.headerText
         headerTarget = determineHeaderTarget(headerText)
         safeAdmonitionBody = admonitionBody.replace('|', '\|')
         sectionLines.append(f"[[{talk.notename}]] | [[{talk.notename}#{headerTarget}\|{headerText}]] | {safeAdmonitionBody}")
+        #notename = talk.notename
+        #if len(notename)<30: notename += "&nbsp;"*5
+        #sectionLines.append(f"{safeAdmonitionBody} | [[{notename}]] | [[{talk.notename}#{headerTarget}\|{headerText}]]")
 
     lastTalk = None
-    def outputQuote(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+    def outputQuote(tuple: AdmonitionInfo):
         (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
         nonlocal lastTalk
         if talk != lastTalk:
-            sectionLines.append(f"##### [[{talk.notename}]]")
-            retreatName = haf.retreatNameFromTalkname(talk.notename)
+            sectionLines.append(f"**[[{talk.notename}]]**")
+            retreatName = retreatByTalkname[talk.notename]
             sectionLines.append(f'<span class="counts">[[{retreatName}]]</span>')
             lastTalk = talk
         headerText = section.headerText
         headerTarget = determineHeaderTarget(headerText)
-        sectionLines.append(f'> {admonitionBody} &nbsp;&nbsp;<span class="counts">([[{talk.notename}#{headerTarget}|{headerText}]])</span>')
+        sectionLines.append(f'> {admonitionBody} &nbsp;&nbsp;<span class="counts">_[[{talk.notename}#{headerTarget}|{headerText}]]_</span>')
         sectionLines.append("")
 
-    createTable = False
-
+    # we currently don't use a table, but we could
+    assert not createTable
     if createTable:
         sectionLines.append("talk | paragraph | quote")
         sectionLines.append("- | - | -")
 
-    lg = mergedAdmonitionTuplesByTerm[term]
-    for quote in lg:
+    #lg = mergedAdmonitionTuplesByTerm[term]
+    for quote in tuplesForTerm:
         if createTable:
             outputQuoteRow(quote)
         else:
@@ -346,22 +353,43 @@ def collectQuoteSection(term, mergedAdmonitionTuplesByTerm):
     return sectionLines
 
 
-def doQuoteSection():
-    haf = HAFEnvironment(HAF_YAML)        
+def replaceQuoteSections(haf, transcriptIndex):
     filenames = [fnTalk for p in haf.collectTranscriptFilenames() if (fnTalk := haf.getTalkFilename(basenameWithoutExt(p))) is not None]
 
-    #import time
-    #tic = time.perf_counter()
-    transcriptIndex = TranscriptIndex(RB_YAML)
-    alternativesByTerm = collectAlternativesByTerm(transcriptIndex)
-    mergedAdmonitionTuplesByTerm = collectAdmonitionTuplesByTermForTalks(filenames, alternativesByTerm, lambda section, type, title: type == 'quote')
-    #toc = time.perf_counter()
-    #print(100*(toc-tic))
+    # we do a quick check if any of the potential spellings of a term occurs in a quote body
+    spellingAlternativesByTerm = defaultdict(list)
+    for spellingAlternativeLC, term  in transcriptIndex.patternLinks.items():
+        spellingAlternativesByTerm[term].append(spellingAlternativeLC)
+    
+    # build master lookup for all quotes by term
+    admonitionInfosByTerm = defaultdict(list)
+    for pTalk in filenames:
+        # dict[term, list[AdmonitionInfo]]
+        admonitionInfosByTermForTalk = buildAdmonitionInfosByTermForTalk(
+            pTalk, 
+            spellingAlternativesByTerm, 
+            filterAdmonition=lambda section, type, title: type == 'quote')
+        
+        for term, admonitionInfo in admonitionInfosByTermForTalk.items():
+            admonitionInfosByTerm[term].extend(admonitionInfo)
 
-    #print(admonitionTuplesByTerm)
+    patternStart = r"^### Quotes$"
+    yamlKey = 'showQuotes'
 
-    sectionLines = collectQuoteSection('Insight', mergedAdmonitionTuplesByTerm)
-    saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", sectionLines)
+    # DANGER: we need to do this, because live lookup via filesystem globs is *slow*
+    retreatByTalkname = haf.createRetreatByTalknameLookup()
+
+    # called from main via changeTopReferrersSection
+    def __indexEntryPageHandler(term, tuplesForTerm, sectionLines, nTop):
+        sectionLines.append(f"### Quotes")
+        sectionLinesForTerm = collectQuoteSectionLinesForTerm(tuplesForTerm, retreatByTalkname, createTable=False)
+        sectionLines.extend(sectionLinesForTerm)
+
+    # main
+    tic = time.perf_counter()
+    replaceIndexEntryPageSection(admonitionInfosByTerm, patternStart, yamlKey, __indexEntryPageHandler)
+    toc = time.perf_counter()
+    print(f"in  {toc-tic:0.4}s")
 
 
 # *********************************************
@@ -494,7 +522,7 @@ if __name__ == "__main__":
         patternStart = r"^#+ Paragraphs with ([0-9]+)\+ mentions"
         paragraphs = TalkParagraphs(haf)
         dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
-        changeTopReferrersSection(dict, patternStart, yamlKey, func, nTopDefault)
+        replaceIndexEntryPageSection(dict, patternStart, yamlKey, func, nTopDefault)
 
 
     elif isScript('topTalks'):
@@ -537,7 +565,7 @@ if __name__ == "__main__":
         patternStart = r"^#+ Top ([0-9]+) referring talks"
         paragraphs = TalkParagraphs(haf)
         dict = paragraphs.createOccurrencesByTermDict() # type: dict[str,list[ParagraphTuple]]
-        changeTopReferrersSection(dict, patternStart, yamlKey, func, nTopDefault)
+        replaceIndexEntryPageSection(dict, patternStart, yamlKey, func, nTopDefault)
 
 
     elif isScript('topCooccurrences'):
@@ -598,13 +626,13 @@ if __name__ == "__main__":
         nTopDefault = 20
 
         tic = time.perf_counter()
-        changeTopReferrersSection(cooc, patternStart, yamlKey, func, nTopDefault)
+        replaceIndexEntryPageSection(cooc, patternStart, yamlKey, func, nTopDefault)
         toc = time.perf_counter()
         print(toc-tic)
 
 
-    elif isScript('quotes'):
-        doQuoteSection()
+    elif isScript('allQuotes'):
+        replaceQuoteSections(haf, transcriptIndex)
 
     else:
         print("unknown script")

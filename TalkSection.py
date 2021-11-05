@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+from collections import namedtuple
 from util import *
 from MarkdownLine import MarkdownLines
 from TalkPageLineParser import TalkPageLineParser
 from TalkPageLineParser import TalkPageLineMatch
 from typing import Iterable
 
+Admonition = namedtuple('Admonition', 'start end type title')
 
 # *********************************************
 # TalkSection
@@ -47,10 +49,10 @@ class TalkSection():
         # see parseLines()
         self.counts = None
         self.audioLinks = None
-        self.admonitions = None
+        self.admonitions = None # type: list[Admonition]
 
 
-    def parseLines(self):
+    def parse(self):
         countInfoPattern = r"\[\[([^\]]+)\]\]( \(([0-9]+)\))?"
 
         self.counts = {}
@@ -100,7 +102,9 @@ class TalkSection():
                 if ml.text == "```":
                     # DO SOMETHING WITH THE COLLECTED ADMONITION
                     endAdmonition = index
-                    self.admonitions.append( (startAdmonition, endAdmonition+1, admonitionType, admonitionTitle))
+                    admonition = Admonition(startAdmonition, endAdmonition+1, admonitionType, admonitionTitle)
+                    self.admonitions.append(admonition)
+                    #self.admonitions.append( (startAdmonition, endAdmonition+1, admonitionType, admonitionTitle))
                     inAdmonition = False
                 elif ml.text.startswith('title:'):
                     admonitionTitle = pluginTitle if (pluginTitle := ml.text[7:].strip()) else None
