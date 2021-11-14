@@ -60,6 +60,11 @@ class Publishing:
         import random
         r = random.randint(0, len(quotes)-1)        
         (link, lines) = quotes[r]
+
+        for (link, lines) in quotes:
+            if lines[0].__contains__("We're talking about an energy body sense"):
+                break
+
         quoteText = canonicalQuoteText('\n'.join(lines))
         admonitionLines = []
         admonitionLines.append("```ad-quote")
