@@ -13,6 +13,7 @@ from TranscriptPage import TranscriptPage
 from TalkPage import TalkPageLineMatch, TalkPageLineParser, TalkPage, createNewTalkPage
 from util import *
 from HAFEnvironment import HAFEnvironment, determineTalkname, talknameFromFilename
+from MarkdownLine import MarkdownLines
 
 # *********************************************
 # Talks (Kanban)
@@ -302,7 +303,7 @@ if __name__ == "__main__":
 
     if not scriptHelp:
         transcriptIndex = TranscriptIndex(RB_YAML)
-        if isScript(['update', 'createNewTalks']):
+        if isScript(['bla', 'update', 'createNewTalks']):
             transcriptModel = TranscriptModel(transcriptIndex)
 
     if isScript('scripts'):
@@ -429,6 +430,124 @@ if __name__ == "__main__":
 
 
     # misc
+
+    elif isScript('bla'):
+        talkname = "Preliminaries Regarding Voice, Movement, and Gesture - Part 5"
+        talkname = "Using Insight to Deepen Love and Compassion"
+        talk = TalkPage(haf.getTalkFilename(talkname))
+        transcript = TranscriptPage(haf.getTranscriptFilename(talkname))
+
+        talk.collectSections(autoparse=True)
+        firstSection = talk.sections[0]
+        lastSection = talk.sections[-1]
+
+        # A: add everything (including yaml) before the first talk section
+        newLines = []
+        newLines.extend(talk.generateYamlLines())
+        prolog = [ml.text for ml in talk.markdownLines[0:firstSection.start-1]]
+        newLines.extend(prolog)
+
+        # B: add sections
+        paragraphs = transcript.collectParagraphs(True)
+        lastParagraphAppendedonTheFly = False
+        for paragraph in paragraphs:
+            (pageNr, paragraphNr, mlParagraph) = paragraph            
+            section = talk.sections.findParagraph(pageNr, paragraphNr)
+            if not section:
+                # paragraph is not included on work talk page
+                (_, _, paragraphText) = parseParagraph(mlParagraph.text)
+                newLines.append(f'<span class="paragraph">{paragraphText}</span>')
+                lastParagraphAppendedonTheFly = True
+            else:
+                if lastParagraphAppendedonTheFly:
+                    # we added the paragraph(s) above, so close the section with another hr
+                    newLines.append('')
+                    newLines.append('---')
+                lastParagraphAppendedonTheFly = False
+
+                # quotes are turned into marking, which we therefore need to skip when adding admonitions
+                handledQuotes = set()
+
+                # start of section needed to put first audio link before paragraph text
+                sectionStart = len(newLines)
+
+                # we need to adjust insertation point of == if we have multiple quotes in this section
+                delta = 0
+
+                # B1: header and counts always come first
+                newLines.append(section.headerLine.text)
+                newLines.append(section.countsLine.text)
+
+                # B2: paragraph text, with marked quotes                
+                if section.admonitions:
+                    rawText = None
+                    replaced = False
+                    for admonition in section.admonitions:
+                        if admonition.type == 'quote':
+                            admonitionText = '\n'.join([ml.text for ml in section.markdownLines[admonition.start+1:admonition.end]])
+                            if rawText is None:
+                                # removeAllLinks only once
+                                mlParagraph.removeAllLinks()
+                                rawText = mlParagraph.text
+
+                            # quote doesn't contain links, so we need to compare it with the paragraph where the links were removed (see above)
+                            ixFound = rawText.find(admonitionText)
+                            if ixFound >= 0:
+                                mlParagraph.replace(ixFound+delta, ixFound+delta+len(admonitionText), f"=={admonitionText}==")
+                                delta += 4
+                                replaced = True
+                                handledQuotes.add(admonition.start)
+                    if replaced:
+                        # we turned at least one quote admonition into a marking
+                        # restore links and footnotes
+                        mlParagraph.applySpacy(transcriptModel, SpacyMode.ALL_LINKS, force=False)
+                        mlParagraph.restoreFootnotes()
+
+                # now the markdown of the paragraph has quotes as ==...== markings
+
+                # B3: add paragraph text
+                
+                (_, _, paragraphText) = parseParagraph(mlParagraph.text)
+                newLines.append(f'<span class="paragraph">{paragraphText}</span>')
+
+                # B4: transfer all lines from the section to the published section (except header, counts and quotes)
+                firstAudioLink = section.firstAudioLink()
+                inAdmonition = False
+                lastAppendedLine = None
+                for index, ml in enumerate(section.markdownLines):
+                    if index < 2:
+                        # skip header and counts
+                        continue
+
+                    if ml == firstAudioLink:
+                        # audio link comes before paragraph text
+                        newLines.insert(sectionStart+2, firstAudioLink.text)
+                        continue
+
+                    if index in handledQuotes:
+                        # quote admonition which was successfully marked in the paragraph text starts...
+                        inAdmonition = True
+                    else:
+                        if inAdmonition:
+                            # ... skip it
+                            pass
+                        else:
+                            mlText = ml.text
+                            if lastAppendedLine == '' and mlText == '':
+                                # duplicate whitespace removed
+                                pass
+                            else:
+                                # add admonition line
+                                newLines.append(mlText)
+                            lastAppendedLine = mlText
+                        if ml.text == '```':
+                            inAdmonition = False                               
+
+        # C: add the lines after the last section
+        epilog = [ml.text for ml in talk.markdownLines[lastSection.end:]]
+        newLines.extend(epilog)
+
+        saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", newLines)
 
     else:
         print("unknown script")

@@ -83,18 +83,21 @@ class ObsidianNote:
                 tags.extend(tagsInLine)
         return tags
 
+    def generateYamlLines(self):
+        lines = []
+        if self.yaml:
+            lines.append("---")
+            # https://stackoverflow.com/questions/25108581/python-yaml-dump-bad-indentation
+            # added indent=3
+            lines.extend(yaml.dump(self.yaml, Dumper=MyDumper, default_flow_style=False, indent=3).splitlines())            
+            lines.append("---")        
+        return lines
 
     def save(self, path=None):
         if path is None: path = self.path
         out = []
-        if self.yaml:
-            out.append("---")
 
-            # https://stackoverflow.com/questions/25108581/python-yaml-dump-bad-indentation
-            # added indent=3
-            out.extend(yaml.dump(self.yaml, Dumper=MyDumper, default_flow_style=False, indent=3).splitlines())
-            
-            out.append("---")
+        out.extend(self.generateYamlLines())
 
         markdownTextLines = self.markdownLines.collectTextLines()
         out.extend(markdownTextLines)

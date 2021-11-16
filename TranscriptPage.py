@@ -97,7 +97,7 @@ class TranscriptPage(ObsidianNote):
             self.bufferedParagraphs = None
         self._bufferParagraphs = value
 
-    def collectParagraphs(self, force=False):
+    def collectParagraphs(self, force=False) -> list[Tuple[int,int,MarkdownLine]]:
         if force or not self.bufferedParagraphs:
             paragraphs =[(v[0], v[1], markdownLine) for markdownLine in self.markdownLines if (v := parseParagraph(markdownLine.text)) != (None, None, None)]
         return self.bufferedParagraphs if self.bufferedParagraphs else paragraphs;

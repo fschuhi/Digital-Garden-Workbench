@@ -11,7 +11,6 @@ from TranscriptPage import TranscriptPage
 from TalkPage import TalkPage
 import filecmp
 from consts import *
-from index import buildAdmonitionInfosByTermForTalk, buildQuoteTuplesByTermForAllTalks, buildAlternativeSpellingsByTerm
 from util import basenameWithoutExt, determineHeaderTarget, saveLinesToTextFile
 
 
@@ -53,59 +52,59 @@ class TestTalkSection(unittest.TestCase):
         self.assertTrue(filecmp.cmp("tmp/tmp.md", r"testing/data/Test_TalkSection.1229 What is Insight (after).md"))
 
 
-    def test_parseCounts(self):
-        import time
-        transcriptIndex = TranscriptIndex(RB_YAML)
-        alternativesByTerm = buildAlternativeSpellingsByTerm(transcriptIndex)
+    # def test_parseCounts(self):
+    #     import time
+    #     transcriptIndex = TranscriptIndex(RB_YAML)
+    #     alternativesByTerm = buildAlternativeSpellingsByTerm(transcriptIndex)
 
-        haf = HAFEnvironment(HAF_YAML)        
-        filenames = [fnTalk for p in haf.collectTranscriptFilenames() if (fnTalk := haf.getTalkFilename(basenameWithoutExt(p))) is not None]
+    #     haf = HAFEnvironment(HAF_YAML)        
+    #     filenames = [fnTalk for p in haf.collectTranscriptFilenames() if (fnTalk := haf.getTalkFilename(basenameWithoutExt(p))) is not None]
 
-        tic = time.perf_counter()
-        mergedAdmonitionTuplesByTerm = buildQuoteTuplesByTermForAllTalks(filenames, alternativesByTerm, lambda section, type, title: type == 'quote')
-        toc = time.perf_counter()
-        print(100*(toc-tic))
+    #     tic = time.perf_counter()
+    #     mergedAdmonitionTuplesByTerm = buildAdmonitionTuplesByTermForAllTalks(filenames, alternativesByTerm, lambda section, type, title: type == 'quote')
+    #     toc = time.perf_counter()
+    #     print(100*(toc-tic))
 
-        #print(admonitionTuplesByTerm)
+    #     #print(admonitionTuplesByTerm)
 
-        l = []
+    #     l = []
 
-        def outputQuoteRow(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
-            (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
-            blockid = f"{section.pageNr}-{section.paragraphNr}"
-            headerText = section.headerText
-            headerTarget = determineHeaderTarget(headerText)
-            safeAdmonitionBody = admonitionBody.replace('|', '\|')
-            l.append(f"[[{talk.notename}]] | [[{talk.notename}#{headerTarget}\|{headerText}]] | {safeAdmonitionBody}")
+    #     def outputQuoteRow(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+    #         (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
+    #         blockid = f"{section.pageNr}-{section.paragraphNr}"
+    #         headerText = section.headerText
+    #         headerTarget = determineHeaderTarget(headerText)
+    #         safeAdmonitionBody = admonitionBody.replace('|', '\|')
+    #         l.append(f"[[{talk.notename}]] | [[{talk.notename}#{headerTarget}\|{headerText}]] | {safeAdmonitionBody}")
 
-        lastTalk = None
-        def outputQuote(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
-            (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
+    #     lastTalk = None
+    #     def outputQuote(tuple: Tuple[TalkPage, TalkSection, str, str, str]):
+    #         (talk, section, admonitionType, admonitionTitle, admonitionBody) = tuple
 
-            nonlocal lastTalk
-            if talk != lastTalk:
-                l.append(f"##### [[{talk.notename}]]")
-                retreatName = haf.retreatNameFromTalkname(talk.notename)
-                l.append(f'<span class="counts">[[{retreatName}]]</span>')
-                lastTalk = talk
-            headerText = section.headerText
-            headerTarget = determineHeaderTarget(headerText)
-            l.append(f'> {admonitionBody} &nbsp;&nbsp;<span class="counts">([[{talk.notename}#{headerTarget}|{headerText}]])</span>')
-            l.append("")
+    #         nonlocal lastTalk
+    #         if talk != lastTalk:
+    #             l.append(f"##### [[{talk.notename}]]")
+    #             retreatName = haf.retreatNameFromTalkname(talk.notename)
+    #             l.append(f'<span class="counts">[[{retreatName}]]</span>')
+    #             lastTalk = talk
+    #         headerText = section.headerText
+    #         headerTarget = determineHeaderTarget(headerText)
+    #         l.append(f'> {admonitionBody} &nbsp;&nbsp;<span class="counts">([[{talk.notename}#{headerTarget}|{headerText}]])</span>')
+    #         l.append("")
 
-        createTable = False
+    #     createTable = False
 
-        if createTable:
-            l.append("talk | paragraph | quote")
-            l.append("- | - | -")
+    #     if createTable:
+    #         l.append("talk | paragraph | quote")
+    #         l.append("- | - | -")
 
-        lg = mergedAdmonitionTuplesByTerm['Love']
-        for quote in lg:
-            if createTable:
-                outputQuoteRow(quote)
-            else:
-                outputQuote(quote)
-        saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", l)
+    #     lg = mergedAdmonitionTuplesByTerm['Love']
+    #     for quote in lg:
+    #         if createTable:
+    #             outputQuoteRow(quote)
+    #         else:
+    #             outputQuote(quote)
+    #     saveLinesToTextFile(r"M:\Brainstorming\Untitled.md", l)
         
 
 if __name__ == "__main__":

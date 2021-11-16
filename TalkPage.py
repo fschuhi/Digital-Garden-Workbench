@@ -23,6 +23,14 @@ class TalkPage(ObsidianNote):
 
     def __init__(self, path: str):
         super().__init__(ObsidianNoteType.TALK, path)
+        self._sections = None
+
+
+    @property
+    def sections(self):
+        if self._sections is None:
+            self._sections = self.collectSections(autoparse=False)
+        return self._sections
 
 
     def update(self, transcriptPage: TranscriptPage, targetType='#') -> None:
@@ -46,26 +54,7 @@ class TalkPage(ObsidianNote):
                     parser.reset()
 
                 elif match == TalkPageLineMatch.INDEX_COUNTS:
-                    # old:
-                    # allTermCounts = {} # type: dict[str,int]
-                    # for mlParagraph in transcriptPage.markdownLines:
-                    #     if (termCounts := mlParagraph.termCounts):
-                    #         for entry, count in termCounts.items():
-                    #             if entry in allTermCounts:
-                    #                 allTermCounts[entry] += count
-                    #             else:
-                    #                 allTermCounts[entry] = count
-
-                    # new:
-                    # allTermCounts = transcriptPage.collectAllTermCounts()
-
-                    # # resulting tuples is sorted descending by counts, for each count ascending by index entry
-                    # tuples = sorted(allTermCounts.items(), key=lambda x: x[0])
-                    # tuples = sorted(tuples, key=lambda x: x[1], reverse=True)
-
-                    # entryFunc = lambda entry : f"[[{entry}]]" if allTermCounts[entry] == 1 else f"[[{entry}]] ({allTermCounts[entry]})"
-                    # links = [entryFunc(tuple[0]) for tuple in tuples]
-                    # parser.counts = " · ".join(links)
+                    # the 
                     parser.counts = transcriptPage.collectAllTermLinks()
                     self.markdownLines[index].text = parser.canonicalIndexCounts(forceSpan=True)
                     parser.reset()
@@ -103,28 +92,6 @@ class TalkPage(ObsidianNote):
                 blockid = f"{parser.pageNr}-{parser.paragraphNr}"
                 targets[blockid] = headerTarget
         return targets
-
-
-    # def collectSectionSpans(self) -> list[Tuple[int,int]]:
-    #     parser = TalkPageLineParser()
-    #     sectionsSpans = []
-    #     start = None
-    #     for index, ml in enumerate(self.markdownLines):
-    #         if parser.match(ml) == TalkPageLineMatch.DESCRIPTION:
-    #             # close the previous section and start new one
-    #             if start:
-    #                 #print(ml.text)
-    #                 sectionsSpans.append((start, index))
-    #             start = index
-    #         elif ml.text.startswith('#'):
-    #             # close the not-yet-closed section
-    #             if start:
-    #                 sectionsSpans.append((start, index))
-    #                 start = None
-    #     if start:
-    #         # including very last line
-    #         sectionsSpans.append((start, index+1))
-    #     return sectionsSpans
 
 
     def collectSectionSpans(self) -> list[Tuple[int,int]]:
@@ -167,13 +134,13 @@ class TalkPage(ObsidianNote):
         return sectionsSpans
 
 
-    def collectSections(self) -> TalkSections:
-        sections = TalkSections()
+    def collectSections(self, autoparse=False) -> TalkSections:
+        self._sections = TalkSections(autoparse)
         sectionSpans = self.collectSectionSpans()
         for start, end in sectionSpans:
             sourceLines = self.markdownLines[start:end]
-            sections.append(sourceLines, start, end)
-        return sections
+            self._sections.append(sourceLines, start, end)
+        return self._sections
 
 
     def getAudioFilename(self):
@@ -187,7 +154,8 @@ class TalkPage(ObsidianNote):
 
         # get the current sections
         # the sections will be expanded by additional lines, determined from the decorations of the associated transcript paragraph
-        sections = self.collectSections()
+        #sections = self.collectSections()
+        sections = self.sections
 
         # sections are modified in the original object
         # section start and end index into self.markdownLines will change incrementally => track total delta

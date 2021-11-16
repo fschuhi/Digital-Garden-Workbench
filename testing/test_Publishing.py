@@ -15,7 +15,7 @@ import filecmp
 class Test_Publishing(unittest.TestCase):
 
     def test_convertMarkdown(self):
-        publishing = Publishing()
+        publishing = Publishing(transcriptModel=None)
         haf_publish = HAFEnvironment(HAF_YAML_TESTING)
         sfnTalk = haf_publish.getTalkFilename("Preliminaries Regarding Voice, Movement, and Gesture - Part 1")
         convertedLines = publishing.convertMarkdownFile(sfnTalk)

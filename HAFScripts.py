@@ -71,13 +71,23 @@ if __name__ == "__main__":
             "Operations:",
             "- createSynopses()",
             "- transferFilesToPublish()",
+            "  _mirrorRetreatFiles()"
+            "  _mirrorIndex()",
+            "  _mirrorHelp()",
+            "  _quoteOfTheDay()",
+            "  _convertTalks()",
+            "  _removeLinksFromAllTranscripts()",
+            "  _copyFiles()",
+            "  mirror images",
+            "  mirror css",
             "- modifyFullstopsInTranscripts()",
             "- replaceLinksInTalkPages()",
             "- replaceLinksOnSpecialPages()",
+            "- replaceLinksOnIndexEntryPages()",
             "- replaceLinksOnTranscriptPages()",
         ])
 
-        publishing = Publishing()
+        publishing = Publishing(transcriptModel)
 
         # we need to recreate all synopses, because the headers might have changed
         publishing.createSynopses()

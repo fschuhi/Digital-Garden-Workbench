@@ -290,10 +290,13 @@ def buildAdmonitionInfosByTermForTalk(pTalkPage, spellingAlternativesByTerm: dic
                     assert admonition.type.lower() == 'quote'
 
                     # provided tuple only has the span, not the body
-                    admonitionBody = "\n".join([ml.text for ml in section.markdownLines[admonition.start+1:admonition.end-1]])
+                    # admonitionBody = "\n".join([ml.text for ml in section.markdownLines[admonition.start+1:admonition.end-1]])
+                    admonitionBody = "\n".join([ml.text for ml in section.markdownLines[admonition.start+1:admonition.end]])
 
                     # admonitionBody stays raw, i.e. w/o changing e.g. the first letter (which could be part of a term)
                     # quotes shown are canonical, i.e. leading [.] and trailing ...
+                    #print(talk.basename, admonition.start, admonition.end)
+                    #print(len(section.markdownLines[admonition.start+1:admonition.end-1]))
                     admonitionTuple = AdmonitionInfo(talk, section, admonition.type, admonition.title, canonicalQuoteText(admonitionBody))
 
                     # case-insensitive

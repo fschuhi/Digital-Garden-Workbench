@@ -316,7 +316,10 @@ class MarkdownLines(Iterable[MarkdownLine]):
             yield markdownLine
 
     def __getitem__(self, key):
-        return self.markdownLines[key]
+        if isinstance(key, slice):
+            indices = range(*key.indices(len(self.markdownLines)))
+            return [self.markdownLines[i] for i in indices]
+        return self.markdownLines[key]        
 
     def __len__(self):
         return len(self.markdownLines)

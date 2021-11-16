@@ -13,6 +13,8 @@ Admonition = namedtuple('Admonition', 'start end type title')
 # TalkSection
 # *********************************************
 
+parser = TalkPageLineParser()        
+
 class TalkSection():
 
     def __init__(self, sourceLines: MarkdownLines, start, end):
@@ -25,7 +27,6 @@ class TalkSection():
         assert end-start == len(sourceLines)
 
         # make sure we conform to a section: header and counts
-        parser = TalkPageLineParser()        
         
         assert parser.matchText(textLines[0]) in [TalkPageLineMatch.DESCRIPTION, TalkPageLineMatch.HEADER]
         self.headerText = parser.headerText
@@ -102,7 +103,7 @@ class TalkSection():
                 if ml.text == "```":
                     # DO SOMETHING WITH THE COLLECTED ADMONITION
                     endAdmonition = index
-                    admonition = Admonition(startAdmonition, endAdmonition+1, admonitionType, admonitionTitle)
+                    admonition = Admonition(startAdmonition, endAdmonition, admonitionType, admonitionTitle)
                     self.admonitions.append(admonition)
                     #self.admonitions.append( (startAdmonition, endAdmonition+1, admonitionType, admonitionTitle))
                     inAdmonition = False
@@ -162,8 +163,9 @@ class TalkSection():
 
 class TalkSections(Iterable[TalkSection]):
 
-    def __init__(self):
+    def __init__(self, autoparse=False):
         self.sections = [] # type: list[TalkSection]
+        self.autoparse = autoparse
         pass
 
     def __iter__(self):
@@ -179,6 +181,8 @@ class TalkSections(Iterable[TalkSection]):
     def append(self, sourceLines: MarkdownLines, start, end) -> TalkSection:
         newSection = TalkSection(sourceLines, start, end)
         self.sections.append(newSection)
+        if self.autoparse:
+            newSection.parse()
         return newSection
 
     def findParagraph(self, pageNr: int, paragraphNr: int) -> TalkSection:
