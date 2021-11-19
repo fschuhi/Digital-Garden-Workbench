@@ -27,6 +27,7 @@ class Publishing:
         self.hafPublish = HAFEnvironment(consts.HAF_PUBLISH_YAML)
 
         self.indexEntryNameSet = self.hafPublish.collectIndexEntryNameSet()
+        self.indexEntryNameSetLC = {name.lower() for name in self.indexEntryNameSet}
         self.transcriptNameSet = self.hafPublish.collectTranscriptNameSet()
         self.transcriptModel = transcriptModel
 
@@ -316,11 +317,15 @@ class Publishing:
 
 
     def _removeLinksFromAllTranscripts(self):
+
         filenames = self.hafPublish.collectTranscriptFilenames()
         for pTranscript in filenames:
             transcript = TranscriptPage(pTranscript)
             for ml in transcript.markdownLines:
-                ml.removeAllLinks()
+                if ml.text == f"[[{transcript.talkname}]]":
+                    pass
+                else:
+                    ml.removeAllLinks()
             transcript.save()
 
 
@@ -455,12 +460,13 @@ class Publishing:
         print("replaceLinksOnTalkPages")
 
         def filterLinksOnTalkPage(match):
-            note = match.group('note')
-            target = match.group('target')                                    
+            note = match.group('note')            
+            target = match.group('target')
+
             if target and target.startswith('#^') and note in self.transcriptNameSet:
                 # convert all links to blockid targets on transcripts
                 return True            
-            if note in self.indexEntryNameSet:
+            if note.lower() in self.indexEntryNameSetLC:
                 # convert any index entry
                 return True
             return False
