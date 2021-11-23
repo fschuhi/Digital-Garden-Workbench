@@ -103,9 +103,9 @@ class Publishing:
         r = random.randint(0, len(quotes)-1)        
         (link, lines) = quotes[r]
 
-        for (link, lines) in quotes:
-            if lines[0].__contains__("We're talking about an energy body sense"):
-                break
+        #for (link, lines) in quotes:
+        #    if lines[0].__contains__("We're talking about an energy body sense"):
+        #        break
 
         quoteText = canonicalQuoteText('\n'.join(lines))
         admonitionLines = []
@@ -212,6 +212,12 @@ class Publishing:
         prolog = [ml.text for ml in talk.markdownLines[0:firstSection.start-1]]
         newLines.extend(prolog)
 
+        def appendParagraph(paragraphText):
+            if paragraphText.startswith('> '):
+                newLines.append(f'> <span class="paragraph">{paragraphText[2:]}</span>')
+            else:
+                newLines.append(f'<span class="paragraph">{paragraphText}</span>')
+
         # B: add sections
         paragraphs = transcript.collectParagraphs(True)
         lastParagraphAppendedonTheFly = False
@@ -221,7 +227,7 @@ class Publishing:
             if not section:
                 # paragraph is not included on work talk page
                 (_, _, paragraphText) = parseParagraph(mlParagraph.text)
-                newLines.append(f'<span class="paragraph">{paragraphText}</span>')
+                appendParagraph(paragraphText)
                 lastParagraphAppendedonTheFly = True
             else:
                 if lastParagraphAppendedonTheFly:
@@ -273,7 +279,7 @@ class Publishing:
                 # B3: add paragraph text
                 
                 (_, _, paragraphText) = parseParagraph(mlParagraph.text)
-                newLines.append(f'<span class="paragraph">{paragraphText}</span>')
+                appendParagraph(paragraphText)
 
                 # B4: transfer all lines from the section to the published section (except header, counts and quotes)
                 firstAudioLink = section.firstAudioLink()

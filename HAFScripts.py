@@ -244,6 +244,8 @@ if __name__ == "__main__":
             newline = newline.replace("__", "")
             newline = newline.replace("** **", " ")
             newline = newline.replace("****", "")
+            newline = newline.replace("_ ]", "_]")
+            newline = newline.replace("_ )", "_)")
             # print(newline)
             newlines.append(newline)
         saveLinesToTextFile("tmp/" + basenameWithoutExt(path) + '.md', newlines)
